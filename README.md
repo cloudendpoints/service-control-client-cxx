@@ -21,4 +21,5 @@ To download the Endpoints Server Proxy source code, clone the ESP repository:
 
 ## Repository Structure ##
 
+* [cache](/cache): The simple LRU cache.
 
