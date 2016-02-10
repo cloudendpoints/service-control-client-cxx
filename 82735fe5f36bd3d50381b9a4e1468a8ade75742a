@@ -82,3 +82,13 @@ are you trying to implement something like google3/base/timer.h: CycleTimerBase 
 
 Any way, I feel it is much readable in current code to simply use microseconds as unit here. And you can rename them with better meaning when you refactor this class for general purpose.
 
+946:22-946:35
+Wed Feb 10 19:05:45 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 7dbb8cf2_61ee2c18
+UUID: 7dbb8cf2_0c0c478d
+Bytes: 249
+The unit can be anything. if cpu cycle, it could be Cycle,  if using time_of_day(), it could be micro_seconds. 
+
+I think calling it "UnitsInSecond" is more extendable.  In the future, we just replace the timer class, not need to rename the function.
+
