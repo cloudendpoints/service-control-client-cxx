@@ -40,6 +40,16 @@ UUID: 7dbb8cf2_c15bb82e
 Bytes: 64
 This class is just name space since its two functions are static
 
+67:33-67:34
+Wed Feb 10 20:14:31 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 7dbb8cf2_4c78ff52
+Bytes: 332
+document that this unit is microsecond for now. I really like explicit name though. But this is not a big deal.
+
+
+Also, defining this as a constant is much more common and efficient. Before you have the actual implementation of what you have in mind for future extension, I am not quite following why this should be a static method.
+
 68:17-68:30
 Wed Feb 10 17:17:21 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
