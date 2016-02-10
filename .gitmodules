@@ -1,0 +1,8 @@
+[submodule "third_party/config"]
+	path = third_party/config
+	url = sso://gcp-apis/config
+	ignore = untracked
+[submodule "google/protobuf"]
+	path = google/protobuf
+	url = https://github.com/google/protobuf.git
+	ignore = untracked
