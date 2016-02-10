@@ -9,10 +9,33 @@ UUID: fd977c52_3585b231
 Bytes: 25
 where is this timer used?
 
+59:6-59:17
+Wed Feb 10 18:02:44 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: fd977c52_3585b231
+UUID: 7dbb8cf2_01df70f6
+Bytes: 64
+never mind, text search in this this review UI doesn't work well
+
+62:17-62:20
+Wed Feb 10 18:02:44 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 7dbb8cf2_4151e850
+Bytes: 168
+I think it is cleaner to simply define a helper method to get time instead of defining a class unless you want to make this extendable or pluggable for testing purpose.
+
 68:17-68:30
 Wed Feb 10 17:17:21 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: fd977c52_d5962e72
 Bytes: 14
 unused method?
+
+946:22-946:35
+Wed Feb 10 18:02:44 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 7dbb8cf2_815ca055
+Bytes: 111
+UnitsInSeconds() -> const int SecToUsec
+it seems much cleaner this way based on the way you used UnitsInSeconds
 
