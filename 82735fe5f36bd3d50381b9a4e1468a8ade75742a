@@ -72,3 +72,13 @@ Bytes: 210
 SimpleTimer class can be extended to use cpu tick for some platform. It should be much faster. We don't implement it in the initial release, but we may in the future.
  For using cpu tick,  it is not a constant.
 
+946:22-946:35
+Wed Feb 10 18:37:04 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 7dbb8cf2_010e5017
+UUID: 7dbb8cf2_61ee2c18
+Bytes: 381
+are you trying to implement something like google3/base/timer.h: CycleTimerBase as used by the original code? You may end up using CyclesPerSecond instead of UnitsInSecond to be more explicit. 
+
+Any way, I feel it is much readable in current code to simply use microseconds as unit here. And you can rename them with better meaning when you refactor this class for general purpose.
+
