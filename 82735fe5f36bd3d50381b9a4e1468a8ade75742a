@@ -142,6 +142,14 @@ My concern is the portability of the cycleclock code.  it may not work for some 
 #error You need to define CycleTimer for your OS and CPU
 #endif
 
+873:17-873:59
+Thu Feb 11 06:04:06 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: bd0fc4b0_130236ec
+UUID: bd0fc4b0_735052d8
+Bytes: 177
+I also don't want to pull in another dependency (submodule the benchmark code from github).  or fork the cycleclock code and copy it over.  The code is so ugly with so many #if.
+
 946:22-946:35
 Wed Feb 10 18:02:44 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -186,4 +194,12 @@ Parent: 7dbb8cf2_0c0c478d
 UUID: bd0fc4b0_737612aa
 Bytes: 224
 this code doesn't seem right. The method name suggests returning microseconds, and SimpleTimer::Now() is already microseconds, I assume head_.prev->last_use_ is also microsconds, what does microsecs * 1000000 * 1000000 mean?
+
+946:22-946:35
+Thu Feb 11 06:04:06 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: bd0fc4b0_737612aa
+UUID: bd0fc4b0_d3601eaf
+Bytes: 57
+You are right.  This should be divided by UnitsInSecond()
 
