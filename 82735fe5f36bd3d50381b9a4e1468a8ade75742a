@@ -50,6 +50,14 @@ document that this unit is microsecond for now. I really like explicit name thou
 
 Also, defining this as a constant is much more common and efficient. Before you have the actual implementation of what you have in mind for future extension, I am not quite following why this should be a static method.
 
+67:33-67:34
+Thu Feb 11 01:44:22 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 7dbb8cf2_4c78ff52
+UUID: 3de034e0_41d994f6
+Bytes: 69
+you haven't responded to this comment yet. why not just use constant?
+
 68:17-68:30
 Wed Feb 10 17:17:21 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
