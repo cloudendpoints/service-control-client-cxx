@@ -74,6 +74,14 @@ UUID: bd0fc4b0_8abb8ba2
 Bytes: 42
 It is documented on the top of this class.
 
+67:33-67:34
+Thu Feb 11 05:00:28 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: bd0fc4b0_50c30472
+UUID: bd0fc4b0_93d2a6d0
+Bytes: 114
+still not quite getting it. how about const int kUnitsInSecond? isn't const int more efficient than static method?
+
 68:17-68:30
 Wed Feb 10 17:17:21 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -88,6 +96,20 @@ Parent: fd977c52_d5962e72
 UUID: 7dbb8cf2_4147a844
 Bytes: 48
 It is used.  problem with your editor or viewer.
+
+873:17-873:59
+Thu Feb 11 05:00:28 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: bd0fc4b0_3399ba33
+Bytes: 782
+I am a little worried about changing the units from cycles to microseconds now. Why not do an apple-to-apple copy? This whole file (method names, variable names, comments, default values) is based on cycles. It is quite confusing to use cycles for units (seconds) or the other way around when reading this code. Also I am afraid this change might break some assumption made by the original code.
+
+You may take a look how many places you changed the value to units(seconds) while the variables/comments are still referring to cycles 
+
+PS: I really don't like this review UI, have to switch to critique for keyword search
+
+Here is the code to get clock cycles which is the fastest call as I know. The original code is using the same way:
+google3/third_party/benchmark/src/cycleclock.h
 
 946:22-946:35
 Wed Feb 10 18:02:44 2016 +0000
