@@ -6,6 +6,9 @@ cc_library(
         "simple_lru_cache.h",
     ],
     visibility = ["//visibility:public"],
+    deps = [
+        "//:common_headers",
+    ],
 )
 
 cc_test(

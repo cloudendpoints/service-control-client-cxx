@@ -1,4 +1,12 @@
 
+cc_library(
+    name = "common_headers",
+    hdrs = [
+      "google_macros.h",
+    ],
+    visibility = ["//visibility:public"],
+)
+
 cc_test(
     name = "service_control_proto_test",
     size = "small",

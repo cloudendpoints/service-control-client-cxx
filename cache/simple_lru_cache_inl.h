@@ -40,16 +40,12 @@
 #include <unordered_map>
 #include <utility>
 
-#include "simple_lru_cache.h"
+#include "cache/simple_lru_cache.h"
+#include "google_macros.h"
 
 namespace google {
 namespace service_control_client {
 namespace cache {
-
-#undef GOOGLE_DISALLOW_EVIL_CONSTRUCTORS
-#define GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(TypeName) \
-  TypeName(const TypeName&);                        \
-  void operator=(const TypeName&)
 
 // Define a timer interface to encapsulate timer related code.
 // The unit of timer is int64_t. In order to support all platforms,
