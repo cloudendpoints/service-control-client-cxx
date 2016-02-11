@@ -58,6 +58,22 @@ UUID: 3de034e0_41d994f6
 Bytes: 69
 you haven't responded to this comment yet. why not just use constant?
 
+67:33-67:34
+Thu Feb 11 02:34:09 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3de034e0_41d994f6
+UUID: bd0fc4b0_50c30472
+Bytes: 452
+Sorry, I thought I have answered.  UnitsInSecond() is better than kMicroSecondInSecond.  It is related to Now() function.  In this implement, Now() returns Microsecond.  But in the future, we may change it to cpu cycle,  It is easier just change UnitsInSecond().  Otherwise we have to search kMicroSecondInSecond to replaced it back to UnitsInSecond().  Some kMicroSecondInSecond may be used for other purposes, you could not blindly just replace them.
+
+67:33-67:34
+Thu Feb 11 02:34:09 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 7dbb8cf2_4c78ff52
+UUID: bd0fc4b0_8abb8ba2
+Bytes: 42
+It is documented on the top of this class.
+
 68:17-68:30
 Wed Feb 10 17:17:21 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
