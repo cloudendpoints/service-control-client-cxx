@@ -51,24 +51,26 @@ namespace cache {
   TypeName(const TypeName&);                        \
   void operator=(const TypeName&)
 
-// Define a timer interface to encapsulate timer related code.
-// The unit of timer is int64_t. In order to support all platforms,
-// gettimeofday() is used in this implementation with units of microsecond.
-// For some platforms, cpu clock can be used as timer. The performance
-// can be greatly improved.
-class SimpleTimer {
+// Define a simple cycle timer interface to encapsulate timer related code.
+// The concept is from CPU cycle. The cycle clock code from
+// https://github.com/google/benchmark/src/cycleclock.h can be used.
+// But that code only works for some platforms.
+// To make code works for all platforms, SimpleCycleTimer calss simulates
+// a CPU cycle by using gettimeofday() and cycle in microseconds.
+// If needed, this timer class can be easily replaced by a real cycle_clock.
+class SimpleCycleTimer {
  public:
-  // Return the current time in SimpleTimer::UnitsInSecond()
+  // Return the current cycle in microseconds.
   static int64_t Now() {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return static_cast<int64_t>(tv.tv_sec * 1000000 + tv.tv_usec);
   }
-  // Return number of timer units in a second.
-  static int64_t UnitsInSecond() { return 1000000; }
+  // Return number of cycles in a second.
+  static int64_t CyclesInSecond() { return 1000000; }
 
  private:
-  SimpleTimer();  // no instances
+  SimpleCycleTimer();  // no instances
 };
 
 // A constant iterator. a client of SimpleLRUCache should not create these
@@ -601,7 +603,7 @@ void SimpleLRUCacheBase<Key, Value, MapType, EQ>::SetTimeout(double seconds,
     // `timeout_cycles` to int64_t will not overflow.
     // NOTE 2: If you modify the computation here, make sure to update the
     // GetBoundaryTimeout() method in the test as well.
-    const double timeout_cycles = seconds * SimpleTimer::UnitsInSecond();
+    const double timeout_cycles = seconds * SimpleCycleTimer::CyclesInSecond();
     if (timeout_cycles >= std::numeric_limits<int64_t>::max()) {
       // The value is outside the range of int64_t, so "round" down to something
       // that can be represented.
@@ -718,7 +720,7 @@ void SimpleLRUCacheBase<Key, Value, MapType, EQ>::ReleaseWithOptions(
     assert(e->value == value);
     assert(e->pin > 0);
     if (lru_ && options.update_eviction_order()) {
-      e->last_use_ = SimpleTimer::Now();
+      e->last_use_ = SimpleCycleTimer::Now();
     }
     e->pin--;
 
@@ -741,7 +743,7 @@ void SimpleLRUCacheBase<Key, Value, MapType, EQ>::InsertPinned(const Key& k,
   Remove(k);
 
   // Make new element
-  Elem* e = new Elem(k, value, 1, units, SimpleTimer::Now());
+  Elem* e = new Elem(k, value, 1, units, SimpleCycleTimer::Now());
 
   // Adjust table, total units fields.
   units_ += units;
@@ -878,7 +880,7 @@ void SimpleLRUCacheBase<Key, Value, MapType, EQ>::DiscardIdle(
   if (max_idle < 0) return;
 
   Elem* e = head_.prev;
-  const int64_t threshold = SimpleTimer::Now() - max_idle;
+  const int64_t threshold = SimpleCycleTimer::Now() - max_idle;
   int64_t last = 0;
   while ((e != &head_) && (e->last_use_ < threshold)) {
     // Sanity check: LRU list should be sorted by last_use_.  We could
@@ -943,8 +945,8 @@ template <class Key, class Value, class MapType, class EQ>
 int64_t SimpleLRUCacheBase<Key, Value, MapType,
                            EQ>::AgeOfLRUItemInMicroseconds() const {
   if (head_.prev == &head_) return 0;
-  return SimpleTimer::UnitsInSecond() * 1000000 *
-         (SimpleTimer::Now() - head_.prev->last_use_);
+  return 1000000 * (SimpleCycleTimer::Now() - head_.prev->last_use_) /
+         SimpleCycleTimer::CyclesInSecond();
 }
 
 template <class Key, class Value, class MapType, class EQ>
