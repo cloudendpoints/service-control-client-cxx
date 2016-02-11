@@ -82,6 +82,16 @@ UUID: bd0fc4b0_93d2a6d0
 Bytes: 114
 still not quite getting it. how about const int kUnitsInSecond? isn't const int more efficient than static method?
 
+67:33-67:34
+Thu Feb 11 05:50:05 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: bd0fc4b0_93d2a6d0
+UUID: bd0fc4b0_d3349edc
+Bytes: 205
+I think if we compile with "-O2", this static function of returning a constant will be the same as const int.
+
+kUnitsInSecond will work now, it will not work if "unit" is CPU clock which is not a constant.
+
 68:17-68:30
 Wed Feb 10 17:17:21 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -110,6 +120,27 @@ PS: I really don't like this review UI, have to switch to critique for keyword s
 
 Here is the code to get clock cycles which is the fastest call as I know. The original code is using the same way:
 google3/third_party/benchmark/src/cycleclock.h
+
+873:17-873:59
+Thu Feb 11 05:50:05 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: bd0fc4b0_3399ba33
+UUID: bd0fc4b0_130236ec
+Bytes: 678
+My concern is the portability of the cycleclock code.  it may not work for some cpu types. Here is the extraction 
+
+// NOTE: only i386 and x86_64 have been well tested.
+// PPC, sparc, alpha, and ia64 are based on
+//    http://peter.kuscsik.com/wordpress/?p=14
+// with modifications by m3b.  See also
+//    https://setisvn.ssl.berkeley.edu/svn/lib/fftw-3.0.1/kernel/cycle.h
+
+#else
+// The soft failover to a generic implementation is automatic only for ARM.
+// For other platforms the developer is expected to make an attempt to create
+// a fast implementation and use generic version if nothing better is available.
+#error You need to define CycleTimer for your OS and CPU
+#endif
 
 946:22-946:35
 Wed Feb 10 18:02:44 2016 +0000
