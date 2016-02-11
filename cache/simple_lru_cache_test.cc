@@ -30,15 +30,15 @@ static bool in_cache[kElems];
 
 namespace {
 
-// Blocks until SimpleTimer::Now() returns a new value.
+// Blocks until SimpleCycleTimer::Now() returns a new value.
 void TickClock() {
-  int64_t start = SimpleTimer::Now();
+  int64_t start = SimpleCycleTimer::Now();
   const int kMaxAttempts = 10;
   int num_attempts = 0;
   do {
     // sleep one microsecond.
     usleep(1);
-  } while (++num_attempts < kMaxAttempts && SimpleTimer::Now() == start);
+  } while (++num_attempts < kMaxAttempts && SimpleCycleTimer::Now() == start);
   // Unable to tick the clock
   assert(num_attempts < kMaxAttempts);
 }
@@ -655,7 +655,7 @@ TEST_F(SimpleLRUCacheTest, InfiniteExpirationAgeBased) {
 static double GetBoundaryTimeout() {
   // Search for the smallest timeout value that will result in overflow when
   // converted to an integral number of cycles.
-  const double seconds_to_cycles = SimpleTimer::UnitsInSecond();
+  const double seconds_to_cycles = SimpleCycleTimer::CyclesInSecond();
   double seconds = static_cast<double>(std::numeric_limits<int64_t>::max()) /
                    seconds_to_cycles;
   // Because of floating point rounding, we are not certain that the previous
@@ -812,7 +812,7 @@ TEST_F(SimpleLRUCacheTest, DontUpdateEvictionOrder) {
 
   // Fully populate the cache and keep track of the time range for this
   // population.
-  original_start = SimpleTimer::Now();
+  original_start = SimpleCycleTimer::Now();
   TickClock();
   for (int i = 0; i < kCacheSize; i++) {
     ASSERT_TRUE(!cache_->Lookup(i));
@@ -820,7 +820,7 @@ TEST_F(SimpleLRUCacheTest, DontUpdateEvictionOrder) {
     in_cache[i] = true;
   }
   TickClock();
-  original_end = SimpleTimer::Now();
+  original_end = SimpleCycleTimer::Now();
 
   // At each step validate the current state of the cache and then insert
   // a new element.
@@ -934,13 +934,13 @@ TEST_F(SimpleLRUCacheTest, GetLastUseTime) {
   ASSERT_EQ(cache_->GetLastUseTime(1), -1);
 
   // Make sure existent key returns something > last and < now
-  last = SimpleTimer::Now();
+  last = SimpleCycleTimer::Now();
   TickClock();
   in_cache[1] = true;
   TestValue* v = new TestValue(1);
   cache_->Insert(1, v, 1);
   TickClock();
-  now = SimpleTimer::Now();
+  now = SimpleCycleTimer::Now();
   ASSERT_GT(cache_->GetLastUseTime(1), last);
   ASSERT_LT(cache_->GetLastUseTime(1), now);
 
@@ -949,7 +949,7 @@ TEST_F(SimpleLRUCacheTest, GetLastUseTime) {
   v = new TestValue(2);
   cache_->Insert(2, v, 1);
   TickClock();
-  now = SimpleTimer::Now();
+  now = SimpleCycleTimer::Now();
   ASSERT_GT(cache_->GetLastUseTime(2), cache_->GetLastUseTime(1));
   ASSERT_LT(cache_->GetLastUseTime(2), now);
 
@@ -962,7 +962,7 @@ TEST_F(SimpleLRUCacheTest, GetLastUseTime) {
   TickClock();
   cache_->Release(1, v);
   TickClock();
-  now = SimpleTimer::Now();
+  now = SimpleCycleTimer::Now();
   ASSERT_GT(cache_->GetLastUseTime(1), cache_->GetLastUseTime(2));
   ASSERT_LT(cache_->GetLastUseTime(1), now);
 
@@ -971,7 +971,7 @@ TEST_F(SimpleLRUCacheTest, GetLastUseTime) {
   cache_->Insert(2, v, 1);
   in_cache[3] = true;
   TickClock();
-  now = SimpleTimer::Now();
+  now = SimpleCycleTimer::Now();
   ASSERT_GT(cache_->GetLastUseTime(2), cache_->GetLastUseTime(1));
   ASSERT_LT(cache_->GetLastUseTime(2), now);
 
@@ -996,13 +996,13 @@ TEST_F(SimpleLRUCacheTest, GetInsertionTime) {
   ASSERT_EQ(cache_->GetInsertionTime(1), -1);
 
   // Make sure existent key returns something > last and < now
-  last = SimpleTimer::Now();
+  last = SimpleCycleTimer::Now();
   TickClock();
   in_cache[1] = true;
   TestValue* v = new TestValue(1);
   cache_->Insert(1, v, 1);
   TickClock();
-  now = SimpleTimer::Now();
+  now = SimpleCycleTimer::Now();
   ASSERT_GT(cache_->GetInsertionTime(1), last);
   ASSERT_LT(cache_->GetInsertionTime(1), now);
 
@@ -1011,7 +1011,7 @@ TEST_F(SimpleLRUCacheTest, GetInsertionTime) {
   v = new TestValue(2);
   cache_->Insert(2, v, 1);
   TickClock();
-  now = SimpleTimer::Now();
+  now = SimpleCycleTimer::Now();
   ASSERT_GT(cache_->GetInsertionTime(2), cache_->GetInsertionTime(1));
   ASSERT_LT(cache_->GetInsertionTime(2), now);
 
@@ -1030,7 +1030,7 @@ TEST_F(SimpleLRUCacheTest, GetInsertionTime) {
   v = new TestValue(3);
   cache_->Insert(1, v, 1);
   TickClock();
-  now = SimpleTimer::Now();
+  now = SimpleCycleTimer::Now();
   ASSERT_GT(cache_->GetInsertionTime(1), cache_->GetInsertionTime(2));
   ASSERT_LT(cache_->GetInsertionTime(1), now);
 
