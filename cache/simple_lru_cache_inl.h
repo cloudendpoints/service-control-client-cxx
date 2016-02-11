@@ -943,8 +943,8 @@ template <class Key, class Value, class MapType, class EQ>
 int64_t SimpleLRUCacheBase<Key, Value, MapType,
                            EQ>::AgeOfLRUItemInMicroseconds() const {
   if (head_.prev == &head_) return 0;
-  return SimpleTimer::UnitsInSecond() * 1000000 *
-         (SimpleTimer::Now() - head_.prev->last_use_);
+  return 1000000 * (SimpleTimer::Now() - head_.prev->last_use_) /
+         SimpleTimer::UnitsInSecond();
 }
 
 template <class Key, class Value, class MapType, class EQ>
