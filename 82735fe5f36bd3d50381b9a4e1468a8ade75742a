@@ -148,3 +148,11 @@ The unit can be anything. if cpu cycle, it could be Cycle,  if using time_of_day
 
 I think calling it "UnitsInSecond" is more extendable.  In the future, we just replace the timer class, not need to rename the function.
 
+946:22-946:35
+Thu Feb 11 05:05:01 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 7dbb8cf2_0c0c478d
+UUID: bd0fc4b0_737612aa
+Bytes: 224
+this code doesn't seem right. The method name suggests returning microseconds, and SimpleTimer::Now() is already microseconds, I assume head_.prev->last_use_ is also microsconds, what does microsecs * 1000000 * 1000000 mean?
+
