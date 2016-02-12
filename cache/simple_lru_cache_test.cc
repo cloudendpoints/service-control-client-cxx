@@ -655,7 +655,7 @@ TEST_F(SimpleLRUCacheTest, InfiniteExpirationAgeBased) {
 static double GetBoundaryTimeout() {
   // Search for the smallest timeout value that will result in overflow when
   // converted to an integral number of cycles.
-  const double seconds_to_cycles = SimpleCycleTimer::CyclesInSecond();
+  const double seconds_to_cycles = SimpleCycleTimer::Frequency();
   double seconds = static_cast<double>(std::numeric_limits<int64_t>::max()) /
                    seconds_to_cycles;
   // Because of floating point rounding, we are not certain that the previous

@@ -47,23 +47,26 @@ namespace google {
 namespace service_control_client {
 namespace cache {
 
+// Define number of microseconds for a second.
+const int64_t kSecToUsec = 1000000;
+
 // Define a simple cycle timer interface to encapsulate timer related code.
 // The concept is from CPU cycle. The cycle clock code from
 // https://github.com/google/benchmark/src/cycleclock.h can be used.
-// But that code only works for some platforms.
-// To make code works for all platforms, SimpleCycleTimer calss simulates
-// a CPU cycle by using gettimeofday() and cycle in microseconds.
-// If needed, this timer class can be easily replaced by a real cycle_clock.
+// But that code only works for some platforms. To make code works for all
+// platforms, SimpleCycleTimer class uses a fake CPU cycle each taking a
+// microsecond. If needed, this timer class can be easily replaced by a
+// real cycle_clock.
 class SimpleCycleTimer {
  public:
   // Return the current cycle in microseconds.
   static int64_t Now() {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    return static_cast<int64_t>(tv.tv_sec * 1000000 + tv.tv_usec);
+    return static_cast<int64_t>(tv.tv_sec * kSecToUsec + tv.tv_usec);
   }
   // Return number of cycles in a second.
-  static int64_t CyclesInSecond() { return 1000000; }
+  static int64_t Frequency() { return kSecToUsec; }
 
  private:
   SimpleCycleTimer();  // no instances
@@ -599,7 +602,7 @@ void SimpleLRUCacheBase<Key, Value, MapType, EQ>::SetTimeout(double seconds,
     // `timeout_cycles` to int64_t will not overflow.
     // NOTE 2: If you modify the computation here, make sure to update the
     // GetBoundaryTimeout() method in the test as well.
-    const double timeout_cycles = seconds * SimpleCycleTimer::CyclesInSecond();
+    const double timeout_cycles = seconds * SimpleCycleTimer::Frequency();
     if (timeout_cycles >= std::numeric_limits<int64_t>::max()) {
       // The value is outside the range of int64_t, so "round" down to something
       // that can be represented.
@@ -941,8 +944,8 @@ template <class Key, class Value, class MapType, class EQ>
 int64_t SimpleLRUCacheBase<Key, Value, MapType,
                            EQ>::AgeOfLRUItemInMicroseconds() const {
   if (head_.prev == &head_) return 0;
-  return 1000000 * (SimpleCycleTimer::Now() - head_.prev->last_use_) /
-         SimpleCycleTimer::CyclesInSecond();
+  return kSecToUsec * (SimpleCycleTimer::Now() - head_.prev->last_use_) /
+         SimpleCycleTimer::Frequency();
 }
 
 template <class Key, class Value, class MapType, class EQ>
