@@ -1,0 +1,13 @@
+Revision: cb7562b57b596a895d987d2f51b74c29df8c4eb0
+Patch-set: 1
+File: cache/simple_lru_cache_inl.h
+
+50:14-50:24
+Fri Feb 12 19:46:11 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: bd0fc4b0_946a895a
+Bytes: 35
+kSecToUsec
+
+Msec means milliseconds
+
