@@ -4,6 +4,7 @@ cc_library(
     hdrs = [
       "google_macros.h",
       "status_test_util.h",
+      "stl_util.h",
     ],
     visibility = ["//visibility:public"],
 )
@@ -46,6 +47,30 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//third_party/config:servicecontrol",
+    ],
+)
+
+cc_library(
+    name = "operation_aggregator_lib",
+    srcs = [ "operation_aggregator.cc" ],
+    hdrs = [ "operation_aggregator.h" ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_headers",
+        ":distribution_helper_lib",
+        ":money_utils_lib",
+        ":signature_lib",
+    ],
+)
+
+cc_test(
+    name = "operation_aggregator_test",
+    size = "small",
+    srcs = [ "operation_aggregator_test.cc" ],
+    linkopts = [ "-lm", ],
+    deps = [
+        ":operation_aggregator_lib",
+        "//external:googletest_main",
     ],
 )
 
