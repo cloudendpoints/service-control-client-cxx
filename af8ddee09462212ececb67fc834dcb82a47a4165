@@ -2,6 +2,21 @@ Revision: af8ddee09462212ececb67fc834dcb82a47a4165
 Patch-set: 5
 File: cache/simple_lru_cache_inl.h
 
+54:58-54:63
+Fri Feb 12 19:16:27 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: bd0fc4b0_14e7b98f
+Bytes: 14
+calss -> class
+
+55:9-55:14
+Fri Feb 12 19:16:27 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: bd0fc4b0_b4434d1b
+Bytes: 120
+this sentence doesn't seem clear to me. 
+probably just say "that class uses a fake cpu cycle each taking a microsecond"?
+
 66:31-66:33
 Fri Feb 12 06:40:17 2016 +0000
 Author: Mingliang Wei <5245@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -16,4 +31,21 @@ Parent: bd0fc4b0_f13437dc
 UUID: bd0fc4b0_34fabd63
 Bytes: 40
 I think CyclesInSecond() is more direct.
+
+66:31-66:33
+Fri Feb 12 19:16:27 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: bd0fc4b0_34fabd63
+UUID: bd0fc4b0_541e5154
+Bytes: 53
+nit: the original name 'CyclesPerSecond' seems better
+
+944:9-944:16
+Fri Feb 12 19:16:27 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: bd0fc4b0_5433f1d6
+Bytes: 82
+nit: define a constant for 1000000? i.e. const int kSecToMsec = 1000000
+
+up to you
 
