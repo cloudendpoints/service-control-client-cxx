@@ -9,3 +9,11 @@ UUID: bd0fc4b0_f13437dc
 Bytes: 37
 do you want to call this Frequency()?
 
+66:31-66:33
+Fri Feb 12 18:33:16 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: bd0fc4b0_f13437dc
+UUID: bd0fc4b0_34fabd63
+Bytes: 40
+I think CyclesInSecond() is more direct.
+
