@@ -9,6 +9,14 @@ UUID: bd0fc4b0_14e7b98f
 Bytes: 14
 calss -> class
 
+54:58-54:63
+Fri Feb 12 19:43:34 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: bd0fc4b0_14e7b98f
+UUID: bd0fc4b0_54a1b11a
+Bytes: 4
+Done
+
 55:9-55:14
 Fri Feb 12 19:16:27 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -16,6 +24,14 @@ UUID: bd0fc4b0_b4434d1b
 Bytes: 120
 this sentence doesn't seem clear to me. 
 probably just say "that class uses a fake cpu cycle each taking a microsecond"?
+
+55:9-55:14
+Fri Feb 12 19:43:34 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: bd0fc4b0_b4434d1b
+UUID: bd0fc4b0_94c5e9af
+Bytes: 4
+Done
 
 66:31-66:33
 Fri Feb 12 06:40:17 2016 +0000
@@ -40,6 +56,14 @@ UUID: bd0fc4b0_541e5154
 Bytes: 53
 nit: the original name 'CyclesPerSecond' seems better
 
+66:31-66:33
+Fri Feb 12 19:43:34 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: bd0fc4b0_541e5154
+UUID: bd0fc4b0_b4dfcd81
+Bytes: 4
+Done
+
 944:9-944:16
 Fri Feb 12 19:16:27 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -48,4 +72,12 @@ Bytes: 82
 nit: define a constant for 1000000? i.e. const int kSecToMsec = 1000000
 
 up to you
+
+944:9-944:16
+Fri Feb 12 19:43:34 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: bd0fc4b0_5433f1d6
+UUID: bd0fc4b0_d44fe107
+Bytes: 4
+Done
 
