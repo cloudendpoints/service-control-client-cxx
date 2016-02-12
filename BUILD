@@ -49,6 +49,30 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "operation_aggregator_lib",
+    srcs = [ "operation_aggregator.cc" ],
+    hdrs = [ "operation_aggregator.h" ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_headers",
+        ":distribution_helper_lib",
+        ":money_utils_lib",
+        ":signature_lib",
+    ],
+)
+
+cc_test(
+    name = "operation_aggregator_test",
+    size = "small",
+    srcs = [ "operation_aggregator_test.cc" ],
+    linkopts = [ "-lm", ],
+    deps = [
+        ":operation_aggregator_lib",
+        "//external:googletest_main",
+    ],
+)
+
 cc_test(
     name = "money_utils_test",
     size = "small",
