@@ -1,0 +1,23 @@
+Revision: 4d9155f1c08a04169b8ec3ad455b8780eeb6349f
+Patch-set: 2
+File: distribution_helper.cc
+
+43:41-43:42
+Fri Feb 12 07:23:51 2016 +0000
+Author: Mingliang Wei <5245@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 7dbb8cf2_32a8804f
+Bytes: 152
+this formula is wrong.
+
+try the following estimation
+https://cs.corp.google.com/#piper///depot/google3/monitoring/streamz/internal/distribution.cc&l=352
+
+54:28-54:35
+Fri Feb 12 07:23:51 2016 +0000
+Author: Mingliang Wei <5245@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 7dbb8cf2_12d45cbe
+Bytes: 48
+the most common way is
+
+std::abs(x-y) < epsilon;
+
