@@ -17,16 +17,6 @@ cc_library(
     ],
 )
 
-cc_test(
-    name = "distribution_helper_test",
-    size = "small",
-    srcs = [ "distribution_helper_test.cc" ],
-    deps = [
-        ":distribution_helper_lib",
-        "//external:googletest_main",
-    ],
-)
-
 cc_library(
     name = "md5_lib",
     srcs = [ "md5.cc" ],
@@ -37,12 +27,43 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "signature_lib",
+    srcs = [ "signature.cc" ],
+    hdrs = [ "signature.h" ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":md5_lib",
+        "//third_party/config:servicecontrol",
+    ],
+)
+
+cc_test(
+    name = "distribution_helper_test",
+    size = "small",
+    srcs = [ "distribution_helper_test.cc" ],
+    deps = [
+        ":distribution_helper_lib",
+        "//external:googletest_main",
+    ],
+)
+
 cc_test(
     name = "md5_test",
     size = "small",
     srcs = [ "md5_test.cc" ],
     deps = [
         ":md5_lib",
+        "//external:googletest_main",
+    ],
+)
+
+cc_test(
+    name = "signature_test",
+    size = "small",
+    srcs = [ "signature_test.cc" ],
+    deps = [
+        ":signature_lib",
         "//external:googletest_main",
     ],
 )
