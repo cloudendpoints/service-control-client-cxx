@@ -12,6 +12,14 @@ this formula is wrong.
 try the following estimation
 https://cs.corp.google.com/#piper///depot/google3/monitoring/streamz/internal/distribution.cc&l=352
 
+43:41-43:42
+Fri Feb 19 02:02:18 2016 +0000
+Author: Chengliang Zhang <5075@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 7dbb8cf2_32a8804f
+UUID: 02a94d5f_27a554cc
+Bytes: 105
+I think the formula is correct. It is less efficient. Let's change to the one that mingliang pointed out.
+
 54:28-54:35
 Fri Feb 12 07:23:51 2016 +0000
 Author: Mingliang Wei <5245@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -20,4 +28,12 @@ Bytes: 48
 the most common way is
 
 std::abs(x-y) < epsilon;
+
+54:28-54:35
+Fri Feb 19 02:02:18 2016 +0000
+Author: Chengliang Zhang <5075@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 7dbb8cf2_12d45cbe
+UUID: 02a94d5f_e7cf3c74
+Bytes: 96
+I would prefer epsilon * std::abs(x) version, especially consider x and y can be less than 1e-5.
 
