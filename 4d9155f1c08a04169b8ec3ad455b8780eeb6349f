@@ -20,6 +20,14 @@ UUID: 02a94d5f_27a554cc
 Bytes: 105
 I think the formula is correct. It is less efficient. Let's change to the one that mingliang pointed out.
 
+43:41-43:42
+Fri Feb 19 03:15:29 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02a94d5f_27a554cc
+UUID: 02a94d5f_07cff829
+Bytes: 4
+Done
+
 54:28-54:35
 Fri Feb 12 07:23:51 2016 +0000
 Author: Mingliang Wei <5245@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -36,4 +44,12 @@ Parent: 7dbb8cf2_12d45cbe
 UUID: 02a94d5f_e7cf3c74
 Bytes: 96
 I would prefer epsilon * std::abs(x) version, especially consider x and y can be less than 1e-5.
+
+54:28-54:35
+Fri Feb 19 03:15:29 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02a94d5f_e7cf3c74
+UUID: 02a94d5f_27d474bd
+Bytes: 22
+OK, keep the old code.
 
