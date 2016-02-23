@@ -10,56 +10,41 @@ cc_library(
 )
 
 cc_library(
-    name = "distribution_helper_lib",
-    srcs = [ "distribution_helper.cc" ],
-    hdrs = [ "distribution_helper.h" ],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//third_party/config:servicecontrol",
+    name = "aggregator_lib",
+    srcs = [
+         "distribution_helper.cc",
+         "md5.cc",
+         "money_utils.cc",
+         "operation_aggregator.cc",
+         "report_aggregator_impl.cc",
+         "signature.cc",
     ],
-)
-
-cc_library(
-    name = "md5_lib",
-    srcs = [ "md5.cc" ],
-    hdrs = [ "md5.h" ],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//external:ssl_crypto",
+    hdrs = [
+         "aggregator_interface.h",
+         "distribution_helper.h",
+         "md5.h",
+         "money_utils.h",
+         "operation_aggregator.h",
+         "report_aggregator_impl.h",
+         "signature.h",
+         "thread.h",
     ],
-)
-
-cc_library(
-    name = "signature_lib",
-    srcs = [ "signature.cc" ],
-    hdrs = [ "signature.h" ],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":md5_lib",
-        "//third_party/config:servicecontrol",
-    ],
-)
-
-cc_library(
-    name = "money_utils_lib",
-    srcs = [ "money_utils.cc" ],
-    hdrs = [ "money_utils.h" ],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//third_party/config:servicecontrol",
-    ],
-)
-
-cc_library(
-    name = "operation_aggregator_lib",
-    srcs = [ "operation_aggregator.cc" ],
-    hdrs = [ "operation_aggregator.h" ],
     visibility = ["//visibility:public"],
     deps = [
         ":common_headers",
-        ":distribution_helper_lib",
-        ":money_utils_lib",
-        ":signature_lib",
+        "//cache:simple_lru_cache",
+        "//external:ssl_crypto",
+        "//third_party/config:servicecontrol",
+    ],
+)
+
+cc_test(
+    name = "report_aggregator_impl_test",
+    size = "small",
+    srcs = [ "report_aggregator_impl_test.cc" ],
+    deps = [
+        ":aggregator_lib",
+        "//external:googletest_main",
     ],
 )
 
@@ -69,7 +54,7 @@ cc_test(
     srcs = [ "operation_aggregator_test.cc" ],
     linkopts = [ "-lm", ],
     deps = [
-        ":operation_aggregator_lib",
+        ":aggregator_lib",
         "//external:googletest_main",
     ],
 )
@@ -79,8 +64,7 @@ cc_test(
     size = "small",
     srcs = [ "money_utils_test.cc" ],
     deps = [
-        ":common_headers",
-        ":money_utils_lib",
+        ":aggregator_lib",
         "//external:googletest_main",
     ],
 )
@@ -90,7 +74,7 @@ cc_test(
     size = "small",
     srcs = [ "distribution_helper_test.cc" ],
     deps = [
-        ":distribution_helper_lib",
+        ":aggregator_lib",
         "//external:googletest_main",
     ],
 )
@@ -100,7 +84,7 @@ cc_test(
     size = "small",
     srcs = [ "md5_test.cc" ],
     deps = [
-        ":md5_lib",
+        ":aggregator_lib",
         "//external:googletest_main",
     ],
 )
@@ -110,7 +94,7 @@ cc_test(
     size = "small",
     srcs = [ "signature_test.cc" ],
     deps = [
-        ":signature_lib",
+        ":aggregator_lib",
         "//external:googletest_main",
     ],
 )
