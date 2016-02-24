@@ -1,0 +1,44 @@
+Revision: cd991681bd54851a4fb987ad5c692bf49caa9d6a
+Patch-set: 2
+File: md5.cc
+
+18:14-18:21
+Wed Feb 24 19:44:47 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02e4ed24_180da289
+Bytes: 91
+digest_ doesn't need to be a member field. a temporary variable seems more reasonable here.
+
+File: md5.h
+
+16:5-16:11
+Wed Feb 24 19:44:47 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02e4ed24_7d725826
+Bytes: 70
+Updates
+for code consistency, lets stay with declarative or imperative
+
+37:5-37:11
+Wed Feb 24 19:44:47 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02e4ed24_3d6cd041
+Bytes: 7
+Returns
+
+44:21-44:36
+Wed Feb 24 19:44:47 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02e4ed24_b8a44ed0
+Bytes: 130
+DebugString()?
+
+can this method be moved into private section? add friend class to make it accessible by testing code if necessary
+
+46:1-46:8
+Wed Feb 24 19:44:47 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02e4ed24_98aab299
+Bytes: 28
+add comment for these fields
+
