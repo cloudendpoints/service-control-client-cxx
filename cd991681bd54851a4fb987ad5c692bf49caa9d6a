@@ -9,6 +9,16 @@ UUID: 02e4ed24_180da289
 Bytes: 91
 digest_ doesn't need to be a member field. a temporary variable seems more reasonable here.
 
+18:14-18:21
+Wed Feb 24 20:01:42 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02e4ed24_180da289
+UUID: 02e4ed24_58fb2a8f
+Bytes: 164
+I think it is useful to allow MD5::Digest() to be called multiple times.  Even we don't use it. 
+
+But MD5_Final can be called once.  so we need to cache the result.
+
 File: md5.h
 
 16:5-16:11
@@ -19,12 +29,28 @@ Bytes: 70
 Updates
 for code consistency, lets stay with declarative or imperative
 
+16:5-16:11
+Wed Feb 24 20:01:42 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02e4ed24_7d725826
+UUID: 02e4ed24_188002ea
+Bytes: 4
+Done
+
 37:5-37:11
 Wed Feb 24 19:44:47 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 02e4ed24_3d6cd041
 Bytes: 7
 Returns
+
+37:5-37:11
+Wed Feb 24 20:01:42 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02e4ed24_3d6cd041
+UUID: 02e4ed24_f88416ff
+Bytes: 4
+Done
 
 44:21-44:36
 Wed Feb 24 19:44:47 2016 +0000
@@ -35,10 +61,27 @@ DebugString()?
 
 can this method be moved into private section? add friend class to make it accessible by testing code if necessary
 
+44:21-44:36
+Wed Feb 24 20:01:42 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02e4ed24_b8a44ed0
+UUID: 02e4ed24_387bbec7
+Bytes: 95
+Done, renamed to DebugString().
+But not moving to private so other code can use it for logging.
+
 46:1-46:8
 Wed Feb 24 19:44:47 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 02e4ed24_98aab299
 Bytes: 28
 add comment for these fields
+
+46:1-46:8
+Wed Feb 24 20:01:42 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02e4ed24_98aab299
+UUID: 02e4ed24_787146e7
+Bytes: 4
+Done
 
