@@ -1,8 +1,8 @@
 #include "signature.h"
 #include "md5.h"
 
-#include "google/type/money.pb.h"
 #include "google/protobuf/text_format.h"
+#include "google/type/money.pb.h"
 #include "gtest/gtest.h"
 
 using std::string;
@@ -94,7 +94,7 @@ class SignatureUtilTest : public ::testing::Test {
 
 TEST_F(SignatureUtilTest, OperationWithNoLabel) {
   EXPECT_EQ("d056b16b88b914b40cd5a82470bc02a5",
-            MD5::PrintableDigest(GenerateReportOperationSignature(operation_)));
+            MD5::DebugString(GenerateReportOperationSignature(operation_)));
 }
 
 TEST_F(SignatureUtilTest, OperationWithLabels) {
@@ -102,13 +102,13 @@ TEST_F(SignatureUtilTest, OperationWithLabels) {
   AddOperationLabel(kResourceTypeLabel, "instance", &operation_);
 
   EXPECT_EQ("7eeeecc5c2bc599dc106921cca181310",
-            MD5::PrintableDigest(GenerateReportOperationSignature(operation_)));
+            MD5::DebugString(GenerateReportOperationSignature(operation_)));
 }
 
 TEST_F(SignatureUtilTest, MetricValueWithNoLabel) {
   EXPECT_EQ(
       "d41d8cd98f00b204e9800998ecf8427e",
-      MD5::PrintableDigest(GenerateReportMetricValueSignature(metric_value_)));
+      MD5::DebugString(GenerateReportMetricValueSignature(metric_value_)));
 }
 
 TEST_F(SignatureUtilTest, MetricValueWithLabels) {
@@ -116,7 +116,7 @@ TEST_F(SignatureUtilTest, MetricValueWithLabels) {
 
   EXPECT_EQ(
       "3f6bc74c0a4be6b6eeaab1faac30a365",
-      MD5::PrintableDigest(GenerateReportMetricValueSignature(metric_value_)));
+      MD5::DebugString(GenerateReportMetricValueSignature(metric_value_)));
 }
 
 TEST_F(SignatureUtilTest, MetricValueHavingMoney) {
@@ -125,14 +125,14 @@ TEST_F(SignatureUtilTest, MetricValueHavingMoney) {
   money->set_units(1000);
   EXPECT_EQ(
       "dbe2168cd8ad1eb33d8f9f6b9aea7f52",
-      MD5::PrintableDigest(GenerateReportMetricValueSignature(metric_value_)));
+      MD5::DebugString(GenerateReportMetricValueSignature(metric_value_)));
 }
 
 TEST_F(SignatureUtilTest, CheckRequest) {
   CheckRequest request;
   ASSERT_TRUE(TextFormat::ParseFromString(kCheckRequest, &request));
   EXPECT_EQ("14d948a5985e97ea8fa13f408b2e9cac",
-            MD5::PrintableDigest(GenerateCheckRequestSignature(request)));
+            MD5::DebugString(GenerateCheckRequestSignature(request)));
 }
 
 }  // namespace
