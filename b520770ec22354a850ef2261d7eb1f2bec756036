@@ -1,0 +1,11 @@
+Revision: b520770ec22354a850ef2261d7eb1f2bec756036
+Patch-set: 6
+File: stl_util.h
+
+7:10-7:14
+Thu Feb 25 21:04:03 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02e4ed24_326bd684
+Bytes: 162
+I think you only need to keep map_util_internal namespace, and remove 'util' + 'gtl' namespaces, unless you are planning to add more util/gtl as stl util methods.
+
