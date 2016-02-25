@@ -1,0 +1,11 @@
+Revision: 90f737e50fa4ca571fba4d801f2637cf6de1f349
+Patch-set: 4
+File: operation_aggregator.cc
+
+161:52-161:67
+Thu Feb 25 18:34:33 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02e4ed24_b2c90624
+Bytes: 114
+this one and the one below are generic methods for Find. consider moving them to a separate file, i.e. map_util.h.
+
