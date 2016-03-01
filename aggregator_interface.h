@@ -153,7 +153,7 @@ std::unique_ptr<ReportAggregator> CreateReportAggregator(
     std::shared_ptr<MetricKindMap> metric_kind);
 
 // Create a Check aggregator.
-std::unique_ptr<CheckAggregator> CreateSimpleCheckAggregator(
+std::unique_ptr<CheckAggregator> CreateCheckAggregator(
     const std::string& service_name, const CheckAggregationOptions& options,
     std::shared_ptr<MetricKindMap> metric_kind);
 
