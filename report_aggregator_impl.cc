@@ -42,7 +42,10 @@ ReportAggregatorImpl::ReportAggregatorImpl(
   }
 }
 
-ReportAggregatorImpl::~ReportAggregatorImpl() { FlushAll(); }
+ReportAggregatorImpl::~ReportAggregatorImpl() {
+  flush_callback_ = NULL;
+  FlushAll(); 
+}
 
 // Set the flush callback function.
 void ReportAggregatorImpl::SetFlushCallback(FlushCallback callback) {
