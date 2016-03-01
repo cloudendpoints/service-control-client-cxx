@@ -148,10 +148,10 @@ class CheckAggregator {
 
   // When the next Flush() should be called.
   // Returns in ms from now, or -1 for never
-  virtual int NextFlushInterval() = 0;
+  virtual int GetNextFlushInterval() = 0;
 
   // Invalidates expired check resposnes.
-  // Called at time specified by NextFlushInterval().
+  // Called at time specified by GetNextFlushInterval().
   virtual ::google::protobuf::util::Status Flush() = 0;
 
   // Flushes out all cached check responses; clears all cache items.
@@ -162,12 +162,12 @@ class CheckAggregator {
   CheckAggregator() {}
 };
 
-// Creates a Report aggregator.
+// Creates a report aggregator.
 std::unique_ptr<ReportAggregator> CreateReportAggregator(
     const std::string& service_name, const ReportAggregationOptions& options,
     std::shared_ptr<MetricKindMap> metric_kind);
 
-// Creates a Check aggregator.
+// Creates a check aggregator.
 std::unique_ptr<CheckAggregator> CreateCheckAggregator(
     const std::string& service_name, const CheckAggregationOptions& options,
     std::shared_ptr<MetricKindMap> metric_kind);
