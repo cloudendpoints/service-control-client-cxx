@@ -11,6 +11,15 @@ is it ok to add b/? in comment for esp code?
 
 also, this bug has been closed. what is the current plan for configuring this aggregation options? are we going to make them configurable or not?
 
+24:7-24:15
+Tue Mar 01 18:18:25 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_16012c25
+UUID: 02feade5_b1e202bd
+Bytes: 121
+Will remove the comment.
+I don't have good plan to make them configurable externally.  So there is not such plan for now.
+
 122:5-122:8
 Tue Mar 01 03:57:28 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -18,12 +27,28 @@ UUID: 02feade5_d6dd04fd
 Bytes: 4
 Sets
 
+122:5-122:8
+Tue Mar 01 18:18:25 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_d6dd04fd
+UUID: 02feade5_f1f48a3b
+Bytes: 4
+Done
+
 125:53-125:59
 Tue Mar 01 03:57:28 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 02feade5_b6e2f8bc
 Bytes: 7
 Returns
+
+125:53-125:59
+Tue Mar 01 18:18:25 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_b6e2f8bc
+UUID: 02feade5_51fa9e25
+Bytes: 4
+Done
 
 132:5-132:10
 Tue Mar 01 03:57:28 2016 +0000
@@ -34,6 +59,14 @@ Cache -> Caches, and other places in all header files
 
 Did we say we will stay with "Caches" or "Cache" for comment consistency?
 
+132:5-132:10
+Tue Mar 01 18:18:25 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_16e80c9b
+UUID: 02feade5_910426fa
+Bytes: 4
+Done
+
 File: report_aggregator_impl.cc
 
 18:5-18:26
@@ -42,6 +75,14 @@ Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 02feade5_f6ec80b0
 Bytes: 154
 are these files also porting from esf/chemist code base? could you add a link to the original code path so I can do a simple diff to make my review easier
+
+18:5-18:26
+Tue Mar 01 18:18:25 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_f6ec80b0
+UUID: 02feade5_113e56a2
+Bytes: 101
+Only a few functions were copied from google3; this one and constructor. the other functions are new.
 
 File: thread.h
 
@@ -53,4 +94,12 @@ Bytes: 103
 rename this file as mutex.h?
 
 I am not sure what will be other thread related stuff to put in this file
+
+12:19-12:24
+Tue Mar 01 18:18:25 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_7654f029
+UUID: 02feade5_115776d4
+Bytes: 95
+"thread" and "condition" will be added to this file.  So I think I will keep the name as thread
 
