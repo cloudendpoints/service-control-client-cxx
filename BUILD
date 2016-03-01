@@ -12,6 +12,7 @@ cc_library(
 cc_library(
     name = "aggregator_lib",
     srcs = [
+         "check_aggregator_impl.cc",
          "distribution_helper.cc",
          "md5.cc",
          "money_utils.cc",
@@ -20,6 +21,7 @@ cc_library(
          "signature.cc",
     ],
     hdrs = [
+         "check_aggregator_impl.h",
          "aggregator_interface.h",
          "distribution_helper.h",
          "md5.h",
@@ -35,6 +37,16 @@ cc_library(
         "//cache:simple_lru_cache",
         "//external:ssl_crypto",
         "//third_party/config:servicecontrol",
+    ],
+)
+
+cc_test(
+    name = "check_aggregator_impl_test",
+    size = "small",
+    srcs = [ "check_aggregator_impl_test.cc" ],
+    deps = [
+        ":aggregator_lib",
+        "//external:googletest_main",
     ],
 )
 
