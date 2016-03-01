@@ -13,7 +13,6 @@
 #include "google/api/metric.pb.h"
 #include "google/api/servicecontrol/v1/operation.pb.h"
 #include "google/api/servicecontrol/v1/service_controller.pb.h"
-#include "google/protobuf/stubs/mutex.h"
 #include "operation_aggregator.h"
 #include "thread.h"
 
