@@ -6,6 +6,7 @@ cc_library(
          "money_utils.cc",
          "operation_aggregator.cc",
          "report_aggregator_impl.cc",
+         "service_control_client_impl.cc",
          "signature.cc",
     ],
     hdrs = [
@@ -14,6 +15,7 @@ cc_library(
          "money_utils.h",
          "operation_aggregator.h",
          "report_aggregator_impl.h",
+         "service_control_client_impl.h",
          "signature.h",
     ],
     # TODO(qiwzhang): Change it to private.

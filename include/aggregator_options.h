@@ -2,6 +2,7 @@
 #define GOOGLE_SERVICE_CONTROL_CLIENT_AGGREGATOR_OPTIONS_H_
 
 #include <memory>
+#include "google/api/metric.pb.h"
 
 namespace google {
 namespace service_control_client {
