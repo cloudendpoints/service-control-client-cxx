@@ -107,6 +107,7 @@ void ReportAggregatorImpl::OnCacheEntryDelete(OperationAggregator* iop) {
 // When the next Flush() should be called.
 // Return in ms from now, or -1 for never
 int ReportAggregatorImpl::GetNextFlushInterval() {
+  if (!cache_) return -1;
   return options_.flush_interval_ms;
 }
 
