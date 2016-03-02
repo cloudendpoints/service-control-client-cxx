@@ -6,6 +6,7 @@ cc_library(
          "money_utils.cc",
          "operation_aggregator.cc",
          "report_aggregator_impl.cc",
+         "service_control_client_impl.cc",
          "signature.cc",
     ],
     hdrs = [
@@ -14,6 +15,7 @@ cc_library(
          "money_utils.h",
          "operation_aggregator.h",
          "report_aggregator_impl.h",
+         "service_control_client_impl.h",
          "signature.h",
     ],
     # TODO(qiwzhang): Change it to private.
@@ -59,6 +61,17 @@ cc_test(
     name = "report_aggregator_impl_test",
     size = "small",
     srcs = [ "report_aggregator_impl_test.cc" ],
+    deps = [
+        ":service_control_client_internal_lib",
+        "//external:googletest_main",
+    ],
+)
+
+cc_test(
+    name = "service_control_client_impl_test",
+    size = "small",
+    srcs = [ "service_control_client_impl_test.cc" ],
+    linkopts = [ "-lm", ],
     deps = [
         ":service_control_client_internal_lib",
         "//external:googletest_main",
