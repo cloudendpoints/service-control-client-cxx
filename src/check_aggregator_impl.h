@@ -53,7 +53,7 @@ namespace service_control_client {
 //
 // Object life management:
 // The callers of this object needs to make sure the object is still valid
-// before calling its methods. Specifically, callers may use non-blocking
+// before calling its methods. Specifically, callers may use async
 // transport to send request to server and pass an on_done() callback to be
 // called when response is received.  If on_done() function is calling
 // CheckAggregator->CacheReponse() funtion, caller MUST make sure the

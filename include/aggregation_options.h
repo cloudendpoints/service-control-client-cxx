@@ -2,6 +2,7 @@
 #define GOOGLE_SERVICE_CONTROL_CLIENT_AGGREGATOR_OPTIONS_H_
 
 #include <memory>
+#include "google/api/metric.pb.h"
 
 namespace google {
 namespace service_control_client {
@@ -23,23 +24,25 @@ struct CheckAggregationOptions {
   // flush_cache_entry_interval_ms is the maximum milliseconds before an
   // aggregated check request needs to send to remote server again.
   // response_expiration_ms is the maximum milliseconds before a cached check
-  // response is invalidated.
+  // response is invalidated. We make sure that it is at least
+  // flush_cache_entry_interval_ms + 1.
   CheckAggregationOptions(int cache_entries, int flush_cache_entry_interval_ms,
                           int response_expiration_ms)
       : num_entries(cache_entries),
         flush_interval_ms(flush_cache_entry_interval_ms),
-        expiration_ms(std::max(flush_cache_entry_interval_ms,
-                               response_expiration_ms + 1)) {}
+        expiration_ms(std::max(flush_cache_entry_interval_ms + 1,
+                               response_expiration_ms)) {}
 
   // Maximum number of cache entries kept in the aggregation cache.
+  // Set to 0 will disable caching and aggregation.
   const int num_entries;
 
   // Maximum milliseconds before aggregated check requests are flushed to the
-  // server. The flush is invoked by a check request.
+  // server. The flush is triggered by a check request.
   const int flush_interval_ms;
 
   // Maximum milliseconds before a cached check response should be deleted. The
-  // deletion is invoked by a timer. This value must be larger than
+  // deletion is triggered by a timer. This value must be larger than
   // flush_interval_ms.
   const int expiration_ms;
 };
@@ -60,11 +63,11 @@ struct ReportAggregationOptions {
         flush_interval_ms(flush_cache_entry_interval_ms) {}
 
   // Maximum number of cache entries kept in the aggregation cache.
+  // Set to 0 will disable caching and aggregation.
   const int num_entries;
 
   // Maximum milliseconds before aggregated report requests are flushed to the
-  // server. The cache entry is deleted after the flush. The flush is invoked by
-  // a timer.
+  // server. The flush is triggered by a timer.
   const int flush_interval_ms;
 };
 
