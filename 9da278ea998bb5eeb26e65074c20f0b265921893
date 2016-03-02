@@ -28,6 +28,20 @@ UUID: e2927965_59beee2c
 Bytes: 138
 can you add a todo and file a bug to track that? we may not need this for esp, but seems like a good feature for open source this library.
 
+24:7-24:15
+Wed Mar 02 02:59:09 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_59beee2c
+UUID: 02feade5_f7be37db
+Bytes: 522
+IMO, it makes sense to support external configurable for a complete system, such as ESP.  ESP needs to worry about how to configure these parameter externally.  
+
+But as a client library, it doesn't make sense.  The caller of the library needs to worry about it, as long as library has ways for callers to set these parameters.
+
+For example, one solution is to use flags,  but it requires main() function to load the flags. This library should not just load the flags library, it is an extra dependency.
+
+Let us not do it.
+
 122:5-122:8
 Tue Mar 01 03:57:28 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
