@@ -42,6 +42,14 @@ For example, one solution is to use flags,  but it requires main() function to l
 
 Let us not do it.
 
+24:7-24:15
+Wed Mar 02 22:37:39 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_f7be37db
+UUID: 02feade5_0dd476bc
+Bytes: 160
+I agree. mis-read the original comment and didn't see the next constructor. So, the client IS able to set these options programmably using the next constructor?
+
 122:5-122:8
 Tue Mar 01 03:57:28 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
