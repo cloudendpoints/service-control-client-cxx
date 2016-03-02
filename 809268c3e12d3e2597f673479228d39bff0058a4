@@ -9,6 +9,14 @@ UUID: e2927965_3925a247
 Bytes: 38
 should these debugging log be removed?
 
+191:23-191:41
+Wed Mar 02 03:52:48 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_3925a247
+UUID: 02feade5_5718cb96
+Bytes: 31
+Done. Thanks for catching this.
+
 File: check_aggregator_impl.h
 
 24:6-24:25
@@ -18,12 +26,29 @@ UUID: e2927965_595c2ec7
 Bytes: 106
 what is the benefit of this inheritance? are we going to have different implementation of CheckAggregator?
 
+24:6-24:25
+Wed Mar 02 03:52:48 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_595c2ec7
+UUID: 02feade5_b7502f50
+Bytes: 220
+Original plan is to have different implementations. SimpleAggregator ESP is using now.  This is the cache implementation.  
+Another reason is to hide the implementation detail. Callers only need to include the interface.
+
 35:5-35:8
 Wed Mar 02 02:11:51 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: e2927965_995696a5
 Bytes: 4
 Sets
+
+35:5-35:8
+Wed Mar 02 03:52:48 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_995696a5
+UUID: 02feade5_772fc7d2
+Bytes: 4
+Done
 
 41:53-41:59
 Wed Mar 02 02:11:51 2016 +0000
@@ -32,12 +57,28 @@ UUID: e2927965_d9673e91
 Bytes: 7
 returns
 
+41:53-41:59
+Wed Mar 02 03:52:48 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_d9673e91
+UUID: 02feade5_572c4bdc
+Bytes: 4
+Done
+
 43:16-43:22
 Wed Mar 02 02:11:51 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: e2927965_f964fa8e
 Bytes: 7
 returns
+
+43:16-43:22
+Wed Mar 02 03:52:48 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_f964fa8e
+UUID: 02feade5_b7294fce
+Bytes: 4
+Done
 
 48:5-48:66
 Wed Mar 02 02:11:51 2016 +0000
@@ -46,12 +87,28 @@ UUID: e2927965_b96a7258
 Bytes: 6
 Caches
 
+48:5-48:66
+Wed Mar 02 03:52:48 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_b96a7258
+UUID: 02feade5_9726d3fa
+Bytes: 4
+Done
+
 54:5-54:11
 Wed Mar 02 02:11:51 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: e2927965_39fcc2d3
 Bytes: 50
 Returns, and rest of the file, and other files ...
+
+54:5-54:11
+Wed Mar 02 03:52:48 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_39fcc2d3
+UUID: 02feade5_f77f57b6
+Bytes: 4
+Done
 
 150:20-150:33
 Wed Mar 02 02:11:51 2016 +0000
@@ -60,10 +117,26 @@ UUID: e2927965_79064ab7
 Bytes: 7
 comment
 
+150:20-150:33
+Wed Mar 02 03:52:48 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_79064ab7
+UUID: 02feade5_d70b3b44
+Bytes: 4
+Done
+
 170:10-170:34
 Wed Mar 02 02:11:51 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: e2927965_59018e9c
 Bytes: 22
 comment for this field
+
+170:10-170:34
+Wed Mar 02 03:52:48 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_59018e9c
+UUID: 02feade5_1706433c
+Bytes: 4
+Done
 
