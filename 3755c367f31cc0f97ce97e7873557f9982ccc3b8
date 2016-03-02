@@ -1,0 +1,107 @@
+Revision: 3755c367f31cc0f97ce97e7873557f9982ccc3b8
+Patch-set: 3
+File: aggregator_interface.h
+
+79:6-79:22
+Wed Mar 02 22:37:39 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_ad98e22e
+Bytes: 31
+nit: ReportAggregatorInterface?
+
+88:2-88:18
+Wed Mar 02 22:37:39 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_0d5756fb
+Bytes: 32
+make the constructor "protected"
+
+102:33-102:37
+Wed Mar 02 22:37:39 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_ad462247
+Bytes: 11
+whom -> who
+
+113:6-113:21
+Wed Mar 02 22:37:39 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_6d3c1ac8
+Bytes: 24
+CheckAggregatorInterface
+
+122:2-122:17
+Wed Mar 02 22:37:39 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_4d395ed6
+Bytes: 9
+protected
+
+File: report_aggregator_impl.cc
+
+18:5-18:26
+Wed Mar 02 22:37:39 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_aeca9961
+Bytes: 51
+HasHighImportanceOperation()
+HighValue is confusing
+
+69:2-69:5
+Wed Mar 02 22:37:39 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_0ee46df9
+Bytes: 74
+add comment here we start reporting request with low importance operations
+
+92:20-92:27
+Wed Mar 02 22:37:39 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_2ea5e9cb
+Bytes: 298
+so, we don't need to track those pending flush calls like the original code?
+
+I cannot remember why we were waiting there. Couldn't find comment for that either. There should be a reason. Lets consult with @chengliang and see if he remembered. just make sure we didn't miss out something important.
+
+104:7-104:27
+Wed Mar 02 22:37:39 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_28a200d6
+Bytes: 156
+do we have test to check that this Flush and the one below will flush deleted entries to chemist? like making sure that OnCacheEntryDelete() will be invoked
+
+File: report_aggregator_impl.h
+
+34:11-34:31
+Wed Mar 02 22:37:39 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_8d2fe666
+Bytes: 33
+~ReportAggregatorImpl() override;
+
+36:5-36:8
+Wed Mar 02 22:37:39 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_6d289a62
+Bytes: 67
+Set -> Sets, and rest of the file. Please also check other files :)
+
+40:35-40:41
+Wed Mar 02 22:37:39 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_cd61eeb3
+Bytes: 145
+Report(...) override; append override to all these virtual methods, this file and other files
+
+I am reviewing based on google3 code style here :)
+
+45:6-45:23
+Wed Mar 02 22:37:39 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_0d9116ce
+Bytes: 50
+nit:
+flush_interval_ms()
+or
+GetNextFlushInterval()
+
