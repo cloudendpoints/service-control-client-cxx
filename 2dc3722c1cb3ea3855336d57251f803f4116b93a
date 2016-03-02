@@ -1,0 +1,12 @@
+Revision: 2dc3722c1cb3ea3855336d57251f803f4116b93a
+Patch-set: 4
+File: README.md
+
+20:45-20:51
+Wed Mar 02 19:57:34 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_edcf8ad0
+Bytes: 100
+isn't it just: "git clone sso://gcp-apis/service-control-client"?
+why do we need this '-cxx' suffix?
+
