@@ -47,6 +47,28 @@ Bytes: 51
 HasHighImportanceOperation()
 HighValue is confusing
 
+18:5-18:26
+Wed Mar 02 22:49:53 2016 +0000
+Author: Dzmitry Huba <5165@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_aeca9961
+UUID: 02feade5_ee36613b
+Bytes: 128
+To be precise they can either be of high or debug importance. In case you would like to make it more clear in the function name.
+
+36:6-36:29
+Wed Mar 02 22:49:53 2016 +0000
+Author: Dzmitry Huba <5165@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_8e46bd99
+Bytes: 153
+What happens if the cache is not initialized? Do you protect other methods from that? If not, should you initialize the cache with some default settings?
+
+45:48-45:59
+Wed Mar 02 22:49:53 2016 +0000
+Author: Dzmitry Huba <5165@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_ee1f81a1
+Bytes: 153
+Can you please add comment here about flushing semantic. Is it blocking or asynchronous, if it is asynchronous, why it is safe to destroy the aggregator.
+
 69:2-69:5
 Wed Mar 02 22:37:39 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -104,4 +126,18 @@ nit:
 flush_interval_ms()
 or
 GetNextFlushInterval()
+
+45:2-45:5
+Wed Mar 02 22:49:53 2016 +0000
+Author: Dzmitry Huba <5165@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_8e74fdd9
+Bytes: 104
+Can we use here something similar Duration type rather than int with comment that it is in milliseconds?
+
+53:35-53:46
+Wed Mar 02 22:49:53 2016 +0000
+Author: Dzmitry Huba <5165@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_4e8af509
+Bytes: 98
+Please add comment here describing the semantic. Basically what happens after this method returns.
 
