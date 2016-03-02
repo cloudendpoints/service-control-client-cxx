@@ -9,6 +9,14 @@ UUID: 02feade5_fcf45e3b
 Bytes: 89
 is this comment up-to-date? this seems like a separate service-control-client repository?
 
+17:39-17:45
+Wed Mar 02 02:28:25 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_fcf45e3b
+UUID: 02feade5_fcd8de6a
+Bytes: 4
+Done
+
 26:33-26:34
 Wed Mar 02 01:20:01 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -20,12 +28,31 @@ https://cs.corp.google.com/piper///depot/google3/sstable/public/
 
 I am not sure about the open sourced convention though
 
+26:33-26:34
+Wed Mar 02 02:28:25 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_7c1cce58
+UUID: 02feade5_9ce8baf9
+Bytes: 126
+I don't have header files for include folder now.  Soon, I will have one. 
+So this cl,  I will remove "include" in this README
+
 27:17-27:28
 Wed Mar 02 01:20:01 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 02feade5_7c1a0e4f
 Bytes: 100
 I didn't see third_party folder either. And why config falls into third party category? just curious
+
+27:17-27:28
+Wed Mar 02 02:28:25 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_7c1a0e4f
+UUID: 02feade5_dcb24231
+Bytes: 118
+You are right, third_party  is a "git submodule" which is created dynamically, it is not in the repository. 
+
+Removed.
 
 File: src/BUILD
 
@@ -37,6 +64,14 @@ Bytes: 161
 make a more descriptive name? i.e. service_control_client_internal
 and in public folder you can use the short version: service_control_client as the library name
 
+3:12-3:22
+Wed Mar 02 02:28:25 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_7c016ee7
+UUID: 02feade5_fcb1fe2a
+Bytes: 4
+Done
+
 File: utils/BUILD
 
 10:21-10:31
@@ -46,10 +81,27 @@ UUID: 02feade5_3c208681
 Bytes: 113
 does these visibility need to be public? I thought you only want the public/library to be public-ally accessible?
 
+10:21-10:31
+Wed Mar 02 02:28:25 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_3c208681
+UUID: 02feade5_9c96fa71
+Bytes: 131
+Each xxx_lib in this utils folder can be used by anybody.  
+When we integrated this with ESP,  some of them can be used by ESP too.
+
 14:12-14:19
 Wed Mar 02 01:20:01 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 02feade5_5c23d28f
 Bytes: 68
 nit: list this one below distribution_lib to keep alphabet ordering?
+
+14:12-14:19
+Wed Mar 02 02:28:25 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_5c23d28f
+UUID: 02feade5_7c932e83
+Bytes: 4
+Done
 
