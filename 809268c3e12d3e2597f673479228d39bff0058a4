@@ -1,5 +1,14 @@
 Revision: 809268c3e12d3e2597f673479228d39bff0058a4
 Patch-set: 3
+File: check_aggregator_impl.cc
+
+191:23-191:41
+Wed Mar 02 02:19:10 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_3925a247
+Bytes: 38
+should these debugging log be removed?
+
 File: check_aggregator_impl.h
 
 24:6-24:25
