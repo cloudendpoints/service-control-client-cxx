@@ -16,6 +16,7 @@ cc_library(
          "report_aggregator_impl.h",
          "signature.h",
     ],
+    # TODO(qiwzhang): Change it to private.
     visibility = ["//visibility:public"],
     deps = [
         "//utils:utils_lib",
