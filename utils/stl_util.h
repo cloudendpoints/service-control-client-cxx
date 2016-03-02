@@ -1,5 +1,5 @@
-#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_STL_UTIL_H_
-#define GOOGLE_SERVICE_CONTROL_CLIENT_STL_UTIL_H_
+#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_STL_UTIL_H_
+#define GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_STL_UTIL_H_
 
 namespace google {
 namespace service_control_client {
@@ -301,4 +301,4 @@ typename Collection::value_type::second_type FindPtrOrNull(
 }  // namespace service_control_client
 }  // namespace google
 
-#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_STL_UTIL_H_
+#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_STL_UTIL_H_

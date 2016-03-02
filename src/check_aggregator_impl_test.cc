@@ -1,10 +1,10 @@
-#include "check_aggregator_impl.h"
+#include "src/check_aggregator_impl.h"
 
 #include "gmock/gmock.h"
 #include "google/protobuf/text_format.h"
 #include "google/protobuf/util/message_differencer.h"
 #include "gtest/gtest.h"
-#include "status_test_util.h"
+#include "utils/status_test_util.h"
 
 #include <unistd.h>
 

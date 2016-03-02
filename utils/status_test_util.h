@@ -1,5 +1,5 @@
-#ifndef GOOGLE_STATUS_TEST_UTIL_H__
-#define GOOGLE_STATUS_TEST_UTIL_H__
+#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_STATUS_TEST_UTIL_H__
+#define GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_STATUS_TEST_UTIL_H__
 
 #include "gmock/gmock.h"
 #include "google/protobuf/stubs/status.h"
@@ -75,4 +75,4 @@ inline ::testing::Matcher<const ::google::protobuf::util::Status&> HasErrorCode(
 }  // namespace util
 }  // namespace google
 
-#endif  // GOOGLE_STATUS_TEST_UTIL_H__
+#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_STATUS_TEST_UTIL_H__

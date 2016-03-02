@@ -14,12 +14,13 @@ the service control service.
 
 ## Getting Service Control Client library ##
 
-To download the Endpoints Server Proxy source code, clone the ESP repository:
+To download the service control client source code, clone the repository:
 
     # Clone the repository
     git clone sso://gcp-apis/service-control-client-cxx
 
 ## Repository Structure ##
 
-* [cache](/cache): The simple LRU cache.
+* [utils](/utils): The folder contains utility code.
+* [src](/src): The folder contains core source code.
 
