@@ -8,7 +8,7 @@
 #include "google/api/metric.pb.h"
 #include "google/api/servicecontrol/v1/metric_value.pb.h"
 #include "google/api/servicecontrol/v1/operation.pb.h"
-#include "google_macros.h"
+#include "utils/google_macros.h"
 
 namespace google {
 namespace service_control_client {

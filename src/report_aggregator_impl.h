@@ -7,14 +7,14 @@
 #include <unordered_map>
 #include <utility>
 
-#include "aggregator_interface.h"
-#include "cache/simple_lru_cache.h"
-#include "cache/simple_lru_cache_inl.h"
 #include "google/api/metric.pb.h"
 #include "google/api/servicecontrol/v1/operation.pb.h"
 #include "google/api/servicecontrol/v1/service_controller.pb.h"
-#include "operation_aggregator.h"
-#include "thread.h"
+#include "src/aggregator_interface.h"
+#include "src/operation_aggregator.h"
+#include "utils/simple_lru_cache.h"
+#include "utils/simple_lru_cache_inl.h"
+#include "utils/thread.h"
 
 namespace google {
 namespace service_control_client {
@@ -56,8 +56,7 @@ class ReportAggregatorImpl : public ReportAggregator {
   // Key is the signature of the operation. Value is the
   // OperationAggregator.
   using ReportCache =
-      cache::SimpleLRUCacheWithDeleter<std::string, OperationAggregator,
-                                       CacheDeleter>;
+    SimpleLRUCacheWithDeleter<std::string, OperationAggregator, CacheDeleter>;
 
   // Callback function passed to Cache, called when a cache item is removed.
   // Takes ownership of the iop.

@@ -1,6 +1,7 @@
-#include "report_aggregator_impl.h"
+#include "src/report_aggregator_impl.h"
+#include "src/signature.h"
+
 #include "google/protobuf/stubs/logging.h"
-#include "signature.h"
 
 using std::string;
 using ::google::api::MetricDescriptor;

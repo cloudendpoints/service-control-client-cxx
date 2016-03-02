@@ -103,7 +103,7 @@ class ReportAggregator {
   virtual int GetNextFlushInterval() = 0;
 
   // Flushes aggregated requests longer than flush_interval.
-  // Called at time specified by NextFlushInterval().
+  // Called at time specified by GetNextFlushInterval().
   virtual ::google::protobuf::util::Status Flush() = 0;
 
   // Flushes out aggregated report requests, clears all cache items.

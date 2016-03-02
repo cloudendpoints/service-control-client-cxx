@@ -1,5 +1,5 @@
-#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_MD5_H_
-#define GOOGLE_SERVICE_CONTROL_CLIENT_MD5_H_
+#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_MD5_H_
+#define GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_MD5_H_
 
 #include <string>
 #include <string.h>
@@ -56,4 +56,4 @@ class MD5 {
 }  // namespace service_control_client
 }  // namespace google
 
-#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_MD5_H_
+#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_MD5_H_
