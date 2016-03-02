@@ -1,0 +1,60 @@
+Revision: 809268c3e12d3e2597f673479228d39bff0058a4
+Patch-set: 3
+File: check_aggregator_impl.h
+
+24:6-24:25
+Wed Mar 02 02:11:51 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_595c2ec7
+Bytes: 106
+what is the benefit of this inheritance? are we going to have different implementation of CheckAggregator?
+
+35:5-35:8
+Wed Mar 02 02:11:51 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_995696a5
+Bytes: 4
+Sets
+
+41:53-41:59
+Wed Mar 02 02:11:51 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_d9673e91
+Bytes: 7
+returns
+
+43:16-43:22
+Wed Mar 02 02:11:51 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_f964fa8e
+Bytes: 7
+returns
+
+48:5-48:66
+Wed Mar 02 02:11:51 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_b96a7258
+Bytes: 6
+Caches
+
+54:5-54:11
+Wed Mar 02 02:11:51 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_39fcc2d3
+Bytes: 50
+Returns, and rest of the file, and other files ...
+
+150:20-150:33
+Wed Mar 02 02:11:51 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_79064ab7
+Bytes: 7
+comment
+
+170:10-170:34
+Wed Mar 02 02:11:51 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_59018e9c
+Bytes: 22
+comment for this field
+
