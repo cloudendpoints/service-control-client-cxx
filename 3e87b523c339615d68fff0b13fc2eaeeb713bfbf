@@ -1,0 +1,73 @@
+Revision: 3e87b523c339615d68fff0b13fc2eaeeb713bfbf
+Patch-set: 2
+File: aggregator_interface.h
+
+37:22-37:44
+Wed Mar 02 02:14:52 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_d9a9feed
+Bytes: 283
+this constructor is a bit different from the original code.  Based on the original code comment, it seems it does that on purpose:
+expiration_ms(std::max(response_expiration_ms,
+                               flush_cache_entry_interval_ms + 1))
+
+any particular reason to change that?
+
+76:13-76:28
+Wed Mar 02 02:14:52 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_19a46613
+Bytes: 74
+is this class still thread-safe like the original one? please comment this
+
+77:6-77:22
+Wed Mar 02 02:14:52 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_d93e5e6f
+Bytes: 74
+do we still need RemoveExpiredEntries() to handle expired entries cleanup?
+
+80:31-80:56
+Wed Mar 02 02:14:52 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_79380a86
+Bytes: 78
+do you mean this class won't schedule a separate thread to call this callback?
+
+81:5-81:11
+Wed Mar 02 02:14:52 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_59334eac
+Bytes: 88
+at the same stack of the member function calls?
+
+so, this might block the Report() call?
+
+99:5-99:10
+Wed Mar 02 02:14:52 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_79daca93
+Bytes: 7
+Flushes
+
+103:5-103:11
+Wed Mar 02 02:14:52 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_99df7681
+Bytes: 7
+Flushes
+
+141:43-141:48
+Wed Mar 02 02:14:52 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_1949c606
+Bytes: 29
+are these all public methods?
+
+143:5-143:11
+Wed Mar 02 02:14:52 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_79b3aa63
+Bytes: 7
+Flushes
+
