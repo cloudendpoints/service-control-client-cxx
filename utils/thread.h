@@ -1,5 +1,5 @@
-#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_THREAD_H_
-#define GOOGLE_SERVICE_CONTROL_CLIENT_THREAD_H_
+#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_THREAD_H_
+#define GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_THREAD_H_
 
 #include <mutex>
 
@@ -15,4 +15,4 @@ typedef std::unique_lock<Mutex> MutexLock;
 }  // namespace service_control_client
 }  // namespace google
 
-#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_THREAD_H_
+#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_THREAD_H_

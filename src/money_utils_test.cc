@@ -1,7 +1,6 @@
-#include "money_utils.h"
-
 #include "gtest/gtest.h"
-#include "status_test_util.h"
+#include "src/money_utils.h"
+#include "utils/status_test_util.h"
 
 using ::google::type::Money;
 using ::google::protobuf::util::Status;

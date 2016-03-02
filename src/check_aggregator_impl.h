@@ -7,14 +7,14 @@
 #include <unordered_map>
 #include <utility>
 
-#include "aggregator_interface.h"
-#include "cache/simple_lru_cache.h"
-#include "cache/simple_lru_cache_inl.h"
 #include "google/api/metric.pb.h"
 #include "google/api/servicecontrol/v1/operation.pb.h"
 #include "google/api/servicecontrol/v1/service_controller.pb.h"
-#include "operation_aggregator.h"
-#include "thread.h"
+#include "src/aggregator_interface.h"
+#include "src/operation_aggregator.h"
+#include "utils/simple_lru_cache.h"
+#include "utils/simple_lru_cache_inl.h"
+#include "utils/thread.h"
 
 namespace google {
 namespace service_control_client {
@@ -135,7 +135,7 @@ class CheckAggregatorImpl : public CheckAggregator {
   // Key is the signature of the check request. Value is the CacheElem.
   // It is a LRU cache with MaxIdelTime as response_expiration_time.
   using CheckCache =
-      cache::SimpleLRUCacheWithDeleter<std::string, CacheElem, CacheDeleter>;
+      SimpleLRUCacheWithDeleter<std::string, CacheElem, CacheDeleter>;
 
   // Returns whether we should flush a cache entry.
   //   If the aggregated check request is less than flush interval, no need to
