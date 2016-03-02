@@ -164,9 +164,12 @@ void OperationAggregator::MergeMetricValueSets(const Operation& operation) {
     std::unordered_map<string, MetricValue>& metric_values =
         metric_value_sets_[metric_value_set.metric_name()];
 
-    const MetricDescriptor::MetricKind& metric_kind =
-        FindWithDefault(*metric_kinds_, metric_value_set.metric_name(),
-                        MetricDescriptor::DELTA);
+    MetricDescriptor::MetricKind metric_kind = MetricDescriptor::DELTA;
+    if (metric_kinds_) {
+      metric_kind =
+          FindWithDefault(*metric_kinds_, metric_value_set.metric_name(),
+                          MetricDescriptor::DELTA);
+    }
     for (const auto& metric_value : metric_value_set.metric_values()) {
       string signature = GenerateReportMetricValueSignature(metric_value);
       MetricValue* existing = FindOrNull(metric_values, signature);
