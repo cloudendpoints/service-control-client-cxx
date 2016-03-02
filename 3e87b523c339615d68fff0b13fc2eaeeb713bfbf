@@ -13,12 +13,28 @@ expiration_ms(std::max(response_expiration_ms,
 
 any particular reason to change that?
 
+37:22-37:44
+Wed Mar 02 02:59:09 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_d9a9feed
+UUID: 02feade5_b7cdcf7d
+Bytes: 75
+Thanks for catching this.  I should keep the original code. Will change it.
+
 76:13-76:28
 Wed Mar 02 02:14:52 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: e2927965_19a46613
 Bytes: 74
 is this class still thread-safe like the original one? please comment this
+
+76:13-76:28
+Wed Mar 02 02:59:09 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_19a46613
+UUID: 02feade5_17f3e3c3
+Bytes: 4
+Done
 
 77:6-77:22
 Wed Mar 02 02:14:52 2016 +0000
@@ -27,12 +43,28 @@ UUID: e2927965_d93e5e6f
 Bytes: 74
 do we still need RemoveExpiredEntries() to handle expired entries cleanup?
 
+77:6-77:22
+Wed Mar 02 02:59:09 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_d93e5e6f
+UUID: 02feade5_d7117ba9
+Bytes: 52
+Flush() is the exact same as RemoveExpiredEntries().
+
 80:31-80:56
 Wed Mar 02 02:14:52 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: e2927965_79380a86
 Bytes: 78
 do you mean this class won't schedule a separate thread to call this callback?
+
+80:31-80:56
+Wed Mar 02 02:59:09 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_79380a86
+UUID: 02feade5_77018752
+Bytes: 43
+Yes.  Agreed, it is confusing.  Removed it.
 
 81:5-81:11
 Wed Mar 02 02:14:52 2016 +0000
@@ -43,12 +75,28 @@ at the same stack of the member function calls?
 
 so, this might block the Report() call?
 
+81:5-81:11
+Wed Mar 02 02:59:09 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_59334eac
+UUID: 02feade5_97f89392
+Bytes: 131
+Yes,  if the callback function is blocked, the called function, such as Report(), will be blocked too.  I will add comment for this
+
 99:5-99:10
 Wed Mar 02 02:14:52 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: e2927965_79daca93
 Bytes: 7
 Flushes
+
+99:5-99:10
+Wed Mar 02 02:59:09 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_79daca93
+UUID: 02feade5_f70c778f
+Bytes: 4
+Done
 
 103:5-103:11
 Wed Mar 02 02:14:52 2016 +0000
@@ -57,6 +105,14 @@ UUID: e2927965_99df7681
 Bytes: 7
 Flushes
 
+103:5-103:11
+Wed Mar 02 02:59:09 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_99df7681
+UUID: 02feade5_97dff31c
+Bytes: 4
+Done
+
 141:43-141:48
 Wed Mar 02 02:14:52 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -64,10 +120,26 @@ UUID: e2927965_1949c606
 Bytes: 29
 are these all public methods?
 
+141:43-141:48
+Wed Mar 02 02:59:09 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_1949c606
+UUID: 02feade5_57d56bfe
+Bytes: 40
+Yes, callers have to be able to call it.
+
 143:5-143:11
 Wed Mar 02 02:14:52 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: e2927965_79b3aa63
 Bytes: 7
 Flushes
+
+143:5-143:11
+Wed Mar 02 02:59:09 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_79b3aa63
+UUID: 02feade5_b7e2efe7
+Bytes: 4
+Done
 
