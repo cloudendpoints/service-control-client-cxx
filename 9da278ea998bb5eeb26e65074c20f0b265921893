@@ -20,6 +20,14 @@ Bytes: 121
 Will remove the comment.
 I don't have good plan to make them configurable externally.  So there is not such plan for now.
 
+24:7-24:15
+Wed Mar 02 02:14:52 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_b1e202bd
+UUID: e2927965_59beee2c
+Bytes: 138
+can you add a todo and file a bug to track that? we may not need this for esp, but seems like a good feature for open source this library.
+
 122:5-122:8
 Tue Mar 01 03:57:28 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
