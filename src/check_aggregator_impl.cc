@@ -186,6 +186,7 @@ Status CheckAggregatorImpl::CacheResponse(const CheckRequest& request,
 // When the next Flush() should be called.
 // Flush() call remove expired response.
 int CheckAggregatorImpl::GetNextFlushInterval() {
+  if (!cache_) return -1;
   return options_.expiration_ms;
 }
 

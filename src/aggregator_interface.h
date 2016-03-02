@@ -5,10 +5,9 @@
 #include <memory>
 #include <string>
 
-#include "google/api/metric.pb.h"
 #include "google/api/servicecontrol/v1/service_controller.pb.h"
 #include "google/protobuf/stubs/status.h"
-#include "include/aggregator_options.h"
+#include "include/aggregation_options.h"
 
 namespace google {
 namespace service_control_client {
