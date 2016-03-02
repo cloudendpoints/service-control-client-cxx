@@ -1,6 +1,7 @@
-#include "check_aggregator_impl.h"
+#include "src/check_aggregator_impl.h"
+#include "src/signature.h"
+
 #include "google/protobuf/stubs/logging.h"
-#include "signature.h"
 
 using std::string;
 using ::google::api::MetricDescriptor;
@@ -9,7 +10,7 @@ using ::google::api::servicecontrol::v1::CheckRequest;
 using ::google::api::servicecontrol::v1::CheckResponse;
 using ::google::protobuf::util::Status;
 using ::google::protobuf::util::error::Code;
-using ::google::service_control_client::cache::SimpleCycleTimer;
+using ::google::service_control_client::SimpleCycleTimer;
 
 namespace google {
 namespace service_control_client {

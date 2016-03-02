@@ -27,8 +27,8 @@
 // . We also provide support for a strict age-based eviction policy
 //   instead of LRU.  See SetAgeBasedEviction().
 
-#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_CACHE_SIMPLE_LRU_CACHE_INL_H_
-#define GOOGLE_SERVICE_CONTROL_CLIENT_CACHE_SIMPLE_LRU_CACHE_INL_H_
+#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_SIMPLE_LRU_CACHE_INL_H_
+#define GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_SIMPLE_LRU_CACHE_INL_H_
 
 #include <stddef.h>
 #include <sys/time.h>
@@ -40,12 +40,11 @@
 #include <unordered_map>
 #include <utility>
 
-#include "cache/simple_lru_cache.h"
+#include "utils/simple_lru_cache.h"
 #include "google_macros.h"
 
 namespace google {
 namespace service_control_client {
-namespace cache {
 
 // Define number of microseconds for a second.
 const int64_t kSecToUsec = 1000000;
@@ -1066,8 +1065,7 @@ class SimpleLRUCacheWithDeleter
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(SimpleLRUCacheWithDeleter);
 };
 
-}  // namespace cache
 }  // namespace service_control_client
 }  // namespace google
 
-#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_CACHE_SIMPLE_LRU_CACHE_INL_H_
+#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_SIMPLE_LRU_CACHE_INL_H_

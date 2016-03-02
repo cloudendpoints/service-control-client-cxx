@@ -1,6 +1,5 @@
-#include "signature.h"
-
-#include "md5.h"
+#include "src/signature.h"
+#include "utils/md5.h"
 
 using std::string;
 using google::api::servicecontrol::v1::CheckRequest;

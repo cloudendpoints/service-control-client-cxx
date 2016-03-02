@@ -1,8 +1,8 @@
 //
 // Tests fo SimpleLRUCache
 
-#include "cache/simple_lru_cache.h"
-#include "cache/simple_lru_cache_inl.h"
+#include "utils/simple_lru_cache.h"
+#include "utils/simple_lru_cache_inl.h"
 
 #include <math.h>
 #include <unistd.h>
@@ -21,7 +21,6 @@ using ::testing::NotNull;
 
 namespace google {
 namespace service_control_client {
-namespace cache {
 
 // Keep track of whether or not specific values are in the cache
 static const int kElems = 100;
@@ -1094,6 +1093,5 @@ TEST_F(SimpleLRUCacheTest, LookupWithoutEvictionOrderUpdateAndRemove) {
   EXPECT_THAT(TestCache::ScopedLookup(cache_.get(), 2).value(), NotNull());
 }
 
-}  // namespace cache
 }  // namespace service_control_client
 }  // namespace google
