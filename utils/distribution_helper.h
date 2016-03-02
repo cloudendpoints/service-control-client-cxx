@@ -1,5 +1,5 @@
-#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_DISTRIBUTION_HELPER_H_
-#define GOOGLE_SERVICE_CONTROL_CLIENT_DISTRIBUTION_HELPER_H_
+#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_DISTRIBUTION_HELPER_H_
+#define GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_DISTRIBUTION_HELPER_H_
 
 #include "google/api/servicecontrol/v1/distribution.pb.h"
 #include "google/protobuf/stubs/status.h"
@@ -42,4 +42,4 @@ class DistributionHelper final {
 }  // namespace service_control_client
 }  // namespace google
 
-#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_DISTRIBUTION_HELPER_H_
+#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_UTILS_DISTRIBUTION_HELPER_H_

@@ -1,5 +1,5 @@
-#include "signature.h"
-#include "md5.h"
+#include "src/signature.h"
+#include "utils/md5.h"
 
 #include "google/protobuf/text_format.h"
 #include "google/type/money.pb.h"

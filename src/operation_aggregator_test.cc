@@ -1,4 +1,4 @@
-#include "operation_aggregator.h"
+#include "src/operation_aggregator.h"
 
 #include "gmock/gmock.h"
 #include "google/protobuf/stubs/logging.h"
