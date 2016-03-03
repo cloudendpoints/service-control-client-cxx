@@ -36,6 +36,16 @@ FlushCallback() is provided by the callers.  It is caller job to make sure aggre
 
 In another word,  the ref_count will be done in the high level callers, not in the aggregator code.
 
+192:6-192:21
+Thu Mar 03 02:04:58 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_b1e5d821
+UUID: e2927965_23cd707c
+Bytes: 470
+can you update the chemist client library design doc the whole interaction between high-level caller and aggregator? I think these internal interface design is very important for us to understand the data flow.
+
+I would like to understand the life time of the aggregator. It seems like you want the high level caller to manage the lifetime of the aggregator and make sure it will outlive the pending callbacks. Lets document all these details so we are on the same page.
+
 File: check_aggregator_impl.h
 
 22:3-22:9
