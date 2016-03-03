@@ -1,0 +1,36 @@
+Revision: e2fa0955fe6014627467962ec654712b4a201613
+Patch-set: 9
+File: aggregator_interface.h
+
+143:5-143:11
+Thu Mar 03 22:05:12 2016 +0000
+Author: Chengliang Zhang <5075@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_5d1625dd
+Bytes: 7
+flushes
+
+148
+Thu Mar 03 22:05:12 2016 +0000
+Author: Chengliang Zhang <5075@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_9d10addf
+Bytes: 7
+report?
+
+153:13-153:18
+Thu Mar 03 22:05:12 2016 +0000
+Author: Chengliang Zhang <5075@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_fdc9f19e
+Bytes: 28
+check?
+
+Let's be consistent.
+
+File: check_aggregator_impl.h
+
+34
+Thu Mar 03 22:05:12 2016 +0000
+Author: Chengliang Zhang <5075@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_9de54d22
+Bytes: 9
+Refreshes
+
