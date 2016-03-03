@@ -145,6 +145,20 @@ UUID: 02feade5_b17b18c5
 Bytes: 144
 I thought you said that the Flush callback shouldn't be a blocking call. i.e. nginx won't block on subrequest() triggered by the flush clalback.
 
+45:48-45:59
+Thu Mar 03 00:37:22 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_b17b18c5
+UUID: 02feade5_71187097
+Bytes: 472
+"blocking call" has to be clarified.
+
+FlushAll() is a blocking call, it will wait until all cache items have been removed.
+
+When removing each item,  we will call flush_callback() to send the item out.  This is a blocking call, we will wait for callback to return.
+
+Ihe flush_callback (provided by high level or callers) is better to be light. If it has to make a remote call,  it is better to be non-blocking.  This is the requirement we imposed on the callback function.
+
 69:2-69:5
 Wed Mar 02 22:37:39 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -187,6 +201,14 @@ sorry, I wasn't clear. I mean  blocking_ref_count_ reference.
 
 and the aggregator shutdown needs to do https://cs.corp.google.com/piper///depot/google3/apiserving/servicecontrol/client/report_aggregator.cc?rcl=115766333&l=183 
 to wait on this reference count
+
+92:20-92:27
+Thu Mar 03 00:37:22 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_518a9409
+UUID: 02feade5_f1b000c2
+Bytes: 131
+We don't have this problem.  The library did not provide any callback function to be called. So we don't need to ref-count ourself.
 
 104:7-104:27
 Wed Mar 02 22:37:39 2016 +0000
