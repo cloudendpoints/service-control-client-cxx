@@ -220,6 +220,14 @@ probably it is fine for Report aggregator. But let @chengliang double read it.
 
 For check aggregator, in my understanding, indirectly there is a callback to call into CacheResponse() when you do FlushCallback(). Lets be more careful on that other cl. Let me post the same comment there.
 
+92:20-92:27
+Thu Mar 03 18:10:41 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_f1eac054
+UUID: 02feade5_17259c46
+Bytes: 36
+Cool. Thanks for the valuable input.
+
 104:7-104:27
 Wed Mar 02 22:37:39 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
