@@ -54,6 +54,21 @@ UUID: e2927965_e3d7e807
 Bytes: 87
 Please also keep a copy of this documentation in the beginning of the class declaration
 
+192:6-192:21
+Thu Mar 03 03:00:22 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_e3d7e807
+UUID: 02feade5_54cf2228
+Bytes: 781
+Added following comment in the top of CheckAggregatorImpl class.
+
+// Object life management:                                                                                                           
+// The callers of this object needs to make sure the object is still valid before calling                                            
+// its methods. Specifically, callers may use non-blocking transport to send request to server                                       
+// and pass an on_done() callback to be called when response is received.  If on_done()                                              
+// function is calling CheckAggregator->CacheReponse() funtion, caller MUST make sure                                                
+// the CacheAggregator object is still valid.
+
 File: check_aggregator_impl.h
 
 22:3-22:9
