@@ -77,6 +77,18 @@ UUID: 02feade5_a86e09c9
 Bytes: 76
 May use non-blocking transport? What if people provide a blocking transport?
 
+192:6-192:21
+Thu Mar 03 23:03:38 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_a86e09c9
+UUID: 02feade5_88fa2d23
+Bytes: 289
+I already added comment for the callback to state that it must be non-blocking.
+
+This aggregator interface is internal only.  It is only used by high level chemist client.  We don't plan to expose it to others directly.
+
+So we can impose non-blocking callback requirements for the callers.
+
 File: check_aggregator_impl.h
 
 22:3-22:9
@@ -156,4 +168,14 @@ Bytes: 154
 This is necessary for ESP use case, since it is single threaded.
 
 Wayne, the whole lib will provide the right interface that Wencheng is expecting, right?
+
+49:35-49:48
+Thu Mar 03 23:03:38 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_087a9d98
+UUID: 02feade5_e813f13e
+Bytes: 223
+This aggregator interface is internal only. It will not be expose to other code.  It will only be used by high level client code. 
+
+ESP will use high level lib interface.  It will not use this aggregator interface directly.
 
