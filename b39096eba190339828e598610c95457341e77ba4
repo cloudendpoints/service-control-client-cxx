@@ -179,3 +179,13 @@ This aggregator interface is internal only. It will not be expose to other code.
 
 ESP will use high level lib interface.  It will not use this aggregator interface directly.
 
+49:35-49:48
+Thu Mar 03 23:30:30 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_087a9d98
+UUID: 02feade5_28b8393c
+Bytes: 498
+the public interface will be the one we discussed in a previous meeting, which is not implemented in this cl yet.
+
+Wayne and I have some disagreement on the aggregator interfaces (internal interfaces) as I described above. But this is not a big deal to me. I think both works, just matter of which one is cleaner. And everyone have different tastes :) Unless you can identify some major flaws of current workflow/interfaces, or come up with a better/cleaner one, then I think this cl is good to go.
+
