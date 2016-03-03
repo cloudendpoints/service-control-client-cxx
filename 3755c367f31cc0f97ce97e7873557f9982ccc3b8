@@ -137,6 +137,14 @@ UUID: 02feade5_6e9d312e
 Bytes: 41
 Will add comment.  It is a blocking call.
 
+45:48-45:59
+Thu Mar 03 00:26:31 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_6e9d312e
+UUID: 02feade5_b17b18c5
+Bytes: 144
+I thought you said that the Flush callback shouldn't be a blocking call. i.e. nginx won't block on subrequest() triggered by the flush clalback.
+
 69:2-69:5
 Wed Mar 02 22:37:39 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -168,6 +176,17 @@ Parent: 02feade5_2ea5e9cb
 UUID: 02feade5_8e77dda4
 Bytes: 95
 I looked at the Google3 code, I did not see "the wait".  which "wait" are you are referring to?
+
+92:20-92:27
+Thu Mar 03 00:26:31 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_8e77dda4
+UUID: 02feade5_518a9409
+Bytes: 258
+sorry, I wasn't clear. I mean  blocking_ref_count_ reference.
+
+and the aggregator shutdown needs to do https://cs.corp.google.com/piper///depot/google3/apiserving/servicecontrol/client/report_aggregator.cc?rcl=115766333&l=183 
+to wait on this reference count
 
 104:7-104:27
 Wed Mar 02 22:37:39 2016 +0000
