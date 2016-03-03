@@ -1,0 +1,11 @@
+Revision: def1103b5aa36bd8086e54570219f3222254a296
+Patch-set: 4
+File: report_aggregator_impl.cc
+
+96:2-96:8
+Thu Mar 03 18:02:29 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_a3d40038
+Bytes: 244
+does this 'iop' need mutex protection? since you will access it in method above to do MergeOperation(). I wonder if this OnCacheEntryDelete is always completed before cache Lookup() returns, then this may not be a problem. Just to double check.
+
