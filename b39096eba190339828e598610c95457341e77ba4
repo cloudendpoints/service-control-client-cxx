@@ -69,6 +69,14 @@ Added following comment in the top of CheckAggregatorImpl class.
 // function is calling CheckAggregator->CacheReponse() funtion, caller MUST make sure                                                
 // the CacheAggregator object is still valid.
 
+192:6-192:21
+Thu Mar 03 22:52:23 2016 +0000
+Author: Chengliang Zhang <5075@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_54cf2228
+UUID: 02feade5_a86e09c9
+Bytes: 76
+May use non-blocking transport? What if people provide a blocking transport?
+
 File: check_aggregator_impl.h
 
 22:3-22:9
@@ -138,4 +146,14 @@ Parent: 02feade5_51cf3428
 UUID: 02feade5_313d4875
 Bytes: 223
 That will make this cache/aggregator overly complicated. The current design is:  it is a cache and aggregator, that is it.  It will not help on_completion() async call.  It is high level tasks to handle on_completion stuff.
+
+49:35-49:48
+Thu Mar 03 22:52:23 2016 +0000
+Author: Chengliang Zhang <5075@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_313d4875
+UUID: 02feade5_087a9d98
+Bytes: 154
+This is necessary for ESP use case, since it is single threaded.
+
+Wayne, the whole lib will provide the right interface that Wencheng is expecting, right?
 
