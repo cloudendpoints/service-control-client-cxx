@@ -18,6 +18,14 @@ UUID: 02feade5_916b7c5e
 Bytes: 106
 The key different is:  This aggregator did not pass any callback to anybody. So it doesn't need ref_count.
 
+192:6-192:21
+Thu Mar 03 01:36:09 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_916b7c5e
+UUID: e2927965_406c3243
+Bytes: 111
+what happen when the FlushCallback() needs to call aggregator::CacheResponse() but aggregator has been deleted?
+
 File: check_aggregator_impl.h
 
 22:3-22:9
