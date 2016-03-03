@@ -26,6 +26,16 @@ UUID: e2927965_406c3243
 Bytes: 111
 what happen when the FlushCallback() needs to call aggregator::CacheResponse() but aggregator has been deleted?
 
+192:6-192:21
+Thu Mar 03 01:47:11 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_406c3243
+UUID: 02feade5_b1e5d821
+Bytes: 222
+FlushCallback() is provided by the callers.  It is caller job to make sure aggregator is valid before calling its method.
+
+In another word,  the ref_count will be done in the high level callers, not in the aggregator code.
+
 File: check_aggregator_impl.h
 
 22:3-22:9
