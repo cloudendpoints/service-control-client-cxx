@@ -112,6 +112,14 @@ UUID: 02feade5_a8b1e90f
 Bytes: 88
 Let's call it HasHighImportanceOperation. DEBUG is not visable for third party services.
 
+18:5-18:26
+Thu Mar 03 22:57:29 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_a8b1e90f
+UUID: 02feade5_883cedc8
+Bytes: 4
+Done
+
 36:6-36:29
 Wed Mar 02 22:49:53 2016 +0000
 Author: Dzmitry Huba <5165@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -249,6 +257,20 @@ So if people implement it as a sync method, then during the time of flush, the w
 2: Previously we need to count how many pending requests, because we work under the assumption that flush_call_back_ is async. So we can wait for the pending requests.
 
 So maybe we say the tracking logic is shifted to people who provides flush_call_back_?
+
+92:20-92:27
+Thu Mar 03 22:57:29 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_28415984
+UUID: 02feade5_4852e50c
+Bytes: 243
+I will add comment for flush_callback to state that it must be an async call.
+
+For ref_counting and waiting issue.  it is the caller job.
+
+I have an illustration code for that. It is here
+
+https://gcp-apis-review.git.corp.google.com/#/c/3439/1
 
 104:7-104:27
 Wed Mar 02 22:37:39 2016 +0000
