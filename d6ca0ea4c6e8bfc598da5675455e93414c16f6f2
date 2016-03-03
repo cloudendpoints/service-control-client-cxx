@@ -1,0 +1,11 @@
+Revision: d6ca0ea4c6e8bfc598da5675455e93414c16f6f2
+Patch-set: 7
+File: check_aggregator_impl.h
+
+167:8-167:20
+Thu Mar 03 19:51:12 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: e2927965_a3ade0cd
+Bytes: 363
+per our discussion, could you add a boolean field is_flushing_ to indicate if we have duplicate flushing requests for the same cache entry in the same time. You can just do a log(warning) to check if this happens for now. If this really causes some problem, we have some insight into that. But in general, I think we should be fine giving 1 second flush interval.
+
