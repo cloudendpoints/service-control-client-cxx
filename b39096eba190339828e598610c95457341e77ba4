@@ -46,6 +46,14 @@ can you update the chemist client library design doc the whole interaction betwe
 
 I would like to understand the life time of the aggregator. It seems like you want the high level caller to manage the lifetime of the aggregator and make sure it will outlive the pending callbacks. Lets document all these details so we are on the same page.
 
+192:6-192:21
+Thu Mar 03 02:08:19 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_23cd707c
+UUID: e2927965_e3d7e807
+Bytes: 87
+Please also keep a copy of this documentation in the beginning of the class declaration
+
 File: check_aggregator_impl.h
 
 22:3-22:9
