@@ -1,5 +1,15 @@
 Revision: b39096eba190339828e598610c95457341e77ba4
 Patch-set: 5
+File: check_aggregator_impl.cc
+
+192:6-192:21
+Thu Mar 03 00:57:21 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 02feade5_b10158ea
+Bytes: 309
+@chengliang
+as mentioned in the other cl, in this check aggregator, the flush_callback_ will trigger an asynchronous call into CheckAggregator::CacheResponse(). In your original call, you added ref_count_ check. But I didn't remember the purpose of that any more. Please double check if we still need it here.
+
 File: check_aggregator_impl.h
 
 22:3-22:9
