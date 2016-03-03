@@ -10,6 +10,14 @@ Bytes: 309
 @chengliang
 as mentioned in the other cl, in this check aggregator, the flush_callback_ will trigger an asynchronous call into CheckAggregator::CacheResponse(). In your original call, you added ref_count_ check. But I didn't remember the purpose of that any more. Please double check if we still need it here.
 
+192:6-192:21
+Thu Mar 03 01:32:19 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_b10158ea
+UUID: 02feade5_916b7c5e
+Bytes: 106
+The key different is:  This aggregator did not pass any callback to anybody. So it doesn't need ref_count.
+
 File: check_aggregator_impl.h
 
 22:3-22:9
@@ -22,6 +30,14 @@ i.e. what the caller needs to do if it is a cache hit, or returns NOT_FOUND. Whe
 
 I saw you document some of them at each method. But probably it is easier to read in one place.
 
+22:3-22:9
+Thu Mar 03 01:32:19 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_3189c8e3
+UUID: 02feade5_516574ab
+Bytes: 4
+Done
+
 36:11-36:17
 Thu Mar 03 00:48:16 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -29,12 +45,28 @@ UUID: 02feade5_f16760f4
 Bytes: 103
 also comment that the FlushCallback will also need to call CacheResponse() to update the check response
 
+36:11-36:17
+Thu Mar 03 01:32:19 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_f16760f4
+UUID: 02feade5_b1767864
+Bytes: 4
+Done
+
 42:39-42:46
 Thu Mar 03 00:48:16 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 02feade5_d1986430
 Bytes: 94
 the caller also needs to call CacheResponse() to update the cache, right? please comment that.
+
+42:39-42:46
+Thu Mar 03 01:32:19 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_d1986430
+UUID: 02feade5_11d00c74
+Bytes: 4
+Done
 
 49:35-49:48
 Thu Mar 03 00:48:16 2016 +0000
@@ -47,4 +79,12 @@ I like the original code better that hides Cache interface/implementation from t
 My idea was passing a callback on_check_done as an arg to Check() method above (same as the original code). And this aggregator class will pass a callback on_flush_done to call FlushCallback(request, on_flush_done). on_flush_done(response, on_check_done) will be invoked when caller gets the response, which is implemented by the Aggregator to update the cache with the returned response and invoke on_check_done to notify the caller the check response. This way, we don't need to return "NOT_FOUND" to let caller dealing with these details when it calls Aggregator:Check() and all chemist interaction is triggered by FlushCallback.
 
 Lets see if @chengliang and @huba can figure out a cleaner solution. Otherwise, I am fine if you strongly prefer existing approach.
+
+49:35-49:48
+Thu Mar 03 01:32:19 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_51cf3428
+UUID: 02feade5_313d4875
+Bytes: 223
+That will make this cache/aggregator overly complicated. The current design is:  it is a cache and aggregator, that is it.  It will not help on_completion() async call.  It is high level tasks to handle on_completion stuff.
 
