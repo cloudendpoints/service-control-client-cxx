@@ -104,6 +104,14 @@ UUID: 02feade5_4e2b1579
 Bytes: 28
 Please suggest a better name
 
+18:5-18:26
+Thu Mar 03 22:42:48 2016 +0000
+Author: Chengliang Zhang <5075@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_4e2b1579
+UUID: 02feade5_a8b1e90f
+Bytes: 88
+Let's call it HasHighImportanceOperation. DEBUG is not visable for third party services.
+
 36:6-36:29
 Wed Mar 02 22:49:53 2016 +0000
 Author: Dzmitry Huba <5165@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -227,6 +235,20 @@ Parent: 02feade5_f1eac054
 UUID: 02feade5_17259c46
 Bytes: 36
 Cool. Thanks for the valuable input.
+
+92:20-92:27
+Thu Mar 03 22:42:48 2016 +0000
+Author: Chengliang Zhang <5075@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_17259c46
+UUID: 02feade5_28415984
+Bytes: 410
+1: I don't see comments about the flush_callback_.
+
+So if people implement it as a sync method, then during the time of flush, the whole cache is locked.
+
+2: Previously we need to count how many pending requests, because we work under the assumption that flush_call_back_ is async. So we can wait for the pending requests.
+
+So maybe we say the tracking logic is shifted to people who provides flush_call_back_?
 
 104:7-104:27
 Wed Mar 02 22:37:39 2016 +0000
