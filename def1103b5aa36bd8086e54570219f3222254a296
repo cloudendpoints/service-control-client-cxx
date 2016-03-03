@@ -19,3 +19,13 @@ It is already protected. But not here.  OnCacheEntryDelete() could be called on 
 
 If we add mutex lock here,  it will dead-lock due to double locking.
 
+96:2-96:8
+Thu Mar 03 19:33:58 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_77ed0018
+UUID: 02feade5_627c2047
+Bytes: 205
+that is what I thought. Please add a comment to make this clear.
+
+This cl looks very good to me now. Thanks for addressing all these comments. But lets give @chengliang and @huba a bit more time to review.
+
