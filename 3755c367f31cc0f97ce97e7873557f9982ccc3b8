@@ -210,6 +210,16 @@ UUID: 02feade5_f1b000c2
 Bytes: 131
 We don't have this problem.  The library did not provide any callback function to be called. So we don't need to ref-count ourself.
 
+92:20-92:27
+Thu Mar 03 00:55:16 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 02feade5_f1b000c2
+UUID: 02feade5_f1eac054
+Bytes: 286
+probably it is fine for Report aggregator. But let @chengliang double read it.
+
+For check aggregator, in my understanding, indirectly there is a callback to call into CacheResponse() when you do FlushCallback(). Lets be more careful on that other cl. Let me post the same comment there.
+
 104:7-104:27
 Wed Mar 02 22:37:39 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
