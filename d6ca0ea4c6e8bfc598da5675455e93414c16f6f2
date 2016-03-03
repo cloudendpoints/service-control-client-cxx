@@ -9,3 +9,11 @@ UUID: e2927965_a3ade0cd
 Bytes: 363
 per our discussion, could you add a boolean field is_flushing_ to indicate if we have duplicate flushing requests for the same cache entry in the same time. You can just do a log(warning) to check if this happens for now. If this really causes some problem, we have some insight into that. But in general, I think we should be fine giving 1 second flush interval.
 
+167:8-167:20
+Thu Mar 03 20:23:47 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: e2927965_a3ade0cd
+UUID: 02feade5_1d413d84
+Bytes: 4
+Done
+
