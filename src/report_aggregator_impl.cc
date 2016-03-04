@@ -66,11 +66,8 @@ Status ReportAggregatorImpl::Report(
                    string(" Expecting: ") + service_name_));
   }
   if (HasHighImportantOperation(request) || !cache_) {
-    MutexLock lock(callback_mutex_);
-    if (flush_callback_) {
-      flush_callback_(request);
-    }
-    return Status::OK;
+    // By returning NO_FOUND, caller will send request to server.
+    return Status(Code::NOT_FOUND, "");
   }
 
   MutexLock lock(cache_mutex_);

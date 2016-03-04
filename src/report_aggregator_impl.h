@@ -33,7 +33,8 @@ class ReportAggregatorImpl : public ReportAggregator {
   // Sets the flush callback function.
   void SetFlushCallback(FlushCallback callback);
 
-  // Adds a report request to cache
+  // Adds a report request to cache. Returns NOT_FOUND if it could not be
+  // aggregated. Callers need to send it to the server.
   ::google::protobuf::util::Status Report(
       const ::google::api::servicecontrol::v1::ReportRequest& request) override;
 
