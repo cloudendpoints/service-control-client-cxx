@@ -269,10 +269,13 @@ TEST_F(ReportAggregatorImplTest, TestCacheExpiration) {
 
 TEST_F(ReportAggregatorImplTest, TestHighValueOperationSuccess) {
   request1_.mutable_operations(0)->set_importance(Operation::HIGH);
-  EXPECT_OK(aggregator_->Report(request1_));
-  // High important item not cached
-  EXPECT_EQ(flushed_.size(), 1);
-  EXPECT_TRUE(MessageDifferencer::Equals(flushed_[0], request1_));
+  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Report(request1_));
+
+  // Nothing flush out.
+  EXPECT_EQ(flushed_.size(), 0);
+  // Nothing in the cache
+  EXPECT_OK(aggregator_->FlushAll());
+  EXPECT_EQ(flushed_.size(), 0);
 }
 
 TEST_F(ReportAggregatorImplTest, TestDisableCache) {
@@ -284,10 +287,12 @@ TEST_F(ReportAggregatorImplTest, TestDisableCache) {
   aggregator_->SetFlushCallback(std::bind(
       &ReportAggregatorImplTest::FlushCallback, this, std::placeholders::_1));
 
-  EXPECT_OK(aggregator_->Report(request1_));
-  // Since cache is disabled, item flush out right away.
-  EXPECT_EQ(flushed_.size(), 1);
-  EXPECT_TRUE(MessageDifferencer::Equals(flushed_[0], request1_));
+  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Report(request1_));
+  // Nothing flush out.
+  EXPECT_EQ(flushed_.size(), 0);
+  // Nothing in the cache
+  EXPECT_OK(aggregator_->FlushAll());
+  EXPECT_EQ(flushed_.size(), 0);
 }
 
 }  // namespace service_control_client
