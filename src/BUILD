@@ -19,6 +19,7 @@ cc_library(
     # TODO(qiwzhang): Change it to private.
     visibility = ["//visibility:public"],
     deps = [
+        "//include:internal_headers",
         "//utils:utils_lib",
     ],
 )
