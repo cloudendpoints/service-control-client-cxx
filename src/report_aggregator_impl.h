@@ -11,6 +11,7 @@
 #include "google/api/servicecontrol/v1/operation.pb.h"
 #include "google/api/servicecontrol/v1/service_controller.pb.h"
 #include "src/aggregator_interface.h"
+#include "src/cache_removed_items_handler.h"
 #include "src/operation_aggregator.h"
 #include "utils/simple_lru_cache.h"
 #include "utils/simple_lru_cache_inl.h"
@@ -21,7 +22,12 @@ namespace service_control_client {
 
 // Caches/Batches/aggregates report requests and sends them to the server.
 // Thread safe.
-class ReportAggregatorImpl : public ReportAggregator {
+typedef CacheRemovedItemsHandler<
+    ::google::api::servicecontrol::v1::ReportRequest>
+    ReportCacheRemovedItemsHandler;
+
+class ReportAggregatorImpl : public ReportAggregator,
+                             public ReportCacheRemovedItemsHandler {
  public:
   // Constructor.
   ReportAggregatorImpl(const std::string& service_name,
@@ -57,7 +63,7 @@ class ReportAggregatorImpl : public ReportAggregator {
   // Key is the signature of the operation. Value is the
   // OperationAggregator.
   using ReportCache =
-    SimpleLRUCacheWithDeleter<std::string, OperationAggregator, CacheDeleter>;
+      SimpleLRUCacheWithDeleter<std::string, OperationAggregator, CacheDeleter>;
 
   // Callback function passed to Cache, called when a cache item is removed.
   // Takes ownership of the iop.
@@ -80,12 +86,6 @@ class ReportAggregatorImpl : public ReportAggregator {
   // entry 1 cost unit.
   // Guarded by mutex_, except when compare against nullptr.
   std::unique_ptr<ReportCache> cache_;
-
-  // Mutex guarding the access of flush_callback_;
-  Mutex callback_mutex_;
-
-  // The callback function to flush out cache items.
-  ReportAggregator::FlushCallback flush_callback_;
 
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(ReportAggregatorImpl);
 };

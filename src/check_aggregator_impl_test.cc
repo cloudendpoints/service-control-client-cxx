@@ -137,6 +137,11 @@ class CheckAggregatorImplTest : public ::testing::Test {
     flushed_.push_back(request);
   }
 
+  void FlushCallbackCallingBackToAggregator(const CheckRequest& request) {
+    flushed_.push_back(request);
+    aggregator_->CacheResponse(request, pass_response1_);
+  }
+
   CheckRequest request1_;
   CheckResponse pass_response1_;
   CheckResponse error_response1_;
@@ -277,6 +282,52 @@ TEST_F(CheckAggregatorImplTest, TestCacheExpired) {
 
   EXPECT_EQ(flushed_.size(), 1);
   EXPECT_TRUE(MessageDifferencer::Equals(flushed_[0], request1_));
+}
+
+TEST_F(CheckAggregatorImplTest, TestFlushAllWithCallbackCallingCacheResposne) {
+  aggregator_->SetFlushCallback(
+      std::bind(&CheckAggregatorImplTest::FlushCallbackCallingBackToAggregator,
+                this, std::placeholders::_1));
+
+  CheckResponse response;
+
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+  EXPECT_OK(aggregator_->Check(request1_, &response));
+  EXPECT_OK(aggregator_->FlushAll());
+  // FlushAll() will call flush callback to flush out request1, then callback
+  // will
+  // call CacheRequest().
+  EXPECT_EQ(flushed_.size(), 1);
+}
+
+TEST_F(CheckAggregatorImplTest,
+       TestCacheResponseWithCallbackCallingCacheResposne) {
+  aggregator_->SetFlushCallback(
+      std::bind(&CheckAggregatorImplTest::FlushCallbackCallingBackToAggregator,
+                this, std::placeholders::_1));
+  CheckResponse response;
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+  EXPECT_OK(aggregator_->Check(request1_, &response));
+  EXPECT_OK(aggregator_->CacheResponse(request2_, pass_response2_));
+  // CacheResponse() will call flush callback to flush out request1 since cache
+  // capacity is 1.
+  EXPECT_EQ(flushed_.size(), 1);
+}
+
+TEST_F(CheckAggregatorImplTest, TestCheckWithCallbackCallingCacheResposne) {
+  aggregator_->SetFlushCallback(
+      std::bind(&CheckAggregatorImplTest::FlushCallbackCallingBackToAggregator,
+                this, std::placeholders::_1));
+  CheckResponse response;
+
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+  EXPECT_OK(aggregator_->Check(request1_, &response));
+
+  usleep(220000);
+
+  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request1_, &response));
+  // Check() will evict request1 since it is expired.
+  EXPECT_EQ(flushed_.size(), 1);
 }
 
 }  // namespace service_control_client

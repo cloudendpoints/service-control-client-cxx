@@ -1,2 +1,4 @@
 
 /bazel-*
+.idea/*
+CMakeLists.txt
