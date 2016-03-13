@@ -184,6 +184,11 @@ class ReportAggregatorImplTest : public ::testing::Test {
     flushed_.push_back(request);
   }
 
+  void FlushCallbackCallingBackToAggregator(const ReportRequest& request) {
+    flushed_.push_back(request);
+    aggregator_->Flush();
+  }
+
   ReportRequest request1_;
   ReportRequest request2_;
   ReportRequest delta_merged12_;
@@ -293,6 +298,33 @@ TEST_F(ReportAggregatorImplTest, TestDisableCache) {
   // Nothing in the cache
   EXPECT_OK(aggregator_->FlushAll());
   EXPECT_EQ(flushed_.size(), 0);
+}
+
+TEST_F(ReportAggregatorImplTest, TestFlushAllWithCallbackCallingFlush) {
+  aggregator_->SetFlushCallback(
+      std::bind(&ReportAggregatorImplTest::FlushCallbackCallingBackToAggregator,
+                this, std::placeholders::_1));
+
+  EXPECT_OK(aggregator_->Report(request1_));
+  EXPECT_OK(aggregator_->FlushAll());
+  EXPECT_EQ(flushed_.size(), 1);
+}
+
+TEST_F(ReportAggregatorImplTest, TestReportWithCallbackCallingFlush) {
+  aggregator_->SetFlushCallback(
+      std::bind(&ReportAggregatorImplTest::FlushCallbackCallingBackToAggregator,
+                this, std::placeholders::_1));
+
+  EXPECT_OK(aggregator_->Report(request1_));
+  AddLabel("key1", "value1", request2_.mutable_operations(0));
+  EXPECT_OK(aggregator_->Report(request2_));
+  // Report(request2_) will evict request1_ out since the cacahe capacity is 1.
+  EXPECT_EQ(flushed_.size(), 1);
+  EXPECT_TRUE(MessageDifferencer::Equals(flushed_[0], request1_));
+
+  EXPECT_OK(aggregator_->FlushAll());
+  EXPECT_EQ(flushed_.size(), 2);
+  EXPECT_TRUE(MessageDifferencer::Equals(flushed_[1], request2_));
 }
 
 }  // namespace service_control_client

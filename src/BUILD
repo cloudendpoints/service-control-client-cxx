@@ -17,6 +17,7 @@ cc_library(
          "operation_aggregator.h",
          "report_aggregator_impl.h",
          "signature.h",
+         "cache_removed_items_handler.h",
     ],
     # TODO(qiwzhang): Change it to private.
     visibility = ["//visibility:public"],
