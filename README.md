@@ -10,6 +10,7 @@ the service control service.
 
 
 ## Prerequisites ##
+* Git
 
 
 ## Getting Service Control Client library ##
@@ -29,6 +30,10 @@ To download the service control client source code, clone the repository:
 
 Recommended workflow to setup, build and test service control client code:
 
+    # Sync your git repository with the origin.
+    git checkout master
+    git pull origin --rebase
+
     # Setup git for remote push
     script/setup
 
@@ -42,5 +47,6 @@ Recommended workflow to setup, build and test service control client code:
     # Use Bazel to test
     bazel test //utils:all
     bazel test //src:all
+
 
 

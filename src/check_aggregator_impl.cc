@@ -87,60 +87,69 @@ Status CheckAggregatorImpl::Check(const CheckRequest& request,
 
   string request_signature = GenerateCheckRequestSignature(request);
 
-  MutexLock lock(cache_mutex_);
-  CheckCache::ScopedLookup lookup(cache_.get(), request_signature);
-  if (!lookup.Found()) {
-    // By returning NO_FOUND, caller will send request to server.
-    return Status(Code::NOT_FOUND, "");
-  }
-
-  CacheElem* elem = lookup.value();
-
-  // If the cached check response has check errors, then we assume the new
-  // request should fail as well and return the cached check response. However,
-  // after the flush interval, the first check request will be send to the
-  // server to refresh the check response. Other check requests still fail with
-  // cached check response.
-  //
-  // If the cached check response is a pass, then we assume the new request
-  // should pass as well and return the cached response directly, besides
-  // updating the quota info to be the same as requested. The requested tokens
-  // are aggregated until flushed.
-  //
-  // More details can be found in design doc go/simple-chemist-client.
-  if (elem->check_response().check_errors_size() > 0) {
-    if (ShouldFlush(*elem)) {
-      // Pretend that we did not find, so we can force it into a check request
-      // to the server.
-      //
-      // Setting last check to now to block more check requests to Chemist.
-      elem->set_last_check_time(SimpleCycleTimer::Now());
+  std::vector<CheckRequest> removed_items;
+  {
+    MutexLock lock(cache_mutex_);
+    SinkSwapper sink_swapper(this, &removed_items);
+    // request_aggregated_ = &removed_items;
+    CheckCache::ScopedLookup lookup(cache_.get(), request_signature);
+    if (!lookup.Found()) {
       // By returning NO_FOUND, caller will send request to server.
       return Status(Code::NOT_FOUND, "");
-    } else {
-      // Use cached response.
-      *response = elem->check_response();
-      return Status::OK;
     }
-  } else {
-    elem->Aggregate(request, metric_kinds_.get());
 
-    if (ShouldFlush(*elem)) {
-      if (elem->is_flushing()) {
-        GOOGLE_LOG(WARNING) << "Last refresh request was not completed yet.";
+    CacheElem* elem = lookup.value();
+
+    // If the cached check response has check errors, then we assume the new
+    // request should fail as well and return the cached check response.
+    // However,
+    // after the flush interval, the first check request will be send to the
+    // server to refresh the check response. Other check requests still fail
+    // with
+    // cached check response.
+    //
+    // If the cached check response is a pass, then we assume the new request
+    // should pass as well and return the cached response directly, besides
+    // updating the quota info to be the same as requested. The requested tokens
+    // are aggregated until flushed.
+    //
+    // More details can be found in design doc go/simple-chemist-client.
+    if (elem->check_response().check_errors_size() > 0) {
+      if (ShouldFlush(*elem)) {
+        // Pretend that we did not find, so we can force it into a check request
+        // to the server.
+        //
+        // Setting last check to now to block more check requests to Chemist.
+        elem->set_last_check_time(SimpleCycleTimer::Now());
+        // By returning NO_FOUND, caller will send request to server.
+        return Status(Code::NOT_FOUND, "");
+      } else {
+        // Use cached response.
+        *response = elem->check_response();
+        return Status::OK;
       }
-      elem->set_is_flushing(true);
-      // Setting last check to now to block more check requests to Chemist.
-      elem->set_last_check_time(SimpleCycleTimer::Now());
-      // By returning NO_FOUND, caller will send request to server.
-      return Status(Code::NOT_FOUND, "");
-    }
+    } else {
+      elem->Aggregate(request, metric_kinds_.get());
 
-    *response = elem->check_response();
+      if (ShouldFlush(*elem)) {
+        if (elem->is_flushing()) {
+          GOOGLE_LOG(WARNING) << "Last refresh request was not completed yet.";
+        }
+        elem->set_is_flushing(true);
+        // Setting last check to now to block more check requests to Chemist.
+        elem->set_last_check_time(SimpleCycleTimer::Now());
+        // By returning NO_FOUND, caller will send request to server.
+        return Status(Code::NOT_FOUND, "");
+      }
+
+      *response = elem->check_response();
+    }
     // TODO(qiwzhang): supports quota
     // ScaleQuotaTokens(request, elem->quota_scale(), response);
-    return Status::OK;
+    // request_aggregated_ = NULL;
   }
+  ProcessRemovedItems(removed_items);
+  return Status::OK;
 }
 
 bool CheckAggregatorImpl::ShouldFlush(const CacheElem& elem) {
@@ -154,28 +163,48 @@ bool CheckAggregatorImpl::ShouldFlush(const CacheElem& elem) {
   return age >= flush_interval_in_cycle_;
 }
 
-Status CheckAggregatorImpl::CacheResponse(const CheckRequest& request,
-                                          const CheckResponse& response) {
-  MutexLock lock(cache_mutex_);
-  if (cache_) {
-    string request_signature = GenerateCheckRequestSignature(request);
-
-    CheckCache::ScopedLookup lookup(cache_.get(), request_signature);
-
-    int64_t now = SimpleCycleTimer::Now();
-    // TODO(qiwzhang): supports quota
-    // int scale = GetQuotaScale(request, response);
-    int quota_scale = 0;
-    if (lookup.Found()) {
-      lookup.value()->set_last_check_time(now);
-      lookup.value()->set_check_response(response);
-      lookup.value()->set_quota_scale(quota_scale);
-      lookup.value()->set_is_flushing(false);
-    } else {
-      CacheElem* cache_elem = new CacheElem(response, now, quota_scale);
-      cache_->Insert(request_signature, cache_elem, 1);
+void CheckAggregatorImpl::ProcessRemovedItems(
+    const std::vector<CheckRequest>& request_vector) {
+  // process the aggregated requests one by one.
+  for (const auto& request : request_vector) {
+    MutexLock lock(callback_mutex_);
+    if (flush_callback_) {
+      flush_callback_(request);
     }
   }
+}
+
+Status CheckAggregatorImpl::CacheResponse(const CheckRequest& request,
+                                          const CheckResponse& response) {
+  std::vector<CheckRequest> removed_items;
+  {
+    MutexLock lock(cache_mutex_);
+
+    if (cache_) {
+      SinkSwapper sink_swapper(this, &removed_items);
+      // request_aggregated_ = &removed_items;
+      string request_signature = GenerateCheckRequestSignature(request);
+
+      CheckCache::ScopedLookup lookup(cache_.get(), request_signature);
+
+      int64_t now = SimpleCycleTimer::Now();
+      // TODO(qiwzhang): supports quota
+      // int scale = GetQuotaScale(request, response);
+      int quota_scale = 0;
+      if (lookup.Found()) {
+        lookup.value()->set_last_check_time(now);
+        lookup.value()->set_check_response(response);
+        lookup.value()->set_quota_scale(quota_scale);
+        lookup.value()->set_is_flushing(false);
+      } else {
+        CacheElem* cache_elem = new CacheElem(response, now, quota_scale);
+        cache_->Insert(request_signature, cache_elem, 1);
+      }
+      // request_aggregated_ = NULL;
+    }
+  }
+
+  ProcessRemovedItems(removed_items);
   return Status::OK;
 }
 
@@ -188,10 +217,18 @@ int CheckAggregatorImpl::GetNextFlushInterval() {
 // Flush aggregated requests whom are longer than flush_interval.
 // Called at time specified by GetNextFlushInterval().
 Status CheckAggregatorImpl::Flush() {
-  MutexLock lock(cache_mutex_);
-  if (cache_) {
-    cache_->RemoveExpiredEntries();
+  std::vector<CheckRequest> removed_items;
+  {
+    MutexLock lock(cache_mutex_);
+
+    if (cache_) {
+      SinkSwapper sink_swapper(this, &removed_items);
+      // request_aggregated_ = &removed_items;
+      cache_->RemoveExpiredEntries();
+      // request_aggregated_ = NULL;
+    }
   }
+  ProcessRemovedItems(removed_items);
   return Status::OK;
 }
 
@@ -201,11 +238,10 @@ void CheckAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
     return;
   }
 
-  MutexLock lock(callback_mutex_);
-  if (flush_callback_) {
+  if (removed_items_) {
     CheckRequest request;
     request = elem->ReturnCheckRequestAndClear(service_name_);
-    flush_callback_(request);
+    removed_items_->push_back(request);
   }
   delete elem;
 }
@@ -213,11 +249,18 @@ void CheckAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
 // Flush out aggregated check requests, clear all cache items.
 // Usually called at destructor.
 Status CheckAggregatorImpl::FlushAll() {
-  MutexLock lock(cache_mutex_);
-  GOOGLE_LOG(INFO) << "Remove all entries of check aggregator.";
-  if (cache_) {
-    cache_->RemoveAll();
+  std::vector<CheckRequest> removed_items;
+  {
+    MutexLock lock(cache_mutex_);
+    GOOGLE_LOG(INFO) << "Remove all entries of check aggregator.";
+    if (cache_) {
+      SinkSwapper sink_swapper(this, &removed_items);
+      // request_aggregated_ = &removed_items;
+      cache_->RemoveAll();
+      // request_aggregated_ = NULL;
+    }
   }
+  ProcessRemovedItems(removed_items);
   return Status::OK;
 }
 

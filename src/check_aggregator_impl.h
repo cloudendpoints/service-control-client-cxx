@@ -33,17 +33,17 @@ namespace service_control_client {
 //
 // Refreshes a cached entry after refresh interval:
 // 1) Calls Check(), found a cached response,
-// 2) If it passes refresh_inetrval, Check() returns NOT_FOUND, callers
+// 2) If it passes refresh_interval, Check() returns NOT_FOUND, callers
 //    will send the request to server.
 // 3) The new Check() calls after will use old response before the new response
 //      arrives.
 // 4) Callers will set the new response by calling CacheResponse().
-// 5) The new Check() calls after will use the new resposne.
+// 5) The new Check() calls after will use the new response.
 //
 // After a response is expired:
 // 1) During Flush() call, if a cached response is expired, it wil be flushed
-//    out.  If it has aggregated quota info, flush_callback will be called to send
-//    the request to server.
+//    out.  If it has aggregated quota info, flush_callback will be called to
+//    send the request to server.
 // 2) Callers need to send the request to server, and get its new response.
 // 3) The new response will be added to the cache by calling CacheResponse().
 // 4) If there is not Check() called for that entry before it is expired again,
@@ -51,11 +51,12 @@ namespace service_control_client {
 //    send to flush_callback(). The item simply just got deleted.
 //
 // Object life management:
-// The callers of this object needs to make sure the object is still valid before calling
-// its methods. Specifically, callers may use non-blocking transport to send request to server
-// and pass an on_done() callback to be called when response is received.  If on_done()
-// function is calling CheckAggregator->CacheReponse() funtion, caller MUST make sure
-// the CacheAggregator object is still valid.
+// The callers of this object needs to make sure the object is still valid
+// before calling its methods. Specifically, callers may use non-blocking
+// transport to send request to server and pass an on_done() callback to be
+// called when response is received.  If on_done() function is calling
+// CheckAggregator->CacheReponse() funtion, caller MUST make sure the
+// CacheAggregator object is still valid.
 class CheckAggregatorImpl : public CheckAggregator {
  public:
   // Constructor.
@@ -106,8 +107,8 @@ class CheckAggregatorImpl : public CheckAggregator {
               const int64_t time, const int quota_scale)
         : check_response_(response),
           last_check_time_(time),
-      quota_scale_(quota_scale),
-      is_flushing_(false) {}
+          quota_scale_(quota_scale),
+          is_flushing_(false) {}
 
     // Aggregates the given request to this cache entry.
     void Aggregate(
@@ -175,6 +176,42 @@ class CheckAggregatorImpl : public CheckAggregator {
     bool is_flushing_;
   };
 
+  // In both CheckAggregator and ReportAggregator, flush_callback() has the
+  // following restrictions: no re-entry. No Aggregator functions can be called
+  // inside flush_callback().
+  // To fix this problem, inside OnCacheEntryDelete(), we put request into
+  // a vector, and process each of them in ProcessRemovedItems(), which is
+  // outside the OnCacheEntryDelete() function.
+  // SinkSwapper is a class aims to protect the vector of requests under each
+  // method, it always appears under the cache_mutex.lock(). During its
+  // construction, a vector of requests is assigned to the pointer
+  // removed_items_. After it is destructed, the pointer removed_items_ is
+  // assigned with NULL and ProcessRemovedItems() will be called.
+  /* Sample usage:
+   *  std::vector<CheckRequest> removed_items;
+   *  {
+   *    MutexLock lock(cache_mutex_);
+   *    SinkSwapper sink_swapper(this, &removed_items);
+   *    ... // aggregator method
+   *    }
+   *  ProcessRemovedItems(removed_items);
+   *
+   */
+  class SinkSwapper {
+   public:
+    SinkSwapper(CheckAggregatorImpl* aggregator,
+                std::vector<::google::api::servicecontrol::v1::CheckRequest>*
+                    removed_items)
+        : aggregator_(aggregator) {
+      aggregator_->removed_items_ = removed_items;
+    }
+
+    ~SinkSwapper() { aggregator_->removed_items_ = NULL; }
+
+   private:
+    CheckAggregatorImpl* aggregator_;
+  };
+
   using CacheDeleter = std::function<void(CacheElem*)>;
   // Key is the signature of the check request. Value is the CacheElem.
   // It is a LRU cache with MaxIdelTime as response_expiration_time.
@@ -190,6 +227,11 @@ class CheckAggregatorImpl : public CheckAggregator {
   // response from the server is NOT cached.
   // Takes ownership of the elem.
   void OnCacheEntryDelete(CacheElem* elem);
+
+  // Process the items need to be removed from cache.
+  void ProcessRemovedItems(
+      const std::vector<::google::api::servicecontrol::v1::CheckRequest>&
+          removed_items);
 
   // The service name for this cache.
   const std::string service_name_;
@@ -215,6 +257,9 @@ class CheckAggregatorImpl : public CheckAggregator {
 
   // The callback function to flush out cache items.
   CheckAggregator::FlushCallback flush_callback_;
+
+  // Requests aggregated
+  std::vector<::google::api::servicecontrol::v1::CheckRequest>* removed_items_;
 
   // flush interval in cycles.
   int64_t flush_interval_in_cycle_;

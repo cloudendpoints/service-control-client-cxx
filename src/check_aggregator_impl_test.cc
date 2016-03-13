@@ -137,6 +137,12 @@ class CheckAggregatorImplTest : public ::testing::Test {
     flushed_.push_back(request);
   }
 
+  void FlushCallbackWithAggregator(const CheckRequest& request) {
+    flushed_.push_back(request);
+    aggregator_->CacheResponse(request, pass_response1_);
+    GOOGLE_LOG(INFO) << "Flush Callback with aggregator.";
+  }
+
   CheckRequest request1_;
   CheckResponse pass_response1_;
   CheckResponse error_response1_;
@@ -277,6 +283,22 @@ TEST_F(CheckAggregatorImplTest, TestCacheExpired) {
 
   EXPECT_EQ(flushed_.size(), 1);
   EXPECT_TRUE(MessageDifferencer::Equals(flushed_[0], request1_));
+}
+
+TEST_F(CheckAggregatorImplTest, TestFlushCallbackWithAggregator) {
+  aggregator_->SetFlushCallback(
+      std::bind(&CheckAggregatorImplTest::FlushCallbackWithAggregator, this,
+                std::placeholders::_1));
+
+  CheckResponse response;
+  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request1_, &response));
+
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+  EXPECT_OK(aggregator_->Check(request1_, &response));
+  EXPECT_TRUE(MessageDifferencer::Equals(response, pass_response1_));
+  EXPECT_EQ(flushed_.size(), 0);
+  EXPECT_OK(aggregator_->FlushAll());
+  EXPECT_EQ(flushed_.size(), 1);
 }
 
 }  // namespace service_control_client
