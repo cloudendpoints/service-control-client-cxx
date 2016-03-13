@@ -11,6 +11,7 @@
 #include "google/api/servicecontrol/v1/operation.pb.h"
 #include "google/api/servicecontrol/v1/service_controller.pb.h"
 #include "src/aggregator_interface.h"
+#include "src/cache_removed_items_handler.h"
 #include "src/operation_aggregator.h"
 #include "utils/simple_lru_cache.h"
 #include "utils/simple_lru_cache_inl.h"
@@ -33,17 +34,17 @@ namespace service_control_client {
 //
 // Refreshes a cached entry after refresh interval:
 // 1) Calls Check(), found a cached response,
-// 2) If it passes refresh_inetrval, Check() returns NOT_FOUND, callers
+// 2) If it passes refresh_interval, Check() returns NOT_FOUND, callers
 //    will send the request to server.
 // 3) The new Check() calls after will use old response before the new response
 //      arrives.
 // 4) Callers will set the new response by calling CacheResponse().
-// 5) The new Check() calls after will use the new resposne.
+// 5) The new Check() calls after will use the new response.
 //
 // After a response is expired:
 // 1) During Flush() call, if a cached response is expired, it wil be flushed
-//    out.  If it has aggregated quota info, flush_callback will be called to send
-//    the request to server.
+//    out.  If it has aggregated quota info, flush_callback will be called to
+//    send the request to server.
 // 2) Callers need to send the request to server, and get its new response.
 // 3) The new response will be added to the cache by calling CacheResponse().
 // 4) If there is not Check() called for that entry before it is expired again,
@@ -51,12 +52,19 @@ namespace service_control_client {
 //    send to flush_callback(). The item simply just got deleted.
 //
 // Object life management:
-// The callers of this object needs to make sure the object is still valid before calling
-// its methods. Specifically, callers may use non-blocking transport to send request to server
-// and pass an on_done() callback to be called when response is received.  If on_done()
-// function is calling CheckAggregator->CacheReponse() funtion, caller MUST make sure
-// the CacheAggregator object is still valid.
-class CheckAggregatorImpl : public CheckAggregator {
+// The callers of this object needs to make sure the object is still valid
+// before calling its methods. Specifically, callers may use non-blocking
+// transport to send request to server and pass an on_done() callback to be
+// called when response is received.  If on_done() function is calling
+// CheckAggregator->CacheReponse() funtion, caller MUST make sure the
+// CacheAggregator object is still valid.
+
+typedef CacheRemovedItemsHandler<
+    ::google::api::servicecontrol::v1::CheckRequest>
+    CheckCacheRemovedItemsHandler;
+
+class CheckAggregatorImpl : public CheckAggregator,
+                            public CheckCacheRemovedItemsHandler {
  public:
   // Constructor.
   // Does not take ownership of metric_kinds and controller, which must outlive
@@ -106,8 +114,8 @@ class CheckAggregatorImpl : public CheckAggregator {
               const int64_t time, const int quota_scale)
         : check_response_(response),
           last_check_time_(time),
-      quota_scale_(quota_scale),
-      is_flushing_(false) {}
+          quota_scale_(quota_scale),
+          is_flushing_(false) {}
 
     // Aggregates the given request to this cache entry.
     void Aggregate(
@@ -209,12 +217,6 @@ class CheckAggregatorImpl : public CheckAggregator {
   // entry 1 cost unit.
   // Guarded by mutex_, except when compare against NULL.
   std::unique_ptr<CheckCache> cache_;
-
-  // Mutex guarding the access of flush_callback_;
-  Mutex callback_mutex_;
-
-  // The callback function to flush out cache items.
-  CheckAggregator::FlushCallback flush_callback_;
 
   // flush interval in cycles.
   int64_t flush_interval_in_cycle_;

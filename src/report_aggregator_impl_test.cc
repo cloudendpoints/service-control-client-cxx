@@ -184,6 +184,13 @@ class ReportAggregatorImplTest : public ::testing::Test {
     flushed_.push_back(request);
   }
 
+  void FlushCallbackCallingBackToAggregator(const ReportRequest& request) {
+    GOOGLE_LOG(INFO) << "start Flush Callback with aggregator.";
+    flushed_.push_back(request);
+    aggregator_->Flush();
+    GOOGLE_LOG(INFO) << "finish Flush Callback with aggregator.";
+  }
+
   ReportRequest request1_;
   ReportRequest request2_;
   ReportRequest delta_merged12_;
@@ -293,6 +300,38 @@ TEST_F(ReportAggregatorImplTest, TestDisableCache) {
   // Nothing in the cache
   EXPECT_OK(aggregator_->FlushAll());
   EXPECT_EQ(flushed_.size(), 0);
+}
+
+TEST_F(ReportAggregatorImplTest,
+       TestFlushCallbackCallingBackToAggregatorFlush) {
+  aggregator_->SetFlushCallback(
+      std::bind(&ReportAggregatorImplTest::FlushCallbackCallingBackToAggregator,
+                this, std::placeholders::_1));
+
+  EXPECT_OK(aggregator_->Report(request1_));
+  EXPECT_OK(aggregator_->FlushAll());
+  EXPECT_EQ(flushed_.size(), 1);
+}
+
+TEST_F(ReportAggregatorImplTest,
+       TestFlushCallbackCallingBackToAggregatorReport) {
+  aggregator_->SetFlushCallback(
+      std::bind(&ReportAggregatorImplTest::FlushCallbackCallingBackToAggregator,
+                this, std::placeholders::_1));
+
+  EXPECT_OK(aggregator_->Report(request1_));
+  GOOGLE_LOG(INFO) << "first report";
+  AddLabel("key1", "value1", request2_.mutable_operations(0));
+  EXPECT_OK(aggregator_->Report(request2_));
+  GOOGLE_LOG(INFO) << "second report";
+
+  EXPECT_EQ(flushed_.size(), 1);
+  EXPECT_TRUE(MessageDifferencer::Equals(flushed_[0], request1_));
+
+  EXPECT_OK(aggregator_->FlushAll());
+  EXPECT_EQ(flushed_.size(), 2);
+  EXPECT_TRUE(MessageDifferencer::Equals(flushed_[1], request2_));
+
 }
 
 }  // namespace service_control_client
