@@ -137,6 +137,12 @@ class CheckAggregatorImplTest : public ::testing::Test {
     flushed_.push_back(request);
   }
 
+  void FlushCallbackCallingBackToAggregator(const CheckRequest& request) {
+    flushed_.push_back(request);
+    aggregator_->CacheResponse(request, pass_response1_);
+    GOOGLE_LOG(INFO) << "Flush Callback with aggregator.";
+  }
+
   CheckRequest request1_;
   CheckResponse pass_response1_;
   CheckResponse error_response1_;
@@ -277,6 +283,45 @@ TEST_F(CheckAggregatorImplTest, TestCacheExpired) {
 
   EXPECT_EQ(flushed_.size(), 1);
   EXPECT_TRUE(MessageDifferencer::Equals(flushed_[0], request1_));
+}
+
+TEST_F(CheckAggregatorImplTest, TestFlushCallbackCallingBackToAggregatorFlush) {
+  aggregator_->SetFlushCallback(
+      std::bind(&CheckAggregatorImplTest::FlushCallbackCallingBackToAggregator,
+                this, std::placeholders::_1));
+
+  CheckResponse response;
+
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+  EXPECT_OK(aggregator_->Check(request1_, &response));
+  EXPECT_OK(aggregator_->FlushAll());
+  EXPECT_EQ(flushed_.size(), 1);
+}
+
+TEST_F(CheckAggregatorImplTest,
+       TestFlushCallbackCallingBackToAggregatorCacheResponse) {
+  aggregator_->SetFlushCallback(
+      std::bind(&CheckAggregatorImplTest::FlushCallbackCallingBackToAggregator,
+                this, std::placeholders::_1));
+  CheckResponse response;
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+  EXPECT_OK(aggregator_->Check(request1_, &response));
+  EXPECT_OK(aggregator_->CacheResponse(request2_, pass_response2_));
+  EXPECT_EQ(flushed_.size(), 1);
+}
+
+TEST_F(CheckAggregatorImplTest, TestFlushCallbackCallingBackToAggregatorCheck) {
+  aggregator_->SetFlushCallback(
+      std::bind(&CheckAggregatorImplTest::FlushCallbackCallingBackToAggregator,
+                this, std::placeholders::_1));
+  CheckResponse response;
+
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+  EXPECT_OK(aggregator_->Check(request1_, &response));
+
+  usleep(220000);
+  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request1_, &response));
+  EXPECT_EQ(flushed_.size(), 1);
 }
 
 }  // namespace service_control_client

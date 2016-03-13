@@ -32,8 +32,7 @@ ReportAggregatorImpl::ReportAggregatorImpl(
     std::shared_ptr<MetricKindMap> metric_kinds)
     : service_name_(service_name),
       options_(options),
-      metric_kinds_(metric_kinds),
-      flush_callback_(NULL) {
+      metric_kinds_(metric_kinds) {
   if (options.num_entries > 0) {
     cache_.reset(
         new ReportCache(options.num_entries,
@@ -53,8 +52,7 @@ ReportAggregatorImpl::~ReportAggregatorImpl() {
 
 // Set the flush callback function.
 void ReportAggregatorImpl::SetFlushCallback(FlushCallback callback) {
-  MutexLock lock(callback_mutex_);
-  flush_callback_ = callback;
+  InternalSetFlushCallback(callback);
 }
 
 // Add a report request to cache
@@ -70,7 +68,10 @@ Status ReportAggregatorImpl::Report(
     return Status(Code::NOT_FOUND, "");
   }
 
+  ReportCacheRemovedItemsHandler::StackBuffer stack_buffer(this);
   MutexLock lock(cache_mutex_);
+  ReportCacheRemovedItemsHandler::StackBuffer::Swapper swapper(this,
+                                                               &stack_buffer);
 
   // Starts to cache and aggregate low important operations.
   for (const auto& operation : request.operations()) {
@@ -98,10 +99,7 @@ void ReportAggregatorImpl::OnCacheEntryDelete(OperationAggregator* iop) {
   *(request.add_operations()) = iop->ToOperationProto();
   delete iop;
 
-  MutexLock lock(callback_mutex_);
-  if (flush_callback_) {
-    flush_callback_(request);
-  }
+  AddRemovedItem(request);
 }
 
 // When the next Flush() should be called.
@@ -113,7 +111,10 @@ int ReportAggregatorImpl::GetNextFlushInterval() {
 // Flush aggregated requests whom are longer than flush_interval.
 // Called at time specified by GetNextFlushInterval().
 Status ReportAggregatorImpl::Flush() {
+  ReportCacheRemovedItemsHandler::StackBuffer stack_buffer(this);
   MutexLock lock(cache_mutex_);
+  ReportCacheRemovedItemsHandler::StackBuffer::Swapper swapper(this,
+                                                               &stack_buffer);
   if (cache_) {
     cache_->RemoveExpiredEntries();
   }
@@ -123,7 +124,10 @@ Status ReportAggregatorImpl::Flush() {
 // Flush out aggregated report requests, clear all cache items.
 // Usually called at destructor.
 Status ReportAggregatorImpl::FlushAll() {
+  ReportCacheRemovedItemsHandler::StackBuffer stack_buffer(this);
   MutexLock lock(cache_mutex_);
+  ReportCacheRemovedItemsHandler::StackBuffer::Swapper swapper(this,
+                                                               &stack_buffer);
   GOOGLE_LOG(INFO) << "Remove all entries of report aggregator.";
   if (cache_) {
     cache_->RemoveAll();
