@@ -1,0 +1,17 @@
+#!/bin/bash
+
+ROOT=$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")
+
+# Set up the ESP submodules.
+git -C "${ROOT}" submodule update --init --recursive
+
+cp "${ROOT}/script/commit-msg" "${ROOT}/.git/hooks/commit-msg"
+cp "${ROOT}/script/commit-msg" "${ROOT}/.git/modules/third_party/config/hooks/commit-msg"
+
+for repo in . third_party/config; do
+  ORIGIN=$(git -C "${ROOT}/${repo}" config remote.origin.url)
+  git -C "${ROOT}/${repo}" config remote.review.pushurl ${ORIGIN}
+  git -C "${ROOT}/${repo}" config remote.review.push HEAD:refs/for/master
+  git -C "${ROOT}/${repo}" config remote.draft.pushurl ${ORIGIN}
+  git -C "${ROOT}/${repo}" config remote.draft.push HEAD:refs/drafts/master
+done
