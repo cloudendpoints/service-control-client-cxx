@@ -1,0 +1,105 @@
+Revision: dfc8a86423b0eed5194346835803ea3029c38538
+Patch-set: 7
+File: include/service_control_client.h
+
+14:19-14:25
+Mon Mar 14 17:56:30 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3cfcba2a_1e918d3b
+Bytes: 301
+add example code how to use this client library on the top of this class declaration. i.e.
+(1) create ServiceControlClient with default options
+(2) create ServiceControlClient with aggregation/cache disabled
+(3) create ServiceControlClient with customized options
+(4) non-blocking vs blocking examples
+
+28:15-28:38
+Mon Mar 14 17:56:30 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_a270df18
+Bytes: 271
+can we set up transport as part of CreateServiceControlClient? Basically, all the options/configurations are done at one step. 
+
+Also, consider SetTransport() to cover both nonblocking and blocking transport
+
+and what about Alarm? do we still need to make this pluggable?
+
+43:29-43:43
+Mon Mar 14 17:56:30 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3cfcba2a_3e8c4925
+Bytes: 51
+is this //google/api path available to third party?
+
+45:13-45:21
+Mon Mar 14 17:56:30 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_dd94ec5f
+Bytes: 148
+I assume we will provide non-blocking & blocking version regardless when the transport is blocking or not? make this clear at the top of this class.
+
+59:43-59:57
+Mon Mar 14 17:56:30 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3cfcba2a_be2619fe
+Bytes: 13
+BlockingCheck
+
+85:43-85:58
+Mon Mar 14 17:56:30 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3cfcba2a_9e235dee
+Bytes: 14
+BlockingReport
+
+91:14-91:34
+Mon Mar 14 17:56:30 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3cfcba2a_7e82d1f6
+Bytes: 51
+why do we need to expose these three Flush methods?
+
+102:38-102:64
+Mon Mar 14 17:56:30 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_dde6ac03
+Bytes: 193
+alternatively, you can have CreateServiceControlClient(options)
+
+and do:
+options.set_check_aggregation()
+options.set_report_aggregation()
+options.set_metric_kind()
+options.set_transport()
+
+etc.
+
+File: include/transport.h
+
+12:6-12:26
+Mon Mar 14 17:56:30 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_fdba88e3
+Bytes: 285
+alternatively, you can have a single class to cover both non-blocking and blocking case with the same method signature. on_check_done=nullptr represents blocking call.
+
+you would need to add a method to indicate if this transport is non-blocking or not. i.e. bool IsBlockingTransport()
+
+File: src/service_control_client_impl.h
+
+35:35-35:49
+Mon Mar 14 17:56:30 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3cfcba2a_fe2ca1e1
+Bytes: 162
+BlockingCheck(
+
+alternatively, we can keep Check() as the single method to support both non-blocking and blocking. if on_check_done is nullptr, it means blocking.
+
+47:35-47:50
+Mon Mar 14 17:56:30 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3cfcba2a_de29e5cf
+Bytes: 15
+BlockingReport(
+
