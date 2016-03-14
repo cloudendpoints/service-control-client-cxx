@@ -1,0 +1,125 @@
+Revision: 531fda17fe619c9d6dc18a104d5c4a4fc1005da5
+Patch-set: 1
+File: /COMMIT_MSG
+
+7:17-7:30
+Mon Mar 14 21:26:43 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_5d20fc83
+Bytes: 65
+How about:
+Supports re-entry for check aggregator flush callback.
+
+File: src/check_aggregator_impl.cc
+
+90:28-90:41
+Mon Mar 14 21:26:43 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_180962c7
+Bytes: 19
+cache_removed_items
+
+129:15-129:21
+Mon Mar 14 21:26:43 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_1ef66baf
+Bytes: 85
+We should not call return here.  We need to call ProcessRemovedItems for each return.
+
+149:27-149:28
+Mon Mar 14 21:26:43 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_beb3d713
+Bytes: 17
+remove this line?
+
+168:17-168:27
+Mon Mar 14 21:26:43 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_d8251a49
+Bytes: 71
+can use use GOOGLE_CHECK() to assert we are outside of cache_mutex lock
+
+185:9-185:28
+Mon Mar 14 21:26:43 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_9ee25be8
+Bytes: 17
+remove this line?
+
+203:9-203:28
+Mon Mar 14 21:26:43 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_5ed8f335
+Bytes: 17
+remove this line?
+
+File: src/check_aggregator_impl.h
+
+199:3-199:5
+Mon Mar 14 21:26:43 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_d8febaca
+Bytes: 1383
+How about simplify the comment as:
+If flush callback is called inside OnCacheEntryDelete(), the callback function SHOULD not call any of CheckAggregator functions, otherwise it will cause deadlock. The reason is: OnCacheEntryDelete() is already holding cache_mutex_ lock and all of CheckAggregator methods will try acquire cache_mutex_ lock which will cause dead lock.
+
+The solution is to buffer the removed items into a stack allocated vector in OnCacheEntryDelete(). After cache_mutex lock is released, calls flush callback for these removed items.
+
+class CacheRemovedItemVectorSwapper is designed to implement this solution.  CheckAggregator has a member variable cache_removed_items_ to point to stack allocated vector which can be used to insert cache removed item in OnCacheEntryDelete(). Actual vector has to be allocated from stack by each caller of cache operation functions. CacheRemovedItemVectorSwapper can be used to set the vector pointer and reset it. Here is a typical usage of this class:
+
+std::vector<CheckRequest> removed_items;
+{
+   MutexLock lock(cache_mutex_);
+   // this has to be within cache_mutex lock
+    SinkSwapper sink_swapper(this, &removed_items);
+   ... // any cache operations
+}
+// Has to be outside of cache_mutex_ lock
+ProcessRemovedItems(removed_items);
+
+All cache operations (which may evict cache items) need to be wrapped by this code pattern.
+
+231:17-231:22
+Mon Mar 14 21:26:43 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_bd3be0b1
+Bytes: 53
+Processes the items have been removed from the cache.
+
+261:14-261:24
+Mon Mar 14 21:26:43 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_3d289063
+Bytes: 83
+A pointer pointing to stack allocated vector to store removed items from the cache.
+
+File: src/check_aggregator_impl_test.cc
+
+140:7-140:34
+Mon Mar 14 21:26:43 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_7e020f5a
+Bytes: 36
+FlushCallbackCallingBackToAggregator
+
+294:24-294:26
+Mon Mar 14 21:26:43 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_1e402b80
+Bytes: 42
+remove tests not related to flush callback
+
+303
+Mon Mar 14 21:26:43 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: f7ab1dee_fe171f88
+Bytes: 84
+Please add test cases for each public function
+
+TestCheck()
+
+and
+
+TestCacheReponse()
+
