@@ -21,6 +21,26 @@ To download the service control client source code, clone the repository:
 
 ## Repository Structure ##
 
+* [include](/include): The folder contains public headers.
 * [utils](/utils): The folder contains utility code.
 * [src](/src): The folder contains core source code.
+
+## Setup, build and test ##
+
+After download the code, run following to setup
+
+    # Setup git for remote push
+    script/setup
+    
+    # Updates submodules
+    git submodule update --init --recursive
+    
+    # Use Bazel to build
+    bazel build //utils:all
+    bazel build //src:all
+
+    # Use Bazel to test
+    bazel test //utils:all
+    bazel test //src:all
+
 
