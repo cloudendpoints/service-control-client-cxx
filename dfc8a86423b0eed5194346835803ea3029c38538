@@ -13,6 +13,14 @@ add example code how to use this client library on the top of this class declara
 (3) create ServiceControlClient with customized options
 (4) non-blocking vs blocking examples
 
+14:19-14:25
+Tue Mar 15 21:37:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3cfcba2a_1e918d3b
+UUID: 578949a7_48cdb37e
+Bytes: 4
+Done
+
 28:15-28:38
 Mon Mar 14 17:56:30 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -24,12 +32,28 @@ Also, consider SetTransport() to cover both nonblocking and blocking transport
 
 and what about Alarm? do we still need to make this pluggable?
 
+28:15-28:38
+Tue Mar 15 21:37:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: f7ab1dee_a270df18
+UUID: 578949a7_88c7bb5c
+Bytes: 4
+Done
+
 43:29-43:43
 Mon Mar 14 17:56:30 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3cfcba2a_3e8c4925
 Bytes: 51
 is this //google/api path available to third party?
+
+43:29-43:43
+Tue Mar 15 21:37:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3cfcba2a_3e8c4925
+UUID: 578949a7_08f64baf
+Bytes: 136
+Yes, both ESP and service-control-client library depends on module "gcp-apis/config".  It will be open to public as separate repository.
 
 45:13-45:21
 Mon Mar 14 17:56:30 2016 +0000
@@ -38,12 +62,28 @@ UUID: f7ab1dee_dd94ec5f
 Bytes: 148
 I assume we will provide non-blocking & blocking version regardless when the transport is blocking or not? make this clear at the top of this class.
 
+45:13-45:21
+Tue Mar 15 21:37:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: f7ab1dee_dd94ec5f
+UUID: 578949a7_68e517f1
+Bytes: 4
+Done
+
 59:43-59:57
 Mon Mar 14 17:56:30 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3cfcba2a_be2619fe
 Bytes: 13
 BlockingCheck
+
+59:43-59:57
+Tue Mar 15 21:37:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3cfcba2a_be2619fe
+UUID: 578949a7_a80d5f8e
+Bytes: 4
+Done
 
 85:43-85:58
 Mon Mar 14 17:56:30 2016 +0000
@@ -52,12 +92,28 @@ UUID: 3cfcba2a_9e235dee
 Bytes: 14
 BlockingReport
 
+85:43-85:58
+Tue Mar 15 21:37:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3cfcba2a_9e235dee
+UUID: 578949a7_c812a3a9
+Bytes: 4
+Done
+
 91:14-91:34
 Mon Mar 14 17:56:30 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3cfcba2a_7e82d1f6
 Bytes: 51
 why do we need to expose these three Flush methods?
+
+91:14-91:34
+Tue Mar 15 21:37:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3cfcba2a_7e82d1f6
+UUID: 578949a7_080d6b89
+Bytes: 96
+We provides an option: call_flush_manually. For this option, these two functions will be called.
 
 102:38-102:64
 Mon Mar 14 17:56:30 2016 +0000
@@ -74,6 +130,14 @@ options.set_transport()
 
 etc.
 
+102:38-102:64
+Tue Mar 15 21:37:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: f7ab1dee_dde6ac03
+UUID: 578949a7_28022f59
+Bytes: 4
+Done
+
 File: include/transport.h
 
 12:6-12:26
@@ -84,6 +148,14 @@ Bytes: 285
 alternatively, you can have a single class to cover both non-blocking and blocking case with the same method signature. on_check_done=nullptr represents blocking call.
 
 you would need to add a method to indicate if this transport is non-blocking or not. i.e. bool IsBlockingTransport()
+
+12:6-12:26
+Tue Mar 15 21:37:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: f7ab1dee_fdba88e3
+UUID: 578949a7_68fc3785
+Bytes: 52
+I feel it is better to have two separate interfaces.
 
 File: src/service_control_client_impl.h
 
@@ -96,10 +168,28 @@ BlockingCheck(
 
 alternatively, we can keep Check() as the single method to support both non-blocking and blocking. if on_check_done is nullptr, it means blocking.
 
+35:35-35:49
+Tue Mar 15 21:37:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3cfcba2a_fe2ca1e1
+UUID: f7ab1dee_9ea53b13
+Bytes: 173
+This was discussed during the design meeting.  Many agreed that it is clearer to have separate function for blocking and non-blocking call.
+
+Will rename it to BlockingCheck(
+
 47:35-47:50
 Mon Mar 14 17:56:30 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3cfcba2a_de29e5cf
 Bytes: 15
 BlockingReport(
+
+47:35-47:50
+Tue Mar 15 21:37:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3cfcba2a_de29e5cf
+UUID: f7ab1dee_fe2c3f4e
+Bytes: 4
+Done
 
