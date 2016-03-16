@@ -1,4 +1,6 @@
 
+licenses(["notice"])
+
 cc_library(
     name = "service_control_client_internal_lib",
     srcs = [

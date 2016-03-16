@@ -1,4 +1,6 @@
 
+licenses(["notice"])
+
 cc_library(
     name = "public_headers",
     hdrs = [
