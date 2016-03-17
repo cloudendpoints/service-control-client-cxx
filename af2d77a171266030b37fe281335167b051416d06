@@ -131,6 +131,13 @@ UUID: 3c1bdab9_6f594103
 Bytes: 108
 Yes, because on_done() callback needs to call CacheRequest() which needs both request and response protobuf.
 
+86:26-86:27
+Thu Mar 17 23:39:57 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_1aebadcc
+Bytes: 91
+describe why we are making a copy here? I guess that copy is fine, might be negligible cost
+
 87:43-87:55
 Thu Mar 17 21:09:13 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
