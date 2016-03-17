@@ -33,6 +33,14 @@ UUID: f7ab1dee_beb3d713
 Bytes: 17
 remove this line?
 
+149:27-149:28
+Thu Mar 17 21:10:58 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: f7ab1dee_beb3d713
+UUID: f7ab1dee_01e56e87
+Bytes: 4
+Done
+
 168:17-168:27
 Mon Mar 14 21:26:43 2016 +0000
 Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -80,6 +88,14 @@ ProcessRemovedItems(removed_items);
 
 All cache operations (which may evict cache items) need to be wrapped by this code pattern.
 
+199:3-199:5
+Thu Mar 17 21:10:58 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: f7ab1dee_d8febaca
+UUID: f7ab1dee_bed11772
+Bytes: 4
+Done
+
 231:17-231:22
 Mon Mar 14 21:26:43 2016 +0000
 Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -87,12 +103,28 @@ UUID: f7ab1dee_bd3be0b1
 Bytes: 53
 Processes the items have been removed from the cache.
 
+231:17-231:22
+Thu Mar 17 21:10:58 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: f7ab1dee_bd3be0b1
+UUID: f7ab1dee_9e737b73
+Bytes: 4
+Done
+
 261:14-261:24
 Mon Mar 14 21:26:43 2016 +0000
 Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: f7ab1dee_3d289063
 Bytes: 83
 A pointer pointing to stack allocated vector to store removed items from the cache.
+
+261:14-261:24
+Thu Mar 17 21:10:58 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: f7ab1dee_3d289063
+UUID: f7ab1dee_be763762
+Bytes: 4
+Done
 
 File: src/check_aggregator_impl_test.cc
 
@@ -103,12 +135,28 @@ UUID: f7ab1dee_7e020f5a
 Bytes: 36
 FlushCallbackCallingBackToAggregator
 
+140:7-140:34
+Thu Mar 17 21:10:58 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: f7ab1dee_7e020f5a
+UUID: f7ab1dee_010c4e1f
+Bytes: 4
+Done
+
 294:24-294:26
 Mon Mar 14 21:26:43 2016 +0000
 Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: f7ab1dee_1e402b80
 Bytes: 42
 remove tests not related to flush callback
+
+294:24-294:26
+Thu Mar 17 21:10:58 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: f7ab1dee_1e402b80
+UUID: f7ab1dee_e1102233
+Bytes: 4
+Done
 
 303
 Mon Mar 14 21:26:43 2016 +0000
