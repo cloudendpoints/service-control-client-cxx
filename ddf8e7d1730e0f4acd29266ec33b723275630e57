@@ -1,0 +1,28 @@
+Revision: ddf8e7d1730e0f4acd29266ec33b723275630e57
+Patch-set: 4
+File: src/cache_removed_items_handler.h
+
+90:7-90:10
+Thu Mar 17 20:57:57 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_cc6b23bc
+Bytes: 68
+Wrong comment.  it should be:
+A vector to cache store removed items.
+
+103:2-103:13
+Thu Mar 17 20:57:57 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_4c59f329
+Bytes: 55
+It should only be set and reset by StackBuffer::Swapper
+
+File: src/check_aggregator_impl_test.cc
+
+298:5-298:9
+Thu Mar 17 20:57:57 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_ec209f94
+Bytes: 6
+format
+
