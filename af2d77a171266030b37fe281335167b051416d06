@@ -9,6 +9,14 @@ UUID: 3c1bdab9_46d71239
 Bytes: 22
 list in alphabet order
 
+7:10-7:29
+Thu Mar 17 22:13:35 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_46d71239
+UUID: 3c1bdab9_ef209194
+Bytes: 30
+renamed it back to transport.h
+
 File: include/plugable_interfaces.h
 
 12:6-12:15
@@ -17,6 +25,14 @@ Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3c1bdab9_66ab2ebb
 Bytes: 81
 change this file name to transport_interface.h or transport.h to be more specific
+
+12:6-12:15
+Thu Mar 17 22:13:35 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_66ab2ebb
+UUID: 3c1bdab9_0fe9ad62
+Bytes: 4
+Done
 
 File: include/service_control_client.h
 
@@ -51,6 +67,23 @@ FlushReport();
 FlushAll();
 }
 
+59:7-59:26
+Thu Mar 17 22:13:35 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_eccfffcc
+UUID: 3c1bdab9_8f5bdd58
+Bytes: 190
+Direction is wrong. Flush() should be implemented by the library and to be called by the caller.
+Not the callback function which is implemented by the caller and to be called by the library.
+
+59:7-59:26
+Thu Mar 17 22:13:35 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_6f09417d
+UUID: 3c1bdab9_cf55d525
+Bytes: 55
+See my above comment.  The function direction is wrong.
+
 136:47-136:53
 Thu Mar 17 21:09:13 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -58,12 +91,28 @@ UUID: 3c1bdab9_a99339d2
 Bytes: 25
 be accumulated and cached
 
+136:47-136:53
+Thu Mar 17 22:13:35 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_a99339d2
+UUID: 3c1bdab9_8f159d60
+Bytes: 4
+Done
+
 167:47-167:53
 Thu Mar 17 21:09:13 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3c1bdab9_8990fdc6
 Bytes: 25
 be accumulated and cached
+
+167:47-167:53
+Thu Mar 17 22:13:35 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_8990fdc6
+UUID: 3c1bdab9_2f33c9f4
+Bytes: 4
+Done
 
 File: src/service_control_client_impl.cc
 
@@ -74,6 +123,14 @@ UUID: 3c1bdab9_89c2bda6
 Bytes: 84
 yes, I am confused by this copy here too. Is this required by the callback function?
 
+86:30-86:34
+Thu Mar 17 22:13:35 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_89c2bda6
+UUID: 3c1bdab9_6f594103
+Bytes: 108
+Yes, because on_done() callback needs to call CacheRequest() which needs both request and response protobuf.
+
 87:43-87:55
 Thu Mar 17 21:09:13 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -83,6 +140,14 @@ is this CheckRequest the same as ::google::api::...::v1::CheckRequest?
 
 can we remove the namespace prefix ::google... for the previous one?
 
+87:43-87:55
+Thu Mar 17 22:13:35 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_49e1e548
+UUID: 3c1bdab9_af5219dd
+Bytes: 4
+Done
+
 89:49-89:67
 Thu Mar 17 21:09:13 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -90,10 +155,28 @@ UUID: 3c1bdab9_29bbc93b
 Bytes: 147
 I remember you use to have shared_ptr to protect the lifetime of the callback/caller/callee/etc. Did you use a new technique to solve that problem?
 
+89:49-89:67
+Thu Mar 17 22:13:35 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_29bbc93b
+UUID: 3c1bdab9_af9339d2
+Bytes: 143
+Yes, check_aggregator_ is a shared_ptr.   so check_aggregator_copy is another shared_ptr which will hold a refcount for the on_done() function.
+
 149:24-149:41
 Thu Mar 17 21:09:13 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3c1bdab9_09640dc3
 Bytes: 155
 this kind of violate the flush policy. If check flush interval is 1ms, and report flush interval is 10 ms, we are doing both check&report every 1ms, right?
+
+149:24-149:41
+Thu Mar 17 22:13:35 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_09640dc3
+UUID: 3c1bdab9_ef76d164
+Bytes: 232
+Flush() can be called more often than desired.  If there is not items expired.  Flush() is an no-op.  GetNextFlushInterval() is a guideline as the least frequency you should call. 
+
+I don't think it is violation of the flush policy.
 
