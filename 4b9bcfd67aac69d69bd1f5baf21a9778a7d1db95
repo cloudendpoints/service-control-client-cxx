@@ -1,0 +1,112 @@
+Revision: 4b9bcfd67aac69d69bd1f5baf21a9778a7d1db95
+Patch-set: 3
+File: README.md
+
+13:2-13:5
+Thu Mar 17 19:35:33 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_a9efb9a3
+Bytes: 37
+no need to list git as prerequisities
+
+File: src/cache_removed_items_handler.h
+
+12:35-12:50
+Thu Mar 17 19:35:33 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_c9f6757c
+Bytes: 43
+replace CheckAggregator with AggregatorImpl
+
+49:13-49:18
+Thu Mar 17 19:35:33 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_49bd6592
+Bytes: 19
+no need lines 46-49
+
+62:20-62:26
+Thu Mar 17 19:35:33 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_899e3d28
+Bytes: 90
+This class has to be instantiated at stack.
+It should be used outside of cache_mutex lock.
+
+75:41-75:59
+Thu Mar 17 19:35:33 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_c9c155fb
+Bytes: 111
+to swap stack_buffer_ variable in the CacheRemovedItemsHandle class.
+It should be used within cache_mutex lock.
+
+File: src/check_aggregator_impl.cc
+
+107:5-107:11
+Thu Mar 17 19:35:33 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_a98b39db
+Bytes: 74
+could you re format these comments, "cformat" build  them into small lines
+
+File: src/check_aggregator_impl_test.cc
+
+143:45-143:55
+Thu Mar 17 19:35:33 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_695b012d
+Bytes: 25
+remove this logging line.
+
+288:32-288:77
+Thu Mar 17 19:35:33 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_094fed64
+Bytes: 104
+TestFlushAllWithCallbackCallingCacheResposne.  
+Could you also rename other test names with this format?
+
+297:25-297:33
+Thu Mar 17 19:35:33 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_e947f145
+Bytes: 108
+Add comment
+FlushAll() will call flush callback to flush out request1
+the callback will call CacheRequest().
+
+309:25-309:38
+Thu Mar 17 19:35:33 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_c944b544
+Bytes: 146
+Add comment
+CacheResponse() will call flush callback to flush out request1 since cache capacity is 1.
+the callback will call CacheRequest() again.
+
+323:50-323:55
+Thu Mar 17 19:35:33 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_692dc18d
+Bytes: 60
+Add comment
+Check() will evict request1 since it is expired.
+
+File: src/report_aggregator_impl_test.cc
+
+191:32-191:37
+Thu Mar 17 19:35:33 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_493285ed
+Bytes: 22
+remove debugging logs.
+
+325:25-325:31
+Thu Mar 17 19:35:33 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_09e9ad62
+Bytes: 86
+Add comment
+Report(request2_) will evict request1_ out since the cacahe capacity is 1.
+
