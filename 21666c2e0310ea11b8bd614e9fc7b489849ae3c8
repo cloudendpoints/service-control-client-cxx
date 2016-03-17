@@ -1,0 +1,11 @@
+Revision: 21666c2e0310ea11b8bd614e9fc7b489849ae3c8
+Patch-set: 11
+File: src/service_control_client_impl.h
+
+68:54-68:63
+Thu Mar 17 23:39:57 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_3abdc9de
+Bytes: 88
+could you add more details why we need to hold ref_count? either here or in the .cc file
+

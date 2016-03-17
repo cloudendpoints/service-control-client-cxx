@@ -1,0 +1,11 @@
+Revision: fd0a14ba77644054ebf297497b52fa83f3b833b3
+Base-for-patch-set: 11
+File: include/aggregator_options.h
+
+15:7-15:30
+Thu Mar 17 23:39:57 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_7a40e112
+Bytes: 40
+rename this file to aggregation_options?
+
