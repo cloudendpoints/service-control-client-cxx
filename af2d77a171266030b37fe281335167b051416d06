@@ -35,6 +35,22 @@ And you can remove this boolean and the three flush related methods from the cla
 
 By the way, lets sync up with Martin and see if he has a better idea to avoid this manual flush? something like abstract the nginx alarmer as a generic alarmer and pass to this library to control flush in this class internally instead of relying on the caller
 
+59:7-59:26
+Thu Mar 17 21:30:32 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_eccfffcc
+UUID: 3c1bdab9_6f09417d
+Bytes: 174
+Another variant: RegisterManualFlush(Flusher* flusher);
+
+class Flusher {
+GetNextCheckFlushInterval();
+GetNextReportFlushInterval();
+FlushCheck();
+FlushReport();
+FlushAll();
+}
+
 136:47-136:53
 Thu Mar 17 21:09:13 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
