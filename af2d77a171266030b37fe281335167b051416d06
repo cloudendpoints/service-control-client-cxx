@@ -1,0 +1,83 @@
+Revision: af2d77a171266030b37fe281335167b051416d06
+Patch-set: 9
+File: include/BUILD
+
+7:10-7:29
+Thu Mar 17 21:09:13 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_46d71239
+Bytes: 22
+list in alphabet order
+
+File: include/plugable_interfaces.h
+
+12:6-12:15
+Thu Mar 17 21:09:13 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_66ab2ebb
+Bytes: 81
+change this file name to transport_interface.h or transport.h to be more specific
+
+File: include/service_control_client.h
+
+59:7-59:26
+Thu Mar 17 21:09:13 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_eccfffcc
+Bytes: 654
+this boolean is tightly associated with below flush* methods. It will be great if we can somehow couple them together. I am thinking of providing a std::function RegisterManualFlush option:
+
+
+void RegisterManualFlush(std::function* GetNextFlushInterval, std::function* Flush, std::function* FlushAll);
+
+
+And you can remove this boolean and the three flush related methods from the class below.
+
+By the way, lets sync up with Martin and see if he has a better idea to avoid this manual flush? something like abstract the nginx alarmer as a generic alarmer and pass to this library to control flush in this class internally instead of relying on the caller
+
+136:47-136:53
+Thu Mar 17 21:09:13 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_a99339d2
+Bytes: 25
+be accumulated and cached
+
+167:47-167:53
+Thu Mar 17 21:09:13 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_8990fdc6
+Bytes: 25
+be accumulated and cached
+
+File: src/service_control_client_impl.cc
+
+86:30-86:34
+Thu Mar 17 21:09:13 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_89c2bda6
+Bytes: 84
+yes, I am confused by this copy here too. Is this required by the callback function?
+
+87:43-87:55
+Thu Mar 17 21:09:13 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_49e1e548
+Bytes: 140
+is this CheckRequest the same as ::google::api::...::v1::CheckRequest?
+
+can we remove the namespace prefix ::google... for the previous one?
+
+89:49-89:67
+Thu Mar 17 21:09:13 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_29bbc93b
+Bytes: 147
+I remember you use to have shared_ptr to protect the lifetime of the callback/caller/callee/etc. Did you use a new technique to solve that problem?
+
+149:24-149:41
+Thu Mar 17 21:09:13 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_09640dc3
+Bytes: 155
+this kind of violate the flush policy. If check flush interval is 1ms, and report flush interval is 10 ms, we are doing both check&report every 1ms, right?
+
