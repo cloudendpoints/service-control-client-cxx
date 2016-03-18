@@ -1,0 +1,13 @@
+Revision: 296c35c10f5972dccb545d2357a62423d4f83ed6
+Patch-set: 17
+File: include/periodic_timer.h
+
+20:8-20:21
+Fri Mar 18 21:59:58 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_a3798d56
+Bytes: 96
+TimerInstance -> Timer?
+
+I think instance typically means the object instance of a certain class
+
