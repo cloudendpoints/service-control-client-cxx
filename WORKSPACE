@@ -36,6 +36,6 @@ new_git_repository(
 )
 
 bind(
-    name = "ssl_crypto",
+    name = "boringssl_crypto",
     actual = "@boringssl_git//:crypto",
 )

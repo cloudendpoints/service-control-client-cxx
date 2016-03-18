@@ -28,7 +28,7 @@ cc_library(
     hdrs = [ "md5.h"  ],
     visibility = ["//visibility:public"],
     deps = [
-         "//external:ssl_crypto",
+         "//external:boringssl_crypto",
     ],
 )
 
