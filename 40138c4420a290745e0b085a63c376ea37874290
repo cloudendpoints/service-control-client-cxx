@@ -9,12 +9,28 @@ UUID: 3c1bdab9_75591203
 Bytes: 50
 add: set to 0 will disable aggregation and caching
 
+36:37-36:41
+Fri Mar 18 21:22:15 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_75591203
+UUID: 3c1bdab9_807d6af6
+Bytes: 4
+Done
+
 40:26-40:33
 Fri Mar 18 03:23:18 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3c1bdab9_f51a224b
 Bytes: 20
 invoked -> triggered
+
+40:26-40:33
+Fri Mar 18 21:22:15 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_f51a224b
+UUID: 3c1bdab9_c0764217
+Bytes: 4
+Done
 
 44:17-44:24
 Fri Mar 18 03:23:18 2016 +0000
@@ -23,6 +39,14 @@ UUID: 3c1bdab9_d5172623
 Bytes: 20
 invoked -> triggered
 
+44:17-44:24
+Fri Mar 18 21:22:15 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_d5172623
+UUID: 3c1bdab9_a0734625
+Bytes: 4
+Done
+
 64:20-64:22
 Fri Mar 18 03:23:18 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -30,12 +54,28 @@ UUID: 3c1bdab9_555e96ec
 Bytes: 38
 add: set to 0 will disable aggregation
 
+64:20-64:22
+Fri Mar 18 21:22:15 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_555e96ec
+UUID: 3c1bdab9_e06d3e42
+Bytes: 4
+Done
+
 68:13-68:55
 Fri Mar 18 03:23:18 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3c1bdab9_153b7eb2
 Bytes: 24
 remove the deletion part
+
+68:13-68:55
+Fri Mar 18 21:22:15 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_153b7eb2
+UUID: 3c1bdab9_9ba4bfd1
+Bytes: 4
+Done
 
 File: include/service_control_client.h
 
@@ -47,6 +87,14 @@ Bytes: 90
 Simplest way -> Normal Usage:
 
 Please provide both sync & async use cases for normal usage
+
+61:6-61:18
+Fri Mar 18 21:22:15 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_b529ca69
+UUID: 3c1bdab9_3b6b0bf6
+Bytes: 4
+Done
 
 84:6-84:13
 Fri Mar 18 03:23:18 2016 +0000
@@ -67,6 +115,14 @@ A nonblocking call returns immediately with whatever data are available: the ful
 
 An asynchronous call requests a transfer that will be performed in its whole(entirety) but will complete at some future time.
 
+84:6-84:13
+Fri Mar 18 21:22:15 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_95264e97
+UUID: 3c1bdab9_1b70cfdc
+Bytes: 4
+Done
+
 149:43-149:56
 Fri Mar 18 03:23:18 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -78,6 +134,14 @@ and comment this as synchronous call instead of blocking call, since async is mo
 
 note many classic methods just use a single method to cover both async and sync. In google, stubby is an example of that. Basically, on_check_done=nullptr means synchronous call. But I am fine if you want to have two methods. Just use the same name then. SyncCheck(), AsyncCheck() also works.
 
+149:43-149:56
+Fri Mar 18 21:22:15 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_758ab29b
+UUID: 3c1bdab9_bb5edb48
+Bytes: 44
+OK, use two separate methods with same name.
+
 179:29-179:36
 Fri Mar 18 03:23:18 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -85,4 +149,12 @@ UUID: 3c1bdab9_558fb6a9
 Bytes: 172
 Add a todo that we will revisit if we want to expose FlushAll() when we open source this client library.
 rule of thumb for a good api: only expose what needs to be exposed.
+
+179:29-179:36
+Fri Mar 18 21:22:15 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_558fb6a9
+UUID: 3c1bdab9_7bee236c
+Bytes: 15
+OK, removed it.
 
