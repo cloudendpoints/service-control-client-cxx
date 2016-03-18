@@ -1,0 +1,88 @@
+Revision: 40138c4420a290745e0b085a63c376ea37874290
+Patch-set: 14
+File: include/aggregation_options.h
+
+36:37-36:41
+Fri Mar 18 03:23:18 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_75591203
+Bytes: 50
+add: set to 0 will disable aggregation and caching
+
+40:26-40:33
+Fri Mar 18 03:23:18 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_f51a224b
+Bytes: 20
+invoked -> triggered
+
+44:17-44:24
+Fri Mar 18 03:23:18 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_d5172623
+Bytes: 20
+invoked -> triggered
+
+64:20-64:22
+Fri Mar 18 03:23:18 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_555e96ec
+Bytes: 38
+add: set to 0 will disable aggregation
+
+68:13-68:55
+Fri Mar 18 03:23:18 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_153b7eb2
+Bytes: 24
+remove the deletion part
+
+File: include/service_control_client.h
+
+61:6-61:18
+Fri Mar 18 03:23:18 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_b529ca69
+Bytes: 90
+Simplest way -> Normal Usage:
+
+Please provide both sync & async use cases for normal usage
+
+84:6-84:13
+Fri Mar 18 03:23:18 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_95264e97
+Bytes: 107
+Advance way -> Advanced Usage: provides custom transport, ...
+provide an example how to disable the caching
+
+84:48-84:60
+Fri Mar 18 03:23:18 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_35803a7c
+Bytes: 375
+please use async instead of non-blocking in all places. I think async is a term used more frequently in this case. 
+
+A nonblocking call returns immediately with whatever data are available: the full number of bytes requested, fewer, or none at all.
+
+An asynchronous call requests a transfer that will be performed in its whole(entirety) but will complete at some future time.
+
+149:43-149:56
+Fri Mar 18 03:23:18 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_758ab29b
+Bytes: 473
+lets simply use method overload, giving this the same name Check(...
+
+and comment this as synchronous call instead of blocking call, since async is more accurate than non-blocking
+
+note many classic methods just use a single method to cover both async and sync. In google, stubby is an example of that. Basically, on_check_done=nullptr means synchronous call. But I am fine if you want to have two methods. Just use the same name then. SyncCheck(), AsyncCheck() also works.
+
+179:29-179:36
+Fri Mar 18 03:23:18 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_558fb6a9
+Bytes: 172
+Add a todo that we will revisit if we want to expose FlushAll() when we open source this client library.
+rule of thumb for a good api: only expose what needs to be exposed.
+
