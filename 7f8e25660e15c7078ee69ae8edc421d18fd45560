@@ -9,12 +9,28 @@ UUID: 3c1bdab9_6304b536
 Bytes: 4
 Uses
 
+68:8-68:11
+Fri Mar 18 21:40:55 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_6304b536
+UUID: 3c1bdab9_234f5d65
+Bytes: 4
+Done
+
 81:8-81:12
 Fri Mar 18 21:27:03 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3c1bdab9_a3150d60
 Bytes: 21
 Uses, for consistency
+
+81:8-81:12
+Fri Mar 18 21:40:55 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_a3150d60
+UUID: 3c1bdab9_c33da9c3
+Bytes: 4
+Done
 
 89:8-89:12
 Fri Mar 18 21:27:03 2016 +0000
@@ -23,6 +39,14 @@ UUID: 3c1bdab9_0313417a
 Bytes: 4
 Uses
 
+89:8-89:12
+Fri Mar 18 21:40:55 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_0313417a
+UUID: 3c1bdab9_6359552a
+Bytes: 4
+Done
+
 101:34-101:38
 Fri Mar 18 21:27:03 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -30,12 +54,28 @@ UUID: 3c1bdab9_83b8d1a4
 Bytes: 22
 how about just (0,0,0)
 
+101:34-101:38
+Fri Mar 18 21:40:55 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_83b8d1a4
+UUID: 3c1bdab9_e3442544
+Bytes: 4
+Done
+
 108:6-108:14
 Fri Mar 18 21:27:03 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3c1bdab9_230abd43
 Bytes: 27
 Synchronous vs Asynchronous
+
+108:6-108:14
+Fri Mar 18 21:40:55 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_230abd43
+UUID: 3c1bdab9_2338fdcb
+Bytes: 4
+Done
 
 170:13-170:21
 Fri Mar 18 21:27:03 2016 +0000
@@ -46,4 +86,12 @@ please update all comments from blocking -> sync
 non-blocking -> async
 
 this file and transport.h and other files
+
+170:13-170:21
+Fri Mar 18 21:40:55 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_e3a8a552
+UUID: 3c1bdab9_832d7190
+Bytes: 4
+Done
 
