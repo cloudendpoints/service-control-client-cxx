@@ -1,6 +1,7 @@
 #include "src/service_control_client_impl.h"
 
 #include "google/protobuf/stubs/logging.h"
+#include "include/periodic_timer.h"
 
 using std::string;
 using ::google::api::servicecontrol::v1::CheckRequest;
@@ -28,11 +29,32 @@ ServiceControlClientImpl::ServiceControlClientImpl(
   report_aggregator_->SetFlushCallback(
       std::bind(&ServiceControlClientImpl::ReportFlushCallback, this,
                 std::placeholders::_1));
+
+  if (options.periodic_timer) {
+    flush_timer_ = options.periodic_timer->StartTimer(GetNextFlushInterval(), [
+      check_aggregator_copy = check_aggregator_,
+      report_aggregator_copy = report_aggregator_
+    ](bool timer_is_canceled) {
+      Status status = check_aggregator_copy->Flush();
+      if (!status.ok()) {
+        GOOGLE_LOG(ERROR) << "Failed in Check::Flush() "
+                          << status.error_message();
+      }
+      status = report_aggregator_copy->FlushAll();
+      if (!status.ok()) {
+        GOOGLE_LOG(ERROR) << "Failed in Report::Flush() "
+                          << status.error_message();
+      }
+    });
+  }
 }
 
 ServiceControlClientImpl::~ServiceControlClientImpl() {
   // Flush out all cached data
   FlushAll();
+  if (flush_timer_) {
+    flush_timer_->Cancel();
+  }
 
   // Disconnects all callback functions since this object is going away.
   // There could be some on_check_done() flying around. Each of them is
@@ -75,8 +97,7 @@ void ServiceControlClientImpl::Check(const CheckRequest& check_request,
                                      CheckResponse* check_response,
                                      DoneCallback on_check_done) {
   if (transport_ == NULL) {
-    on_check_done(
-        Status(Code::INVALID_ARGUMENT, "transport is NULL."));
+    on_check_done(Status(Code::INVALID_ARGUMENT, "transport is NULL."));
     return;
   }
 
@@ -103,8 +124,8 @@ void ServiceControlClientImpl::Check(const CheckRequest& check_request,
   on_check_done(status);
 }
 
-Status ServiceControlClientImpl::Check(
-    const CheckRequest& check_request, CheckResponse* check_response) {
+Status ServiceControlClientImpl::Check(const CheckRequest& check_request,
+                                       CheckResponse* check_response) {
   return Status(Code::UNIMPLEMENTED, "This method is not implemented yet.");
 }
 
@@ -112,8 +133,7 @@ void ServiceControlClientImpl::Report(const ReportRequest& report_request,
                                       ReportResponse* report_response,
                                       DoneCallback on_report_done) {
   if (transport_ == NULL) {
-    on_report_done(
-        Status(Code::INVALID_ARGUMENT, "transport is NULL."));
+    on_report_done(Status(Code::INVALID_ARGUMENT, "transport is NULL."));
     return;
   }
 
@@ -125,8 +145,8 @@ void ServiceControlClientImpl::Report(const ReportRequest& report_request,
   on_report_done(status);
 }
 
-Status ServiceControlClientImpl::Report(
-    const ReportRequest& report_request, ReportResponse* report_response) {
+Status ServiceControlClientImpl::Report(const ReportRequest& report_request,
+                                        ReportResponse* report_response) {
   return Status(Code::UNIMPLEMENTED, "This method is not implemented yet.");
 }
 

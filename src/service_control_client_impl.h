@@ -1,6 +1,7 @@
 #ifndef GOOGLE_SERVICE_CONTROL_CLIENT_SERVICE_CONTROL_CLIENT_IMPL_H_
 #define GOOGLE_SERVICE_CONTROL_CLIENT_SERVICE_CONTROL_CLIENT_IMPL_H_
 
+#include "include/periodic_timer.h"
 #include "include/service_control_client.h"
 #include "src/aggregator_interface.h"
 #include "utils/google_macros.h"
@@ -64,14 +65,18 @@ class ServiceControlClientImpl : public ServiceControlClient {
   // The transport object.
   std::shared_ptr<Transport> transport_;
 
+  // The Timer object.
+  std::unique_ptr<PeriodicTimer::Timer> flush_timer_;
+
   // The check aggregator object. Uses shared_ptr for check_aggregator_.
   // Transport::on_check_done() callback needs to call check_aggregator_
   // CacheResponse() function. The callback function needs to hold a ref_count
   // of check_aggregator_ to make sure it is not freed.
   std::shared_ptr<CheckAggregator> check_aggregator_;
 
-  // The report aggregator object.
-  std::unique_ptr<ReportAggregator> report_aggregator_;
+  // The report aggregator object. report_aggregator_ has to be shared_ptr since
+  // it will be passed to flush_timer callback.
+  std::shared_ptr<ReportAggregator> report_aggregator_;
 
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(ServiceControlClientImpl);
 };
