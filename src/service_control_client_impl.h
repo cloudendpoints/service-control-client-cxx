@@ -64,14 +64,18 @@ class ServiceControlClientImpl : public ServiceControlClient {
   // The transport object.
   std::shared_ptr<Transport> transport_;
 
+  // The Timer object.
+  std::shared_ptr<PeriodicTimer::Timer> flush_timer_;
+
   // The check aggregator object. Uses shared_ptr for check_aggregator_.
   // Transport::on_check_done() callback needs to call check_aggregator_
   // CacheResponse() function. The callback function needs to hold a ref_count
   // of check_aggregator_ to make sure it is not freed.
   std::shared_ptr<CheckAggregator> check_aggregator_;
 
-  // The report aggregator object.
-  std::unique_ptr<ReportAggregator> report_aggregator_;
+  // The report aggregator object. report_aggregator_ has to be shared_ptr since
+  // it will be passed to flush_timer callback.
+  std::shared_ptr<ReportAggregator> report_aggregator_;
 
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(ServiceControlClientImpl);
 };
