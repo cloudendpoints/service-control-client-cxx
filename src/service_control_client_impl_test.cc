@@ -334,12 +334,34 @@ class MockTransport : public Transport {
   ReportResponse* report_response_;
 
   // saved on_done callback from either Transport::Check() or
-  // Transport::Check().
+  // Transport::Report().
   std::vector<DoneCallback> on_done_vector_;
   // The status to send in on_done call back for Check() or Report().
   Status done_status_;
   // A vector to store thread objects used to call on_done callback.
   std::vector<std::unique_ptr<std::thread>> callback_threads_;
+};
+
+// A mocking class to mock Periodic_Timer interface.
+class MockPeriodicTimer : public PeriodicTimer {
+ public:
+  MOCK_METHOD2(StartTimer, std::unique_ptr<Timer>(int, PeriodicCallback));
+
+  class MockTimer : public Timer {
+   public:
+    // Cancels the timer.
+    MOCK_METHOD0(Cancel, void());
+  };
+
+  std::unique_ptr<Timer> MyStartTimer(int interval_ms,
+                                      PeriodicCallback callback) {
+    interval_ms_ = interval_ms;
+    callback_ = callback;
+    return std::unique_ptr<Timer>(new MockTimer);
+  }
+
+  int interval_ms_;
+  PeriodicTimer::PeriodicCallback callback_;
 };
 
 }  // namespace
@@ -692,7 +714,7 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedCheckWithStoredCallback) {
   // repeatly.
   InternalTestNonCachedCheckWithStoredCallback(check_request1_, Status::OK,
                                                &pass_check_response1_);
-  // For a cached request, it can be called repeatly.
+  // For a cached request, it can be called repeatedly.
   for (int i = 0; i < 10; i++) {
     InternalTestCachedCheck(check_request1_, pass_check_response1_);
   }
@@ -1233,6 +1255,144 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportUsingThread) {
   // on_report_done is called with right status.
   status_future.wait();
   EXPECT_ERROR_CODE(Code::PERMISSION_DENIED, status_future.get());
+}
+
+TEST_F(ServiceControlClientImplTest, TestFlushIntervalReportNeverFlush) {
+  // With periodic_timer, report flush interval is -1, Check flush interval is
+  // 1000, so the overall flush interval is 1000
+  ServiceControlClientOptions options(
+      CheckAggregationOptions(1 /*entries */, 500 /* refresh_interval_ms */,
+                              1000 /* expiration_ms */),
+      ReportAggregationOptions(1 /* entries */, -1 /*flush_interval_ms*/));
+
+  std::shared_ptr<MockPeriodicTimer> mock_timer(new MockPeriodicTimer);
+
+  options.periodic_timer = mock_timer;
+  EXPECT_CALL(*mock_timer.get(), StartTimer(_, _))
+      .WillOnce(Invoke(mock_timer.get(), &MockPeriodicTimer::MyStartTimer));
+
+  std::unique_ptr<ServiceControlClient> client =
+      std::move(CreateServiceControlClient(kServiceName, options));
+  ASSERT_EQ(mock_timer->interval_ms_, 1000);
+}
+
+TEST_F(ServiceControlClientImplTest, TestFlushIntervalCheckNeverFlush) {
+  // With periodic_timer, report flush interval is 500,
+  // Check flush interval is -1 since its cache is disabled.
+  // So the overall flush interval is 500
+  ServiceControlClientOptions options(
+      // If entries = 0, cache is disabled, GetNextFlushInterval() will be -1.
+      CheckAggregationOptions(0 /*entries */, 500 /* refresh_interval_ms */,
+                              1000 /* expiration_ms */),
+      ReportAggregationOptions(1 /* entries */, 500 /*flush_interval_ms*/));
+
+  std::shared_ptr<MockPeriodicTimer> mock_timer(new MockPeriodicTimer);
+
+  options.periodic_timer = mock_timer;
+  EXPECT_CALL(*mock_timer.get(), StartTimer(_, _))
+      .WillOnce(Invoke(mock_timer.get(), &MockPeriodicTimer::MyStartTimer));
+
+  std::unique_ptr<ServiceControlClient> client =
+      std::move(CreateServiceControlClient(kServiceName, options));
+  ASSERT_EQ(mock_timer->interval_ms_, 500);
+}
+
+TEST_F(ServiceControlClientImplTest, TestFlushInterval) {
+  // With periodic_timer, report flush interval is 800, Check flush interval is
+  // 1000, So the overall flush interval is 800
+  ServiceControlClientOptions options(
+      CheckAggregationOptions(1 /*entries */, 500 /* refresh_interval_ms */,
+                              1000 /* expiration_ms */),
+      ReportAggregationOptions(1 /* entries */, 800 /*flush_interval_ms*/));
+
+  std::shared_ptr<MockPeriodicTimer> mock_timer(new MockPeriodicTimer);
+
+  options.periodic_timer = mock_timer;
+  EXPECT_CALL(*mock_timer.get(), StartTimer(_, _))
+      .WillOnce(Invoke(mock_timer.get(), &MockPeriodicTimer::MyStartTimer));
+
+  std::unique_ptr<ServiceControlClient> client =
+      std::move(CreateServiceControlClient(kServiceName, options));
+  ASSERT_EQ(mock_timer->interval_ms_, 800);
+}
+
+TEST_F(ServiceControlClientImplTest, TestFlushCalled) {
+  // To test flush function is called properly with periodic_timer.
+  ServiceControlClientOptions options(
+      CheckAggregationOptions(1 /*entries */, 500 /* refresh_interval_ms */,
+                              1000 /* expiration_ms */),
+      ReportAggregationOptions(1 /* entries */, 500 /*flush_interval_ms*/));
+
+  options.transport = mock_transport_shared_ptr_;
+  std::shared_ptr<MockPeriodicTimer> mock_timer(new MockPeriodicTimer);
+  options.periodic_timer = mock_timer;
+  EXPECT_CALL(*mock_timer.get(), StartTimer(_, _))
+      .WillOnce(Invoke(mock_timer.get(), &MockPeriodicTimer::MyStartTimer));
+
+  client_ = std::move(CreateServiceControlClient(kServiceName, options));
+  ASSERT_TRUE(mock_timer->callback_ != NULL);
+
+  ReportResponse report_response;
+  Status done_status1 = Status::UNKNOWN;
+  // this report should be cached,  one_done() should be called right away
+  client_->Report(
+      report_request1_, &report_response,
+      [& ret_status = done_status1](Status status) { ret_status = status; });
+  EXPECT_OK(done_status1);
+  // Wait for cached item to be expired.
+  usleep(600000);
+  EXPECT_CALL(*mock_transport_, Report(_, _, _))
+      .WillOnce(
+          Invoke(mock_transport_, &MockTransport::ReportWithStoredCallback));
+
+  // client call Flush()
+  mock_timer->callback_(false);
+
+  EXPECT_TRUE(mock_transport_->on_done_vector_.size() == 1);
+  EXPECT_TRUE(MessageDifferencer::Equals(mock_transport_->report_request_,
+                                         report_request1_));
+  // Call the on_check_done() to complete the data flow.
+  mock_transport_->on_done_vector_[0](Status::OK);
+}
+
+TEST_F(ServiceControlClientImplTest,
+       TestTimerCallbackCalledAfterClientDeleted) {
+  // When the client object is deleted, timer callback may be called after it
+  // is deleted,  it should not crash.
+  ServiceControlClientOptions options(
+      CheckAggregationOptions(1 /*entries */, 500 /* refresh_interval_ms */,
+                              1000 /* expiration_ms */),
+      ReportAggregationOptions(1 /* entries */, 500 /*flush_interval_ms*/));
+
+  options.transport = mock_transport_shared_ptr_;
+  std::shared_ptr<MockPeriodicTimer> mock_timer(new MockPeriodicTimer);
+  options.periodic_timer = mock_timer;
+  EXPECT_CALL(*mock_timer.get(), StartTimer(_, _))
+      .WillOnce(Invoke(mock_timer.get(), &MockPeriodicTimer::MyStartTimer));
+  client_ = std::move(CreateServiceControlClient(kServiceName, options));
+  ASSERT_TRUE(mock_timer->callback_ != NULL);
+
+  ReportResponse report_response;
+  Status done_status1 = Status::UNKNOWN;
+  // this report should be cached,  one_done() should be called right away
+  client_->Report(
+      report_request1_, &report_response,
+      [& ret_status = done_status1](Status status) { ret_status = status; });
+  EXPECT_OK(done_status1);
+
+  // Only after client is destroyed, mock_transport_::Report() is called.
+  EXPECT_CALL(*mock_transport_, Report(_, _, _))
+      .WillOnce(
+          Invoke(mock_transport_, &MockTransport::ReportWithStoredCallback));
+  client_.reset();
+
+  EXPECT_TRUE(mock_transport_->on_done_vector_.size() == 1);
+  EXPECT_TRUE(MessageDifferencer::Equals(mock_transport_->report_request_,
+                                         report_request1_));
+  // Call the on_check_done() to complete the data flow.
+  mock_transport_->on_done_vector_[0](Status::OK);
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mock_transport_));
+  mock_timer->callback_(true);
 }
 
 }  // namespace service_control_client

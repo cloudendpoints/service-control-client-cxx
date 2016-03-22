@@ -2,6 +2,7 @@
 #define GOOGLE_SERVICE_CONTROL_CLIENT_PERIODIC_TIMER_H_
 
 #include <functional>
+#include <memory>
 
 namespace google {
 namespace service_control_client {
@@ -18,6 +19,7 @@ class PeriodicTimer {
   // Represents a timer created by StartTimer.
   // Its only purpose is to cancel the timer instance.
   class Timer {
+   public:
     // Destructor
     virtual ~Timer() {}
 
@@ -31,8 +33,8 @@ class PeriodicTimer {
   // Creates a periodic timer periodically calling the callback
   // with desired interval. The returned object can be used to cancel
   // the instance.
-  virtual std::unique_ptr<Timer> StartTimer(
-      int interval_ms, PeriodicCallback callback) = 0;
+  virtual std::unique_ptr<Timer> StartTimer(int interval_ms,
+                                            PeriodicCallback callback) = 0;
 };
 
 }  // namespace service_control_client
