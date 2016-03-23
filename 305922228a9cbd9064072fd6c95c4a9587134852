@@ -28,6 +28,13 @@ report_aggregator_ has to be shared_ptr since it will be passed to flush_timer c
 
 File: src/service_control_client_impl_test.cc
 
+366:13-366:24
+Wed Mar 23 02:53:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_afeb2098
+Bytes: 33
+this one is not used.  remove it.
+
 1272:27-1272:60
 Wed Mar 23 00:53:23 2016 +0000
 Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
