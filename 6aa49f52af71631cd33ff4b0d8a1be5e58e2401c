@@ -9,6 +9,14 @@ UUID: 3c1bdab9_ea3a26c8
 Bytes: 7
 Flush()
 
+43:39-43:47
+Wed Mar 23 16:46:45 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_ea3a26c8
+UUID: 3c1bdab9_aa45ce23
+Bytes: 4
+Done
+
 File: src/service_control_client_impl.h
 
 4:18-4:32
@@ -18,10 +26,26 @@ UUID: 3c1bdab9_6a4f5664
 Bytes: 97
 we don't need to include peridic_timer.h here, it is already included in service_control_client.h
 
+4:18-4:32
+Wed Mar 23 16:46:45 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_6a4f5664
+UUID: 3c1bdab9_aa0cae1d
+Bytes: 4
+Done
+
 69:7-69:17
 Wed Mar 23 16:34:41 2016 +0000
 Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3c1bdab9_aa594e2c
 Bytes: 25
 this should be shared_ptr
+
+69:7-69:17
+Wed Mar 23 16:46:45 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_aa594e2c
+UUID: 3c1bdab9_4a1b7a50
+Bytes: 4
+Done
 
