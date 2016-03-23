@@ -9,12 +9,28 @@ UUID: 3c1bdab9_f4796f55
 Bytes: 39
 Flush(), not FlushAll(), same as report
 
+38:43-38:45
+Wed Mar 23 15:38:19 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_f4796f55
+UUID: 3c1bdab9_4a59ba5e
+Bytes: 4
+Done
+
 40:45-40:46
 Wed Mar 23 00:53:23 2016 +0000
 Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3c1bdab9_5477a361
 Bytes: 24
 Failed in Check::Flush()
+
+40:45-40:46
+Wed Mar 23 15:38:19 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_5477a361
+UUID: 3c1bdab9_2a56fe30
+Bytes: 4
+Done
 
 File: src/service_control_client_impl.h
 
@@ -26,6 +42,14 @@ Bytes: 101
 Add comment:
 report_aggregator_ has to be shared_ptr since it will be passed to flush_timer callback.
 
+78:7-78:17
+Wed Mar 23 15:38:19 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_74d73f6b
+UUID: 3c1bdab9_8adc52ff
+Bytes: 4
+Done
+
 File: src/service_control_client_impl_test.cc
 
 366:13-366:24
@@ -35,12 +59,28 @@ UUID: 3c1bdab9_afeb2098
 Bytes: 33
 this one is not used.  remove it.
 
+366:13-366:24
+Wed Mar 23 15:38:19 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_afeb2098
+UUID: 3c1bdab9_cae64ad3
+Bytes: 4
+Done
+
 1272:27-1272:60
 Wed Mar 23 00:53:23 2016 +0000
 Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3c1bdab9_34cdc7d5
 Bytes: 16
 Not need to cast
+
+1272:27-1272:60
+Wed Mar 23 15:38:19 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_34cdc7d5
+UUID: 3c1bdab9_eaece6b0
+Bytes: 4
+Done
 
 1351:24-1351:28
 Wed Mar 23 00:53:23 2016 +0000
@@ -49,12 +89,28 @@ UUID: 3c1bdab9_7431ffa0
 Bytes: 18
 use false to call.
 
+1351:24-1351:28
+Wed Mar 23 15:38:19 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_7431ffa0
+UUID: 3c1bdab9_4afa5a61
+Bytes: 4
+Done
+
 1353:13-1353:17
 Wed Mar 23 00:53:23 2016 +0000
 Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3c1bdab9_b43b777e
 Bytes: 16
 remove this log.
+
+1353:13-1353:17
+Wed Mar 23 15:38:19 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_b43b777e
+UUID: 3c1bdab9_2af71e7a
+Bytes: 4
+Done
 
 1359:20-1359:46
 Wed Mar 23 00:53:23 2016 +0000
@@ -63,6 +119,14 @@ UUID: 3c1bdab9_f43ccf76
 Bytes: 17
 remove last line.
 
+1359:20-1359:46
+Wed Mar 23 15:38:19 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_f43ccf76
+UUID: 3c1bdab9_8a057237
+Bytes: 4
+Done
+
 1387:9-1387:15
 Wed Mar 23 00:53:23 2016 +0000
 Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -70,10 +134,26 @@ UUID: 3c1bdab9_544a03ff
 Bytes: 58
 Since you call client_->reset(), not need to call usleep()
 
+1387:9-1387:15
+Wed Mar 23 15:38:19 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_544a03ff
+UUID: 3c1bdab9_6a0ab644
+Bytes: 4
+Done
+
 1394:14-1394:23
 Wed Mar 23 00:53:23 2016 +0000
 Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 3c1bdab9_b454179d
 Bytes: 26
 move this to the last line
+
+1394:14-1394:23
+Wed Mar 23 15:38:19 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 3c1bdab9_b454179d
+UUID: 3c1bdab9_caff6a4b
+Bytes: 4
+Done
 
