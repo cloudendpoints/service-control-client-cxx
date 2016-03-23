@@ -1,0 +1,72 @@
+Revision: 305922228a9cbd9064072fd6c95c4a9587134852
+Patch-set: 1
+File: src/service_control_client_impl.cc
+
+38:43-38:45
+Wed Mar 23 00:53:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_f4796f55
+Bytes: 39
+Flush(), not FlushAll(), same as report
+
+40:45-40:46
+Wed Mar 23 00:53:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_5477a361
+Bytes: 24
+Failed in Check::Flush()
+
+File: src/service_control_client_impl.h
+
+78:7-78:17
+Wed Mar 23 00:53:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_74d73f6b
+Bytes: 101
+Add comment:
+report_aggregator_ has to be shared_ptr since it will be passed to flush_timer callback.
+
+File: src/service_control_client_impl_test.cc
+
+1272:27-1272:60
+Wed Mar 23 00:53:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_34cdc7d5
+Bytes: 16
+Not need to cast
+
+1351:24-1351:28
+Wed Mar 23 00:53:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_7431ffa0
+Bytes: 18
+use false to call.
+
+1353:13-1353:17
+Wed Mar 23 00:53:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_b43b777e
+Bytes: 16
+remove this log.
+
+1359:20-1359:46
+Wed Mar 23 00:53:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_f43ccf76
+Bytes: 17
+remove last line.
+
+1387:9-1387:15
+Wed Mar 23 00:53:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_544a03ff
+Bytes: 58
+Since you call client_->reset(), not need to call usleep()
+
+1394:14-1394:23
+Wed Mar 23 00:53:23 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 3c1bdab9_b454179d
+Bytes: 26
+move this to the last line
+
