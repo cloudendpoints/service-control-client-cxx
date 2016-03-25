@@ -19,3 +19,12 @@ UUID: 5c57aee9_15691468
 Bytes: 118
 shared_ptr is ref_counted.   I don't understand why you want to manually implement shared_ptr with your own ref_count.
 
+78:7-78:17
+Fri Mar 25 18:13:53 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 5c57aee9_15691468
+UUID: 5c57aee9_75950063
+Bytes: 248
+Just read the google3 ref_count class.  If we want to protect client object, it will require users of the object to explicitly call Ref/Unref.  They could not simply call new Obj() and delete.   or use unique_ptr<Client>
+I don't think we want that.
+
