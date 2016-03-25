@@ -105,3 +105,13 @@ UUID: 5144f987_5e5cf521
 Bytes: 597
 if we have 10 shared_ptr objects, I agreed that performance wise, it is better to group them in a single object, use one shared_ptr.   But we only have two shared_ptr objects here: check_aggregator and report_aggregator.   we only pass two aggregators to periodic_timer at constructor of client_library.  ref_counting of two shared_ptr only happens at constructor, not at each callback of every 1 second.  (event ref_count one more object at every second is not big deal). I feel that the code will look ugly if we use a separate object to group two aggregators.  I will like to keep current code.
 
+78:7-78:17
+Fri Mar 25 21:26:58 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 5144f987_5e5cf521
+UUID: 5144f987_5eb51510
+Bytes: 523
+ok, I misread the timer part, since I saw 4 shared_ptr here, and am afraid there will be more coming. And just hesitate to see shared_ptr used that way. Handling the ownership of objects and lifetime control seems a bit overly complicate to me. I am hoping that we can find a more elegant and simpler solution. Like making aggregator self manage their lifetime based on pending callbacks, then their callers won't need to worry about them.
+
+lets revisit this once we finished the integration and have more performance data.
+
