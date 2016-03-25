@@ -85,3 +85,15 @@ By the way, I think all we are trying to do here is protect this class object. A
 
 We probably should go back and revisit the underlying aggregator implementation. I like the original implementation from chengliang, which may solve this problem on the low level already, unless it also need to introduce another library dependency.
 
+78:7-78:17
+Fri Mar 25 19:22:15 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 5c57aee9_783175cb
+UUID: 5c57aee9_f88e45ac
+Bytes: 463
+to clarify, I mean handling the pending callbacks part in aggregator, which chengliang and I had expressed a little concerns.
+
+If you really don't like chengliang's approach, how about grouping these pointers to a single object, and only making this top-level object shared ptr. And you just need to document once why this needs to shared ptr as well as the pending callback complication.
+
+Performance wise, we only do one ref count op instead of multiple of them
+
