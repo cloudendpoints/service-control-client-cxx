@@ -50,3 +50,14 @@ we've been going by PG3 rules which have been created by Google team after surve
 
 Chemist client may have different requirements but I'd probably rather use standard C++ feature than adding a dependency. If it turns out that the performance cost is prohibitive, we could revisit then?
 
+78:7-78:17
+Fri Mar 25 18:38:31 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 5c57aee9_d8398129
+UUID: 5c57aee9_7856d531
+Bytes: 302
+yes, this doc has the link to when we should use shared_ptr:
+https://engdoc.corp.google.com/eng/doc/devguide/cpp/styleguide.shtml?cl=head#Ownership_and_Smart_Pointers
+
+see the "decision" section. If there is a better alternative, why would we choose shared_ptr to sacrifice performance and readability?
+
