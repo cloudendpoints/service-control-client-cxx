@@ -11,3 +11,11 @@ I feel shared_ptr is not very readable and track. Do you know if there is any re
 
 I think we just need do ref/unref to manage pending flush callback, and all these shared_ptr here can be changed back to unique_ptr
 
+78:7-78:17
+Fri Mar 25 17:54:05 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 5c57aee9_75f7c078
+UUID: 5c57aee9_15691468
+Bytes: 118
+shared_ptr is ref_counted.   I don't understand why you want to manually implement shared_ptr with your own ref_count.
+
