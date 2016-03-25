@@ -73,3 +73,15 @@ I was concerned about adding dependency on another library in order to get expli
 
 (reading the discussion on smart pointers where they prefer unique pointer over shared pointer, I realized that there may be confusion (by me) which of the options (shared vs. unique, and shared vs. some other shared) we were discussing. Hopefully this helps clarify what I meant.
 
+78:7-78:17
+Fri Mar 25 19:16:23 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 5c57aee9_f88645d5
+UUID: 5c57aee9_783175cb
+Bytes: 613
+points taken. Is it very expensive to add another lib dependency for open source code? google3 we always like to reuse good library :)
+
+By the way, I think all we are trying to do here is protect this class object. And this feels like a LITTLE bit hacky to me. Every pointer added to this class needs to be a shared pointer and hold data for the pending callback.
+
+We probably should go back and revisit the underlying aggregator implementation. I like the original implementation from chengliang, which may solve this problem on the low level already, unless it also need to introduce another library dependency.
+
