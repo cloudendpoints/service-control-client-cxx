@@ -38,3 +38,15 @@ Ref/Unref in my mind is much cleaner than implicit reference counting. Also shar
 
 Anyway, could you check if there is refcount class available in opensource, if not, we can revisit this after more performance study.
 
+78:7-78:17
+Fri Mar 25 18:26:52 2016 +0000
+Author: Martin Maly <5006@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 5c57aee9_f8f485a9
+UUID: 5c57aee9_d8398129
+Bytes: 458
+https://engdoc.corp.google.com/eng/doc/devguide/cpp/cpp11.shtml?cl=head
+
+we've been going by PG3 rules which have been created by Google team after surveying support for C++ language features across broad spectrum of compilers to ensure code portability.
+
+Chemist client may have different requirements but I'd probably rather use standard C++ feature than adding a dependency. If it turns out that the performance cost is prohibitive, we could revisit then?
+
