@@ -61,3 +61,15 @@ https://engdoc.corp.google.com/eng/doc/devguide/cpp/styleguide.shtml?cl=head#Own
 
 see the "decision" section. If there is a better alternative, why would we choose shared_ptr to sacrifice performance and readability?
 
+78:7-78:17
+Fri Mar 25 18:54:36 2016 +0000
+Author: Martin Maly <5006@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 5c57aee9_7856d531
+UUID: 5c57aee9_f88645d5
+Bytes: 601
+to clarify ... whether it is decision between shared_ptr and unique_ptr I am agnostic (that seems to have been part of the discussion).
+
+I was concerned about adding dependency on another library in order to get explicit reference counting class (in which case I'd rather stick with shared_ptr until we have more data).
+
+(reading the discussion on smart pointers where they prefer unique pointer over shared pointer, I realized that there may be confusion (by me) which of the options (shared vs. unique, and shared vs. some other shared) we were discussing. Hopefully this helps clarify what I meant.
+
