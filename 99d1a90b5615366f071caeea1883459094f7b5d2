@@ -1,0 +1,13 @@
+Revision: 99d1a90b5615366f071caeea1883459094f7b5d2
+Patch-set: 4
+File: src/service_control_client_impl.h
+
+78:7-78:17
+Fri Mar 25 17:13:10 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 5c57aee9_75f7c078
+Bytes: 323
+I feel shared_ptr is not very readable and track. Do you know if there is any ref/uref class like this one: https://cs.corp.google.com/piper///depot/google3/util/refcount/reference_counted.h
+
+I think we just need do ref/unref to manage pending flush callback, and all these shared_ptr here can be changed back to unique_ptr
+
