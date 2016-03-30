@@ -1,0 +1,34 @@
+Revision: 0773744a5d3713ec7ca78ccc9c58f32cc30a6940
+Patch-set: 2
+File: BUILD
+
+14:10-14:13
+Wed Mar 30 19:34:11 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 51795972_bc976966
+Bytes: 38
+please list them in alphabetical order
+
+35:17-35:37
+Wed Mar 30 19:34:11 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 51795972_9c92ad77
+Bytes: 32
+a blank line?  please remove it.
+
+62:14-62:19
+Wed Mar 30 19:34:11 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 51795972_bce5a9f2
+Bytes: 141
+please start a new line.
+
+could you try to remove these header files in srcs?  and try to build simple_lru_cache_test to see if we need them.
+
+74:12-74:36
+Wed Mar 30 19:34:11 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 51795972_3cd2791c
+Bytes: 40
+order the tests in alphabetic order too.
+
