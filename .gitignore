@@ -2,3 +2,4 @@
 /bazel-*
 .idea/*
 CMakeLists.txt
+script/generate-cmakelists
