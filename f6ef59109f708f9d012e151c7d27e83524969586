@@ -9,12 +9,28 @@ UUID: 51795972_f9ce532f
 Bytes: 18
 move md5.h to srsc
 
+33:17-33:20
+Wed Mar 30 18:50:08 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 51795972_f9ce532f
+UUID: 51795972_b96a1bb9
+Bytes: 4
+Done
+
 37:11-37:19
 Wed Mar 30 18:41:38 2016 +0000
 Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 51795972_d9b277c2
 Bytes: 48
 remove this TODO. we always want it to be public
+
+37:11-37:19
+Wed Mar 30 18:50:08 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 51795972_d9b277c2
+UUID: 51795972_99655fec
+Bytes: 4
+Done
 
 39:12-39:15
 Wed Mar 30 18:41:38 2016 +0000
@@ -24,4 +40,12 @@ Bytes: 164
 Add comment for this hack:
 # A hack to use this BUILD as part of other projects.
 # The other projects will add this module as third_party/service-control-client-cxx
+
+39:12-39:15
+Wed Mar 30 18:50:08 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 51795972_59a7477c
+UUID: 51795972_d95fd71d
+Bytes: 4
+Done
 
