@@ -1,0 +1,21 @@
+Revision: 742349414a36537e9f36d6b08b77f78fee06d19d
+Patch-set: 1
+File: src/service_control_client_impl.cc
+
+39:9-39:30
+Thu Mar 31 06:04:25 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 51795972_507f1438
+Bytes: 148
+just curious, why do we need to make this change?
+will this make another shared_ptr assignment now? 
+'check_aggregator_copy' = check_aggregator_copy
+
+40:13-40:30
+Thu Mar 31 06:04:25 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 51795972_5098f4f3
+Bytes: 84
+check_aggregator_ -> check_aggegator_copy
+probably this comment is not needed though
+
