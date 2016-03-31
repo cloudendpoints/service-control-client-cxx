@@ -7,9 +7,9 @@
 
 #include "google/api/servicecontrol/v1/service_controller.pb.h"
 #include "google/protobuf/stubs/status.h"
-#include "include/aggregation_options.h"
-#include "include/periodic_timer.h"
-#include "include/transport.h"
+#include "aggregation_options.h"
+#include "periodic_timer.h"
+#include "transport.h"
 
 namespace google {
 namespace service_control_client {

@@ -40,8 +40,8 @@
 #include <unordered_map>
 #include <utility>
 
-#include "utils/simple_lru_cache.h"
 #include "google_macros.h"
+#include "simple_lru_cache.h"
 
 namespace google {
 namespace service_control_client {
