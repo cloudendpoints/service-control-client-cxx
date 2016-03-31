@@ -31,21 +31,25 @@ ServiceControlClientImpl::ServiceControlClientImpl(
                 std::placeholders::_1));
 
   if (options.periodic_timer) {
-    flush_timer_ = options.periodic_timer->StartTimer(GetNextFlushInterval(), [
-      check_aggregator_copy = check_aggregator_,
-      report_aggregator_copy = report_aggregator_
-    ]() {
-      Status status = check_aggregator_copy->Flush();
-      if (!status.ok()) {
-        GOOGLE_LOG(ERROR) << "Failed in Check::Flush() "
-                          << status.error_message();
-      }
-      status = report_aggregator_copy->Flush();
-      if (!status.ok()) {
-        GOOGLE_LOG(ERROR) << "Failed in Report::Flush() "
-                          << status.error_message();
-      }
-    });
+    // Class members cannot be captured in lambda. We need to make a copy to
+    // avoid mac build problem, to avoid someone else changing the code later.
+    std::shared_ptr<CheckAggregator> check_aggregator_copy = check_aggregator_;
+    std::shared_ptr<ReportAggregator> report_aggregator_copy =
+        report_aggregator_;
+    flush_timer_ = options.periodic_timer->StartTimer(
+        GetNextFlushInterval(),
+        [check_aggregator_copy, report_aggregator_copy]() {
+          Status status = check_aggregator_copy->Flush();
+          if (!status.ok()) {
+            GOOGLE_LOG(ERROR) << "Failed in Check::Flush() "
+                              << status.error_message();
+          }
+          status = report_aggregator_copy->Flush();
+          if (!status.ok()) {
+            GOOGLE_LOG(ERROR) << "Failed in Report::Flush() "
+                              << status.error_message();
+          }
+        });
   }
 }
 
@@ -106,19 +110,21 @@ void ServiceControlClientImpl::Check(const CheckRequest& check_request,
     // Makes a copy of check_request so that on_done() callback can use
     // it to call CacheResponse.
     CheckRequest* check_request_copy = new CheckRequest(check_request);
-    transport_->Check(*check_request_copy, check_response, [
-      check_aggregator_copy = check_aggregator_, check_request_copy,
-      check_response, on_check_done
-    ](Status status) {
-      if (status.ok()) {
-        check_aggregator_copy->CacheResponse(*check_request_copy,
-                                             *check_response);
-      } else {
-        GOOGLE_LOG(ERROR) << "Failed in Check call: " << status.error_message();
-      }
-      delete check_request_copy;
-      on_check_done(status);
-    });
+    std::shared_ptr<CheckAggregator> check_aggregator_copy = check_aggregator_;
+
+    transport_->Check(*check_request_copy, check_response,
+                      [check_aggregator_copy, check_request_copy,
+                       check_response, on_check_done](Status status) {
+                        if (status.ok()) {
+                          check_aggregator_copy->CacheResponse(
+                              *check_request_copy, *check_response);
+                        } else {
+                          GOOGLE_LOG(ERROR) << "Failed in Check call: "
+                                            << status.error_message();
+                        }
+                        delete check_request_copy;
+                        on_check_done(status);
+                      });
     return;
   }
   on_check_done(status);
