@@ -19,6 +19,18 @@ UUID: 51795972_103afc7a
 Bytes: 83
 https://gcp-apis.git.corp.google.com/esp/+/06800cac3d504bd8bd7f7e7422d9e7aa9e323445
 
+39:9-39:30
+Thu Mar 31 15:40:09 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 51795972_103afc7a
+UUID: 1148c14e_0cc4b70c
+Bytes: 265
+add a comment for that? i.e. we need to make a copy to avoid mac build problem, to avoid someone else changing the code later
+
+by the way, can [check_aggregator_, report_aggregator_] work? if we want to avoid this extra copy? 
+
+also please add to the cl description
+
 40:13-40:30
 Thu Mar 31 06:04:25 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
