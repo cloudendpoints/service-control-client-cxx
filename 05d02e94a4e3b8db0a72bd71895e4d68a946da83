@@ -1,0 +1,12 @@
+Revision: 05d02e94a4e3b8db0a72bd71895e4d68a946da83
+Patch-set: 2
+File: src/service_control_client_impl.cc
+
+35:13-35:16
+Thu Mar 31 16:59:53 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 51795972_6bc4217c
+Bytes: 137
+please dont mention mac build problem. we should say: to support c++11.   
+please remove "to avoid someone else changing the code later."
+
