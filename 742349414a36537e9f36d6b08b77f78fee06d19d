@@ -31,6 +31,22 @@ by the way, can [check_aggregator_, report_aggregator_] work? if we want to avoi
 
 also please add to the cl description
 
+39:9-39:30
+Thu Mar 31 16:29:25 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 51795972_507f1438
+UUID: 51795972_abd4796c
+Bytes: 33
+Yes, this will make another copy.
+
+39:9-39:30
+Thu Mar 31 16:29:25 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 1148c14e_0cc4b70c
+UUID: 51795972_0be48d51
+Bytes: 129
+I've tried, [check_aggregator_, report_aggregator_] does not work, since they are class members. Will add this to cl description.
+
 40:13-40:30
 Thu Mar 31 06:04:25 2016 +0000
 Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
@@ -38,4 +54,12 @@ UUID: 51795972_5098f4f3
 Bytes: 84
 check_aggregator_ -> check_aggegator_copy
 probably this comment is not needed though
+
+40:13-40:30
+Thu Mar 31 16:29:25 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 51795972_5098f4f3
+UUID: 51795972_8b489d59
+Bytes: 4
+Done
 
