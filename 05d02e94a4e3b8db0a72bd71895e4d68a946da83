@@ -44,3 +44,11 @@ thanks for the info
 
 just for educating myself, I thought the build succeed in linux box but failed in mac build, is this right? so linux build support c++14, and mac build only support c++11?
 
+35:13-35:16
+Thu Mar 31 18:36:35 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 51795972_1dacd4c2
+UUID: 51795972_3d78b000
+Bytes: 36
+Yes, that's my understanding so far.
+
