@@ -34,3 +34,13 @@ UUID: 51795972_fd0398ee
 Bytes: 66
 Actually, [x=y] initializer in lambda function is a C++14 feature.
 
+35:13-35:16
+Thu Mar 31 18:35:31 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 51795972_fd0398ee
+UUID: 51795972_1dacd4c2
+Bytes: 192
+thanks for the info
+
+just for educating myself, I thought the build succeed in linux box but failed in mac build, is this right? so linux build support c++14, and mac build only support c++11?
+
