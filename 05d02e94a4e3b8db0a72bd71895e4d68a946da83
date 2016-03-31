@@ -26,3 +26,11 @@ UUID: 51795972_ddadfc62
 Bytes: 180
 so this is c++11 issue instead of mac build? and [check_aggregator_, report_aggregator_] I mentioned above won't work too? just to double check the root cause for this change here.
 
+35:13-35:16
+Thu Mar 31 18:02:06 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 51795972_ddadfc62
+UUID: 51795972_fd0398ee
+Bytes: 66
+Actually, [x=y] initializer in lambda function is a C++14 feature.
+
