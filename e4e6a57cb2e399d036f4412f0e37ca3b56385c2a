@@ -1,0 +1,13 @@
+Revision: e4e6a57cb2e399d036f4412f0e37ca3b56385c2a
+Patch-set: 1
+File: include/service_control_client.h
+
+10:10-10:29
+Thu Mar 31 23:22:50 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 51795972_16de715a
+Bytes: 294
+please add comment:
+To make it easier for other packages to include this module as their submodule, following include rules have to be followed:
+A public exposed header can only include local headers in the same folder. When including, not to put folder name in the include, just the file name.
+
