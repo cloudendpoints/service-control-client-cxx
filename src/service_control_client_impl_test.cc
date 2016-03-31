@@ -279,15 +279,15 @@ class MockTransport : public Transport {
   void CheckUsingThread(const CheckRequest& request, CheckResponse* response,
                         DoneCallback on_done) {
     check_request_ = request;
-    callback_threads_.push_back(std::unique_ptr<std::thread>(new std::thread([
-      on_done, done_status = done_status_, check_response = check_response_,
-      response
-    ]() {
-      if (check_response) {
-        *response = *check_response;
-      }
-      on_done(done_status);
-    })));
+    Status done_status = done_status_;
+    CheckResponse* check_response = check_response_;
+    callback_threads_.push_back(std::unique_ptr<std::thread>(
+        new std::thread([on_done, done_status, check_response, response]() {
+          if (check_response) {
+            *response = *check_response;
+          }
+          on_done(done_status);
+        })));
   }
 
   // The done callback is stored in on_done_. It MUST be called later.
@@ -319,8 +319,9 @@ class MockTransport : public Transport {
     if (report_response_) {
       *response = *report_response_;
     }
+    Status done_status = done_status_;
     callback_threads_.push_back(std::unique_ptr<std::thread>(new std::thread(
-        [ on_done, done_status = done_status_ ]() { on_done(done_status); })));
+        [ on_done, done_status ]() { on_done(done_status); })));
   }
 
   // Saved check_request from mocked Transport::Check() call.
@@ -421,9 +422,8 @@ class ServiceControlClientImplTest : public ::testing::Test {
 
     CheckResponse check_response;
     Status done_status = Status::UNKNOWN;
-    client_->Check(
-        request, &check_response,
-        [& ret_status = done_status](Status status) { ret_status = status; });
+    client_->Check(request, &check_response,
+                   [&done_status](Status status) { done_status = status; });
     // on_check_done is not called yet. waiting for transport one_check_done.
     EXPECT_EQ(done_status, Status::UNKNOWN);
 
@@ -464,9 +464,8 @@ class ServiceControlClientImplTest : public ::testing::Test {
 
     CheckResponse check_response;
     Status done_status = Status::UNKNOWN;
-    client_->Check(
-        request, &check_response,
-        [& ret_status = done_status](Status status) { ret_status = status; });
+    client_->Check(request, &check_response,
+                   [&done_status](Status status) { done_status = status; });
     // on_check_done should be called.
     EXPECT_EQ(done_status, transport_status);
     EXPECT_TRUE(
@@ -501,10 +500,9 @@ class ServiceControlClientImplTest : public ::testing::Test {
     std::future<Status> status_future = status_promise.get_future();
 
     CheckResponse check_response;
-    client_->Check(request, &check_response,
-                   [& promise = status_promise](Status status) {
-                     promise.set_value(status);
-                   });
+    client_->Check(request, &check_response, [&status_promise](Status status) {
+      status_promise.set_value(status);
+    });
 
     // Since it is not cached, transport should be called.
     EXPECT_TRUE(
@@ -541,9 +539,8 @@ class ServiceControlClientImplTest : public ::testing::Test {
 
     CheckResponse check_response2;
     Status done_status2 = Status::UNKNOWN;
-    client_->Check(
-        request2, &check_response2,
-        [& ret_status = done_status2](Status status) { ret_status = status; });
+    client_->Check(request2, &check_response2,
+                   [&done_status2](Status status) { done_status2 = status; });
     // on_check_done is not called yet. waiting for transport one_check_done.
     EXPECT_EQ(done_status2, Status::UNKNOWN);
 
@@ -607,9 +604,8 @@ class ServiceControlClientImplTest : public ::testing::Test {
 
     CheckResponse check_response;
     Status done_status = Status::UNKNOWN;
-    client_->Check(
-        request2, &check_response,
-        [& ret_status = done_status](Status status) { ret_status = status; });
+    client_->Check(request2, &check_response,
+                   [&done_status](Status status) { done_status = status; });
     EXPECT_EQ(transport_status2, done_status);
     if (transport_status2.ok()) {
       EXPECT_TRUE(
@@ -643,10 +639,9 @@ class ServiceControlClientImplTest : public ::testing::Test {
     std::future<Status> status_future = status_promise.get_future();
 
     CheckResponse check_response;
-    client_->Check(request2, &check_response,
-                   [& promise = status_promise](Status status) {
-                     promise.set_value(status);
-                   });
+    client_->Check(request2, &check_response, [&status_promise](Status status) {
+      status_promise.set_value(status);
+    });
 
     // on_check_done is called with right status.
     status_future.wait();
@@ -671,10 +666,9 @@ class ServiceControlClientImplTest : public ::testing::Test {
 
     CheckResponse cached_response;
     Status cached_done_status = Status::UNKNOWN;
-    client_->Check(request, &cached_response,
-                   [& ret_status = cached_done_status](Status status) {
-                     ret_status = status;
-                   });
+    client_->Check(
+        request, &cached_response,
+        [&cached_done_status](Status status) { cached_done_status = status; });
     // on_check_done is called inplace with a cached entry.
     EXPECT_OK(cached_done_status);
     EXPECT_TRUE(MessageDifferencer::Equals(expected_response, cached_response));
@@ -910,16 +904,14 @@ TEST_F(ServiceControlClientImplTest, TestCachedReportWithStoredCallback) {
   ReportResponse report_response;
   Status done_status1 = Status::UNKNOWN;
   // this report should be cached,  one_done() should be called right away
-  client_->Report(
-      report_request1_, &report_response,
-      [& ret_status = done_status1](Status status) { ret_status = status; });
+  client_->Report(report_request1_, &report_response,
+                  [&done_status1](Status status) { done_status1 = status; });
   EXPECT_OK(done_status1);
 
   Status done_status2 = Status::UNKNOWN;
   // this report should be cached,  one_done() should be called right away
-  client_->Report(
-      report_request2_, &report_response,
-      [& ret_status = done_status2](Status status) { ret_status = status; });
+  client_->Report(report_request2_, &report_response,
+                  [&done_status2](Status status) { done_status2 = status; });
   EXPECT_OK(done_status2);
 
   // Verifies that mock_transport_::Report() is NOT called.
@@ -948,16 +940,14 @@ TEST_F(ServiceControlClientImplTest, TestCachedReportWithInplaceCallback) {
   ReportResponse report_response;
   Status done_status1 = Status::UNKNOWN;
   // this report should be cached,  one_done() should be called right away
-  client_->Report(
-      report_request1_, &report_response,
-      [& ret_status = done_status1](Status status) { ret_status = status; });
+  client_->Report(report_request1_, &report_response,
+                  [&done_status1](Status status) { done_status1 = status; });
   EXPECT_OK(done_status1);
 
   Status done_status2 = Status::UNKNOWN;
   // this report should be cached,  one_done() should be called right away
-  client_->Report(
-      report_request2_, &report_response,
-      [& ret_status = done_status2](Status status) { ret_status = status; });
+  client_->Report(report_request2_, &report_response,
+                  [&done_status2](Status status) { done_status2 = status; });
   EXPECT_OK(done_status2);
 
   // Verifies that mock_transport_::Report() is NOT called.
@@ -982,16 +972,14 @@ TEST_F(ServiceControlClientImplTest, TestCachedReportUsingThread) {
   ReportResponse report_response;
   Status done_status1 = Status::UNKNOWN;
   // this report should be cached,  one_done() should be called right away
-  client_->Report(
-      report_request1_, &report_response,
-      [& ret_status = done_status1](Status status) { ret_status = status; });
+  client_->Report(report_request1_, &report_response,
+                  [&done_status1](Status status) { done_status1 = status; });
   EXPECT_OK(done_status1);
 
   Status done_status2 = Status::UNKNOWN;
   // this report should be cached,  one_done() should be called right away
-  client_->Report(
-      report_request2_, &report_response,
-      [& ret_status = done_status2](Status status) { ret_status = status; });
+  client_->Report(report_request2_, &report_response,
+                  [&done_status2](Status status) { done_status2 = status; });
   EXPECT_OK(done_status2);
 
   // Verifies that mock_transport_::Report() is NOT called.
@@ -1018,9 +1006,8 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportWithStoredCallback) {
   ReportResponse report_response;
   Status done_status1 = Status::UNKNOWN;
   // this report should be cached,  one_done() should be called right away
-  client_->Report(
-      report_request1_, &report_response,
-      [& ret_status = done_status1](Status status) { ret_status = status; });
+  client_->Report(report_request1_, &report_response,
+                  [&done_status1](Status status) { done_status1 = status; });
   EXPECT_OK(done_status1);
 
   // Verifies that mock_transport_::Report() is NOT called.
@@ -1036,9 +1023,8 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportWithStoredCallback) {
 
   Status done_status2 = Status::UNKNOWN;
   // this report should be cached,  one_done() should be called right away
-  client_->Report(
-      report_request2_, &report_response,
-      [& ret_status = done_status2](Status status) { ret_status = status; });
+  client_->Report(report_request2_, &report_response,
+                  [&done_status2](Status status) { done_status2 = status; });
   EXPECT_OK(done_status2);
 
   EXPECT_TRUE(mock_transport_->on_done_vector_.size() == 1);
@@ -1075,9 +1061,8 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportWithInplaceCallback) {
   ReportResponse report_response;
   Status done_status1 = Status::UNKNOWN;
   // this report should be cached,  one_done() should be called right away
-  client_->Report(
-      report_request1_, &report_response,
-      [& ret_status = done_status1](Status status) { ret_status = status; });
+  client_->Report(report_request1_, &report_response,
+                  [&done_status1](Status status) { done_status1 = status; });
   EXPECT_OK(done_status1);
 
   // Verifies that mock_transport_::Report() is NOT called.
@@ -1093,9 +1078,8 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportWithInplaceCallback) {
 
   Status done_status2 = Status::UNKNOWN;
   // this report should be cached,  one_done() should be called right away
-  client_->Report(
-      report_request2_, &report_response,
-      [& ret_status = done_status2](Status status) { ret_status = status; });
+  client_->Report(report_request2_, &report_response,
+                  [&done_status2](Status status) { done_status2 = status; });
   EXPECT_OK(done_status2);
 
   EXPECT_TRUE(MessageDifferencer::Equals(mock_transport_->report_request_,
@@ -1127,9 +1111,8 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportUsingThread) {
   ReportResponse report_response;
   Status done_status1 = Status::UNKNOWN;
   // this report should be cached,  one_done() should be called right away
-  client_->Report(
-      report_request1_, &report_response,
-      [& ret_status = done_status1](Status status) { ret_status = status; });
+  client_->Report(report_request1_, &report_response,
+                  [&done_status1](Status status) { done_status1 = status; });
   EXPECT_OK(done_status1);
 
   // Verifies that mock_transport_::Report() is NOT called.
@@ -1144,9 +1127,8 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportUsingThread) {
 
   Status done_status2 = Status::UNKNOWN;
   // this report should be cached,  one_done() should be called right away
-  client_->Report(
-      report_request2_, &report_response,
-      [& ret_status = done_status2](Status status) { ret_status = status; });
+  client_->Report(report_request2_, &report_response,
+                  [&done_status2](Status status) { done_status2 = status; });
   EXPECT_OK(done_status2);
 
   EXPECT_TRUE(MessageDifferencer::Equals(mock_transport_->report_request_,
@@ -1179,9 +1161,8 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportWithStoredCallback) {
   // This request is high important, so it will not be cached.
   // client->Report() will call Transport::Report() right away.
   report_request1_.mutable_operations(0)->set_importance(Operation::HIGH);
-  client_->Report(
-      report_request1_, &report_response,
-      [& ret_status = done_status](Status status) { ret_status = status; });
+  client_->Report(report_request1_, &report_response,
+                  [&done_status](Status status) { done_status = status; });
   // on_report_done is not called yet. waiting for transport one_report_done.
   EXPECT_EQ(done_status, Status::UNKNOWN);
 
@@ -1213,9 +1194,8 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportWithInplaceCallback) {
   // This request is high important, so it will not be cached.
   // client->Report() will call Transport::Report() right away.
   report_request1_.mutable_operations(0)->set_importance(Operation::HIGH);
-  client_->Report(
-      report_request1_, &report_response,
-      [& ret_status = done_status](Status status) { ret_status = status; });
+  client_->Report(report_request1_, &report_response,
+                  [&done_status](Status status) { done_status = status; });
 
   // one_done should be called for now.
   EXPECT_ERROR_CODE(Code::PERMISSION_DENIED, done_status);
@@ -1243,10 +1223,9 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportUsingThread) {
   // This request is high important, so it will not be cached.
   // client->Report() will call Transport::Report() right away.
   report_request1_.mutable_operations(0)->set_importance(Operation::HIGH);
-  client_->Report(report_request1_, &report_response,
-                  [& promise = status_promise](Status status) {
-                    promise.set_value(status);
-                  });
+  client_->Report(
+      report_request1_, &report_response,
+      [&status_promise](Status status) { status_promise.set_value(status); });
 
   // Since it is not cached, transport should be called.
   EXPECT_TRUE(MessageDifferencer::Equals(mock_transport_->report_request_,
@@ -1335,16 +1314,14 @@ TEST_F(ServiceControlClientImplTest, TestFlushCalled) {
   ReportResponse report_response;
   Status done_status1 = Status::UNKNOWN;
   // this report should be cached,  one_done() should be called right away
-  client_->Report(
-      report_request1_, &report_response,
-      [& ret_status = done_status1](Status status) { ret_status = status; });
+  client_->Report(report_request1_, &report_response,
+                  [&done_status1](Status status) { done_status1 = status; });
   EXPECT_OK(done_status1);
   // Wait for cached item to be expired.
   usleep(600000);
   EXPECT_CALL(*mock_transport_, Report(_, _, _))
       .WillOnce(
           Invoke(mock_transport_, &MockTransport::ReportWithStoredCallback));
-
 
   // client call Flush()
   mock_timer->callback_();
@@ -1376,9 +1353,8 @@ TEST_F(ServiceControlClientImplTest,
   ReportResponse report_response;
   Status done_status1 = Status::UNKNOWN;
   // this report should be cached,  one_done() should be called right away
-  client_->Report(
-      report_request1_, &report_response,
-      [& ret_status = done_status1](Status status) { ret_status = status; });
+  client_->Report(report_request1_, &report_response,
+                  [&done_status1](Status status) { done_status1 = status; });
   EXPECT_OK(done_status1);
 
   // Only after client is destroyed, mock_transport_::Report() is called.
