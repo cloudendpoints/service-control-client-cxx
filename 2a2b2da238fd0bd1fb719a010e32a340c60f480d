@@ -25,10 +25,26 @@ UUID: 4efc542b_618b50a2
 Bytes: 23
 Clear CLion template :)
 
+3:0-3:2
+Fri Apr 01 17:25:17 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 4efc542b_618b50a2
+UUID: cebbe49e_ca324339
+Bytes: 4
+hehe
+
 5
 Fri Apr 01 17:22:54 2016 +0000
 Author: Lizan Zhou <5455@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 4efc542b_419054ce
 Bytes: 60
 Prefix with GOOGLE_ and postfix a _ like other header files?
+
+5
+Fri Apr 01 17:25:17 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 4efc542b_419054ce
+UUID: cebbe49e_4a841303
+Bytes: 18
+Nice catch, thanks
 
