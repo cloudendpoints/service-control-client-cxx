@@ -101,7 +101,7 @@ TEST_F(SignatureUtilTest, OperationWithLabels) {
   AddOperationLabel(kRegionLabel, "us-central1", &operation_);
   AddOperationLabel(kResourceTypeLabel, "instance", &operation_);
 
-  EXPECT_EQ("7eeeecc5c2bc599dc106921cca181310",
+  EXPECT_EQ("93bc5c613fc4eabb2a40042f7f73f671",
             MD5::DebugString(GenerateReportOperationSignature(operation_)));
 }
 
@@ -131,7 +131,7 @@ TEST_F(SignatureUtilTest, MetricValueHavingMoney) {
 TEST_F(SignatureUtilTest, CheckRequest) {
   CheckRequest request;
   ASSERT_TRUE(TextFormat::ParseFromString(kCheckRequest, &request));
-  EXPECT_EQ("14d948a5985e97ea8fa13f408b2e9cac",
+  EXPECT_EQ("71287bd97890da01fd14d3f8daef3db9",
             MD5::DebugString(GenerateCheckRequestSignature(request)));
 }
 
