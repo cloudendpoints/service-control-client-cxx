@@ -15,7 +15,8 @@ const int kDelimiterLength = 1;
 // Updates the give hasher with the given labels.
 void UpdateHashLabels(const ::google::protobuf::Map<string, string>& labels,
                       MD5* hasher) {
-  for (const auto& label : labels) {
+  std::map<string, string> ordered_labels(labels.begin(), labels.end());
+  for (const auto& label : ordered_labels) {
     // Note we must use the Update(void const *data, int size) function here
     // for the delimiter instead of Update(StringPiece data), because
     // StringPiece would use strlen and gets zero length.
