@@ -1,0 +1,12 @@
+Revision: de034957b434f2eba359b5d20627d90f1f8379e2
+Patch-set: 1
+File: /COMMIT_MSG
+
+7:20-7:33
+Mon Apr 04 18:22:11 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: cebbe49e_f13ff7b6
+Bytes: 98
+misleading title. it should be:
+use order map for labels for signature calculation for consistent.
+
