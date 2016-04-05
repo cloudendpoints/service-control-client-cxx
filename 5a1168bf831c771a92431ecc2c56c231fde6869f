@@ -1,0 +1,11 @@
+Revision: 5a1168bf831c771a92431ecc2c56c231fde6869f
+Patch-set: 2
+File: src/signature.cc
+
+18
+Tue Apr 05 18:06:46 2016 +0000
+Author: Lizan Zhou <5455@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: cebbe49e_528836e3
+Bytes: 71
+Just curious, how will this copy to ordered map affect the performance?
+
