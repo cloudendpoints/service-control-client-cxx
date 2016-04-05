@@ -9,3 +9,11 @@ UUID: cebbe49e_528836e3
 Bytes: 71
 Just curious, how will this copy to ordered map affect the performance?
 
+18
+Tue Apr 05 18:11:14 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: cebbe49e_528836e3
+UUID: cebbe49e_d249865c
+Bytes: 142
+We are building a new map for each Report. Each report has roughly about 10 labels.  The speed impact is building of map for roughly 10 items.
+
