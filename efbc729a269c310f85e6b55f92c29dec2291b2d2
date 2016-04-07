@@ -9,10 +9,26 @@ UUID: 6ea598c6_e565a0e8
 Bytes: 14
 RequestContext
 
+10:6-10:19
+Thu Apr 07 16:17:49 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 6ea598c6_e565a0e8
+UUID: 6ea598c6_6520708c
+Bytes: 4
+Done
+
 14:52-14:56
 Thu Apr 07 16:10:41 2016 +0000
 Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: 6ea598c6_05564403
 Bytes: 95
 Does this mean after changing RequestContext* into void*, Auth component can be kept unchanged?
+
+14:52-14:56
+Thu Apr 07 16:17:49 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 6ea598c6_05564403
+UUID: 6ea598c6_85237499
+Bytes: 4
+Yes.
 
