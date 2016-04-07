@@ -1,0 +1,18 @@
+Revision: efbc729a269c310f85e6b55f92c29dec2291b2d2
+Patch-set: 2
+File: /COMMIT_MSG
+
+10:6-10:19
+Thu Apr 07 16:10:41 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 6ea598c6_e565a0e8
+Bytes: 14
+RequestContext
+
+14:52-14:56
+Thu Apr 07 16:10:41 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 6ea598c6_05564403
+Bytes: 95
+Does this mean after changing RequestContext* into void*, Auth component can be kept unchanged?
+
