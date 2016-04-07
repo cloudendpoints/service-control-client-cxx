@@ -9,3 +9,12 @@ UUID: 6ea598c6_1a39fa84
 Bytes: 47
 Just curious, where/how to specify this NDEBUG?
 
+882:8-882:14
+Thu Apr 07 21:38:57 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 6ea598c6_1a39fa84
+UUID: 6ea598c6_ba0faebf
+Bytes: 173
+With bazel,   when you build with bazel -c dbg.  NDEBUG is not defined.  with -c opt,  NDEBUG is defined.  
+The warning is from "-c opt".   Robot presubmit test is using it.
+
