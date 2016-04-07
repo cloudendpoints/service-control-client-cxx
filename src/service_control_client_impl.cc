@@ -30,14 +30,15 @@ ServiceControlClientImpl::ServiceControlClientImpl(
       std::bind(&ServiceControlClientImpl::ReportFlushCallback, this,
                 std::placeholders::_1));
 
-  if (options.periodic_timer) {
+  int flush_interval = GetNextFlushInterval();
+  if (options.periodic_timer && flush_interval > 0) {
     // Class members cannot be captured in lambda. We need to make a copy to
     // support C++11.
     std::shared_ptr<CheckAggregator> check_aggregator_copy = check_aggregator_;
     std::shared_ptr<ReportAggregator> report_aggregator_copy =
         report_aggregator_;
     flush_timer_ = options.periodic_timer->StartTimer(
-        GetNextFlushInterval(),
+        flush_interval,
         [check_aggregator_copy, report_aggregator_copy]() {
           Status status = check_aggregator_copy->Flush();
           if (!status.ok()) {
