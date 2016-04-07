@@ -97,7 +97,7 @@ void ServiceControlClientImpl::ReportFlushCallback(
                      });
 }
 
-void ServiceControlClientImpl::Check(RequestContext* ctx,
+void ServiceControlClientImpl::Check(void* ctx,
                                      const CheckRequest& check_request,
                                      CheckResponse* check_response,
                                      DoneCallback on_check_done) {
@@ -131,13 +131,13 @@ void ServiceControlClientImpl::Check(RequestContext* ctx,
   on_check_done(status);
 }
 
-Status ServiceControlClientImpl::Check(RequestContext* ctx,
+Status ServiceControlClientImpl::Check(void* ctx,
                                        const CheckRequest& check_request,
                                        CheckResponse* check_response) {
   return Status(Code::UNIMPLEMENTED, "This method is not implemented yet.");
 }
 
-void ServiceControlClientImpl::Report(RequestContext* ctx,
+void ServiceControlClientImpl::Report(void* ctx,
                                       const ReportRequest& report_request,
                                       ReportResponse* report_response,
                                       DoneCallback on_report_done) {
@@ -154,7 +154,7 @@ void ServiceControlClientImpl::Report(RequestContext* ctx,
   on_report_done(status);
 }
 
-Status ServiceControlClientImpl::Report(RequestContext* ctx,
+Status ServiceControlClientImpl::Report(void* ctx,
                                         const ReportRequest& report_request,
                                         ReportResponse* report_response) {
   return Status(Code::UNIMPLEMENTED, "This method is not implemented yet.");
