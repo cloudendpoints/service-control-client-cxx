@@ -1,0 +1,11 @@
+Revision: 0d7f4b35e4d900783cb658b913a799dc0073533c
+Patch-set: 1
+File: utils/simple_lru_cache_inl.h
+
+882:8-882:14
+Thu Apr 07 21:31:03 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 6ea598c6_1a39fa84
+Bytes: 47
+Just curious, where/how to specify this NDEBUG?
+
