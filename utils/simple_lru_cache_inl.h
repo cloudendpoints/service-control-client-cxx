@@ -879,7 +879,9 @@ void SimpleLRUCacheBase<Key, Value, MapType, EQ>::DiscardIdle(
 
   Elem* e = head_.prev;
   const int64_t threshold = SimpleCycleTimer::Now() - max_idle;
+#ifndef NDEBUG
   int64_t last = 0;
+#endif
   while ((e != &head_) && (e->last_use_ < threshold)) {
     // Sanity check: LRU list should be sorted by last_use_.  We could
     // check the entire list, but that gives quadratic behavior.
@@ -897,8 +899,10 @@ void SimpleLRUCacheBase<Key, Value, MapType, EQ>::DiscardIdle(
     //  # /etc/init.d/cpufrequtils restart
     //
     // fixes the problem.
+#ifndef NDEBUG
     assert(last <= e->last_use_ + kAcceptableClockSynchronizationDriftCycles);
     last = e->last_use_;
+#endif
 
     Elem* prev = e->prev;
     // There are no pinned elements on the list in the LRU mode, and in the
