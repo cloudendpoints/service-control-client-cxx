@@ -2,6 +2,7 @@
 
 #include "google/protobuf/stubs/logging.h"
 #include "include/periodic_timer.h"
+#include "utils/thread.h"
 
 using std::string;
 using ::google::api::servicecontrol::v1::CheckRequest;
@@ -38,8 +39,7 @@ ServiceControlClientImpl::ServiceControlClientImpl(
     std::shared_ptr<ReportAggregator> report_aggregator_copy =
         report_aggregator_;
     flush_timer_ = options.periodic_timer->StartTimer(
-        flush_interval,
-        [check_aggregator_copy, report_aggregator_copy]() {
+        flush_interval, [check_aggregator_copy, report_aggregator_copy]() {
           Status status = check_aggregator_copy->Flush();
           if (!status.ok()) {
             GOOGLE_LOG(ERROR) << "Failed in Check::Flush() "
@@ -135,7 +135,14 @@ void ServiceControlClientImpl::Check(void* ctx,
 Status ServiceControlClientImpl::Check(void* ctx,
                                        const CheckRequest& check_request,
                                        CheckResponse* check_response) {
-  return Status(Code::UNIMPLEMENTED, "This method is not implemented yet.");
+  StatusPromise status_promise;
+  StatusFuture status_future = status_promise.get_future();
+
+  Check(ctx, check_request, check_response,
+        [&status_promise](Status status) { status_promise.set_value(status); });
+
+  status_future.wait();
+  return status_future.get();
 }
 
 void ServiceControlClientImpl::Report(void* ctx,
@@ -158,7 +165,15 @@ void ServiceControlClientImpl::Report(void* ctx,
 Status ServiceControlClientImpl::Report(void* ctx,
                                         const ReportRequest& report_request,
                                         ReportResponse* report_response) {
-  return Status(Code::UNIMPLEMENTED, "This method is not implemented yet.");
+  StatusPromise status_promise;
+  StatusFuture status_future = status_promise.get_future();
+
+  Report(
+      ctx, report_request, report_response,
+      [&status_promise](Status status) { status_promise.set_value(status); });
+
+  status_future.wait();
+  return status_future.get();
 }
 
 int ServiceControlClientImpl::GetNextFlushInterval() {
