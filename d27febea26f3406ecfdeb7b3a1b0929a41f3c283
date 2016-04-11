@@ -1,0 +1,13 @@
+Revision: d27febea26f3406ecfdeb7b3a1b0929a41f3c283
+Patch-set: 2
+File: utils/thread.h
+
+16:13-16:19
+Mon Apr 11 23:20:24 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 8b3abef4_268c822b
+Bytes: 108
+Not put ::google::protobuf::util::Status here
+so others can use Future for some other types.
+Same as promise
+
