@@ -240,10 +240,10 @@ operations: {
 // A mocking class to mock Transport interface.
 class MockTransport : public Transport {
  public:
-  MOCK_METHOD4(Check,
-               void(void*, const CheckRequest&, CheckResponse*, DoneCallback));
-  MOCK_METHOD4(Report, void(void*, const ReportRequest&, ReportResponse*,
-                            DoneCallback));
+  MOCK_METHOD4(Check, void(RequestContext*, const CheckRequest&, CheckResponse*,
+                           DoneCallback));
+  MOCK_METHOD4(Report, void(RequestContext*, const ReportRequest&,
+                            ReportResponse*, DoneCallback));
 
   MockTransport() : check_response_(NULL), report_response_(NULL) {
     // To avoid vector resize which will cause segmentation fault.
@@ -257,7 +257,7 @@ class MockTransport : public Transport {
   }
 
   // The done callback is stored in on_done_. It MUST be called later.
-  void CheckWithStoredCallback(void* ctx, const CheckRequest& request,
+  void CheckWithStoredCallback(RequestContext* ctx, const CheckRequest& request,
                                CheckResponse* response, DoneCallback on_done) {
     check_request_ = request;
     if (check_response_) {
@@ -267,7 +267,8 @@ class MockTransport : public Transport {
   }
 
   // The done callback is called right away (in place).
-  void CheckWithInplaceCallback(void* ctx, const CheckRequest& request,
+  void CheckWithInplaceCallback(RequestContext* ctx,
+                                const CheckRequest& request,
                                 CheckResponse* response, DoneCallback on_done) {
     check_request_ = request;
     if (check_response_) {
@@ -277,7 +278,7 @@ class MockTransport : public Transport {
   }
 
   // The done callback is called from a separate thread with check_status_
-  void CheckUsingThread(void* ctx, const CheckRequest& request,
+  void CheckUsingThread(RequestContext* ctx, const CheckRequest& request,
                         CheckResponse* response, DoneCallback on_done) {
     check_request_ = request;
     Status done_status = done_status_;
@@ -292,7 +293,8 @@ class MockTransport : public Transport {
   }
 
   // The done callback is stored in on_done_. It MUST be called later.
-  void ReportWithStoredCallback(void* ctx, const ReportRequest& request,
+  void ReportWithStoredCallback(RequestContext* ctx,
+                                const ReportRequest& request,
                                 ReportResponse* response,
                                 DoneCallback on_done) {
     report_request_ = request;
@@ -303,7 +305,8 @@ class MockTransport : public Transport {
   }
 
   // The done callback is called right away (in place).
-  void ReportWithInplaceCallback(void* ctx, const ReportRequest& request,
+  void ReportWithInplaceCallback(RequestContext* ctx,
+                                 const ReportRequest& request,
                                  ReportResponse* response,
                                  DoneCallback on_done) {
     report_request_ = request;
@@ -314,7 +317,7 @@ class MockTransport : public Transport {
   }
 
   // The done callback is called from a separate thread with done_status_
-  void ReportUsingThread(void* ctx, const ReportRequest& request,
+  void ReportUsingThread(RequestContext* ctx, const ReportRequest& request,
                          ReportResponse* response, DoneCallback on_done) {
     report_request_ = request;
     if (report_response_) {
@@ -411,7 +414,7 @@ class ServiceControlClientImplTest : public ::testing::Test {
   // 4) Transport::on_done() is called in the same thread.
   // 5) Client::on_check_done() is called.
   void InternalTestNonCachedCheckWithStoredCallback(
-      void* ctx, const CheckRequest& request, Status transport_status,
+      RequestContext* ctx, const CheckRequest& request, Status transport_status,
       CheckResponse* transport_response) {
     EXPECT_CALL(*mock_transport_, Check(_, _, _, _))
         .WillOnce(
@@ -453,7 +456,7 @@ class ServiceControlClientImplTest : public ::testing::Test {
   // 2) Transport::Check() is called. on_done callback is called inside
   //    Transport::Check().
   void InternalTestNonCachedCheckWithInplaceCallback(
-      void* ctx, const CheckRequest& request, Status transport_status,
+      RequestContext* ctx, const CheckRequest& request, Status transport_status,
       CheckResponse* transport_response) {
     EXPECT_CALL(*mock_transport_, Check(_, _, _, _))
         .WillOnce(
@@ -488,7 +491,7 @@ class ServiceControlClientImplTest : public ::testing::Test {
   // 3) Client::Check() returns, but Client::on_check_done() will be called
   //    from the other thread.
   void InternalTestNonCachedCheckUsingThread(
-      void* ctx, const CheckRequest& request, Status transport_status,
+      RequestContext* ctx, const CheckRequest& request, Status transport_status,
       CheckResponse* transport_response) {
     EXPECT_CALL(*mock_transport_, Check(_, _, _, _))
         .WillOnce(Invoke(mock_transport_, &MockTransport::CheckUsingThread));
@@ -527,9 +530,10 @@ class ServiceControlClientImplTest : public ::testing::Test {
   // evicted request1 will be called Transport::Check() again, and its response
   // is dropped. The cache will have request2.
   void InternalTestReplacedGoodCheckWithStoredCallback(
-      void* ctx, const CheckRequest& request2, Status transport_status2,
-      CheckResponse* transport_response2, const CheckRequest& request1,
-      Status transport_status1, CheckResponse* transport_response1) {
+      RequestContext* ctx, const CheckRequest& request2,
+      Status transport_status2, CheckResponse* transport_response2,
+      const CheckRequest& request1, Status transport_status1,
+      CheckResponse* transport_response1) {
     EXPECT_CALL(*mock_transport_, Check(_, _, _, _))
         .WillOnce(
             Invoke(mock_transport_, &MockTransport::CheckWithStoredCallback));
@@ -590,8 +594,8 @@ class ServiceControlClientImplTest : public ::testing::Test {
   // evicted request1 will be called Transport::Check() again, and its response
   // is dropped. The cache will have request2.
   void InternalTestReplacedGoodCheckWithInplaceCallback(
-      void* ctx, const CheckRequest& request2, Status transport_status2,
-      CheckResponse* transport_response2) {
+      RequestContext* ctx, const CheckRequest& request2,
+      Status transport_status2, CheckResponse* transport_response2) {
     // Transport::Check() will be called twice. First one is for request2
     // The second one is for evicted request1.
     ON_CALL(*mock_transport_, Check(_, _, _, _))
@@ -623,8 +627,8 @@ class ServiceControlClientImplTest : public ::testing::Test {
   // evicted request1 will be called Transport::Check() again, and its response
   // is dropped. The cache will have request2.
   void InternalTestReplacedGoodCheckUsingThread(
-      void* ctx, const CheckRequest& request2, Status transport_status2,
-      CheckResponse* transport_response2) {
+      RequestContext* ctx, const CheckRequest& request2,
+      Status transport_status2, CheckResponse* transport_response2) {
     // Transport::Check() will be called twice. First one is for request2
     // The second one is for evicted request1.
     ON_CALL(*mock_transport_, Check(_, _, _, _))
@@ -660,7 +664,7 @@ class ServiceControlClientImplTest : public ::testing::Test {
   // 1) Calls a Client::Check(), its request is in the cache.
   // 2) Client::on_check_done() is called right away.
   // 3) Transport::Check() is not called.
-  void InternalTestCachedCheck(void* ctx, const CheckRequest& request,
+  void InternalTestCachedCheck(RequestContext* ctx, const CheckRequest& request,
                                const CheckResponse& expected_response) {
     // Check should not be called with cached entry
     EXPECT_CALL(*mock_transport_, Check(_, _, _, _)).Times(0);
@@ -698,7 +702,7 @@ class ServiceControlClientImplTest : public ::testing::Test {
   std::unique_ptr<ServiceControlClient> client_;
   std::shared_ptr<MockTransport> mock_transport_shared_ptr_;
   MockTransport* mock_transport_;
-  void* ctx_;
+  RequestContext* ctx_;
 };
 
 TEST_F(ServiceControlClientImplTest, TestNonCachedCheckWithStoredCallback) {
