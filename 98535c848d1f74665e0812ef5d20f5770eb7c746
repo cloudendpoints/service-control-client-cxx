@@ -1,0 +1,12 @@
+Revision: 98535c848d1f74665e0812ef5d20f5770eb7c746
+Patch-set: 1
+File: src/service_control_client_impl_test.cc
+
+1179:7-1179:50
+Mon Apr 11 21:57:55 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 8b3abef4_e070c214
+Bytes: 107
+TestCachedReport is NOT very useful for testing blocking call.s
+We should add test for TestNonCachedReport.
+
