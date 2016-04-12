@@ -5,6 +5,8 @@
 #include "src/aggregator_interface.h"
 #include "utils/google_macros.h"
 
+#include <atomic>
+
 namespace google {
 namespace service_control_client {
 
@@ -47,6 +49,9 @@ class ServiceControlClientImpl : public ServiceControlClient {
       ::google::api::servicecontrol::v1::ReportResponse* report_response)
       override;
 
+  ::google::protobuf::util::Status GetStatistics(
+      Statistics* stat) const override;
+
  private:
   // A flush callback for check.
   void CheckFlushCallback(
@@ -70,6 +75,15 @@ class ServiceControlClientImpl : public ServiceControlClient {
 
   // The Timer object.
   std::shared_ptr<PeriodicTimer::Timer> flush_timer_;
+
+  // Atomic object to deal with multi-threads situation.
+  std::atomic_int_fast64_t total_called_checks_;
+  std::atomic_int_fast64_t send_checks_by_flush_;
+  std::atomic_int_fast64_t send_checks_in_flight_;
+  std::atomic_int_fast64_t total_called_reports_;
+  std::atomic_int_fast64_t send_reports_by_flush_;
+  std::atomic_int_fast64_t send_reports_in_flight_;
+  std::atomic_int_fast64_t send_report_operations_;
 
   // The check aggregator object. Uses shared_ptr for check_aggregator_.
   // Transport::on_check_done() callback needs to call check_aggregator_
