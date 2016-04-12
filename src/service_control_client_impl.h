@@ -47,6 +47,9 @@ class ServiceControlClientImpl : public ServiceControlClient {
       ::google::api::servicecontrol::v1::ReportResponse* report_response)
       override;
 
+  ::google::protobuf::util::Status GetStatistics(
+      Statistics* stat) const override;
+
  private:
   // A flush callback for check.
   void CheckFlushCallback(
@@ -70,6 +73,9 @@ class ServiceControlClientImpl : public ServiceControlClient {
 
   // The Timer object.
   std::shared_ptr<PeriodicTimer::Timer> flush_timer_;
+
+  // The statistics recorded.
+  Statistics statistics_;
 
   // The check aggregator object. Uses shared_ptr for check_aggregator_.
   // Transport::on_check_done() callback needs to call check_aggregator_

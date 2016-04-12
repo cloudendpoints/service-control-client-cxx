@@ -56,6 +56,27 @@ struct ServiceControlClientOptions {
   std::shared_ptr<PeriodicTimer> periodic_timer;
 };
 
+// The statistics recorded by library.
+struct Statistics {
+  uint64_t total_checks;
+  // Check calls from flush timer.
+  uint64_t checks_from_flush;
+  // actual calling remote during the Check() call,
+  uint64_t checks_in_flight;
+
+  uint64_t total_reports;
+  // Report calls from flush timer.
+  uint64_t reports_from_flush;
+  // actual calling remote during the Report() call,
+  uint64_t reports_in_flight;
+
+  // the number of operations send. each report is 1 operation,  the ratio of
+  // send_operations_numbers / total_report_calls  will reflect aggregation
+  // rate.  Each send can send multiple operations,  report_send_numbers may not
+  // reflect aggregation rate.
+  uint64_t send_report_operations;
+};
+
 // Service control client interface. It is thread safe.
 // Here are some usage examples:
 //
@@ -215,6 +236,8 @@ class ServiceControlClient {
       void* ctx,
       const ::google::api::servicecontrol::v1::ReportRequest& report_request,
       ::google::api::servicecontrol::v1::ReportResponse* report_response) = 0;
+
+    virtual ::google::protobuf::util::Status GetStatistics(Statistics* stat) const = 0;
 };
 
 // Creates a ServiceControlClient object.

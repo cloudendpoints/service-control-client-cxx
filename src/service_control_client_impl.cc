@@ -23,6 +23,8 @@ ServiceControlClientImpl::ServiceControlClientImpl(
 
   transport_ = options.transport;
 
+  memset(&statistics_, 0, sizeof statistics_);
+
   check_aggregator_->SetFlushCallback(
       std::bind(&ServiceControlClientImpl::CheckFlushCallback, this,
                 std::placeholders::_1));
@@ -38,8 +40,7 @@ ServiceControlClientImpl::ServiceControlClientImpl(
     std::shared_ptr<ReportAggregator> report_aggregator_copy =
         report_aggregator_;
     flush_timer_ = options.periodic_timer->StartTimer(
-        flush_interval,
-        [check_aggregator_copy, report_aggregator_copy]() {
+        flush_interval, [check_aggregator_copy, report_aggregator_copy]() {
           Status status = check_aggregator_copy->Flush();
           if (!status.ok()) {
             GOOGLE_LOG(ERROR) << "Failed in Check::Flush() "
@@ -83,6 +84,7 @@ void ServiceControlClientImpl::CheckFlushCallback(
                                           << status.error_message();
                       }
                     });
+  statistics_.checks_from_flush++;
 }
 
 void ServiceControlClientImpl::ReportFlushCallback(
@@ -96,12 +98,15 @@ void ServiceControlClientImpl::ReportFlushCallback(
                                            << status.error_message();
                        }
                      });
+  statistics_.reports_from_flush++;
+  statistics_.send_report_operations += report_request.operations_size();
 }
 
 void ServiceControlClientImpl::Check(void* ctx,
                                      const CheckRequest& check_request,
                                      CheckResponse* check_response,
                                      DoneCallback on_check_done) {
+  statistics_.total_checks++;
   if (transport_ == NULL) {
     on_check_done(Status(Code::INVALID_ARGUMENT, "transport is NULL."));
     return;
@@ -127,6 +132,7 @@ void ServiceControlClientImpl::Check(void* ctx,
                         delete check_request_copy;
                         on_check_done(status);
                       });
+    statistics_.checks_in_flight++;
     return;
   }
   on_check_done(status);
@@ -142,6 +148,7 @@ void ServiceControlClientImpl::Report(void* ctx,
                                       const ReportRequest& report_request,
                                       ReportResponse* report_response,
                                       DoneCallback on_report_done) {
+  statistics_.total_reports++;
   if (transport_ == NULL) {
     on_report_done(Status(Code::INVALID_ARGUMENT, "transport is NULL."));
     return;
@@ -150,6 +157,8 @@ void ServiceControlClientImpl::Report(void* ctx,
   Status status = report_aggregator_->Report(report_request);
   if (status.error_code() == Code::NOT_FOUND) {
     transport_->Report(ctx, report_request, report_response, on_report_done);
+    statistics_.reports_in_flight++;
+    statistics_.send_report_operations += report_request.operations_size();
     return;
   }
   on_report_done(status);
@@ -159,6 +168,22 @@ Status ServiceControlClientImpl::Report(void* ctx,
                                         const ReportRequest& report_request,
                                         ReportResponse* report_response) {
   return Status(Code::UNIMPLEMENTED, "This method is not implemented yet.");
+}
+
+Status ServiceControlClientImpl::GetStatistics(Statistics* stat) const {
+  stat->total_checks = statistics_.total_checks;
+  stat->checks_from_flush = statistics_.checks_from_flush;
+  stat->checks_in_flight = statistics_.checks_in_flight;
+  stat->total_reports = statistics_.total_reports;
+  stat->reports_from_flush = statistics_.checks_from_flush;
+  stat->reports_in_flight = statistics_.reports_in_flight;
+  stat->send_report_operations = statistics_.send_report_operations;
+
+  if (stat->total_checks > 0 || stat->total_reports > 0) {
+    return Status::OK;
+  } else {
+    return Status::UNKNOWN;
+  }
 }
 
 int ServiceControlClientImpl::GetNextFlushInterval() {

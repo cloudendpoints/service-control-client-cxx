@@ -714,6 +714,13 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedCheckWithStoredCallback) {
   for (int i = 0; i < 10; i++) {
     InternalTestCachedCheck(ctx_, check_request1_, pass_check_response1_);
   }
+  Statistics stat;
+  Status stat_status = client_->GetStatistics(&stat);
+  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat.total_checks, 11);
+  EXPECT_EQ(stat.checks_from_flush, 0);
+  EXPECT_EQ(stat.checks_in_flight, 1);
+  EXPECT_EQ(stat.send_report_operations, 0);
 
   // There is a cached check request in the cache. When client is destroyed,
   // it will call Transport Check.
@@ -728,11 +735,24 @@ TEST_F(ServiceControlClientImplTest, TestReplacedGoodCheckWithStoredCallback) {
   InternalTestNonCachedCheckWithStoredCallback(
       ctx_, check_request1_, Status::OK, &pass_check_response1_);
   InternalTestCachedCheck(ctx_, check_request1_, pass_check_response1_);
+  Statistics stat;
+  Status stat_status = client_->GetStatistics(&stat);
+  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat.total_checks, 2);
+  EXPECT_EQ(stat.checks_from_flush, 0);
+  EXPECT_EQ(stat.checks_in_flight, 1);
+  EXPECT_EQ(stat.send_report_operations, 0);
 
   InternalTestReplacedGoodCheckWithStoredCallback(
       ctx_, check_request2_, Status::OK, &pass_check_response2_,
       check_request1_, Status::OK, &pass_check_response1_);
   InternalTestCachedCheck(ctx_, check_request2_, pass_check_response2_);
+  stat_status = client_->GetStatistics(&stat);
+  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat.total_checks, 4);
+  EXPECT_EQ(stat.checks_from_flush, 1);
+  EXPECT_EQ(stat.checks_in_flight, 2);
+  EXPECT_EQ(stat.send_report_operations, 0);
 
   // There is a cached check request in the cache. When client is destroyed,
   // it will call Transport Check.
@@ -1115,6 +1135,14 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportUsingThread) {
   // this report should be cached,  one_done() should be called right away
   client_->Report(ctx_, report_request1_, &report_response,
                   [&done_status1](Status status) { done_status1 = status; });
+  Statistics stat;
+  Status stat_status = client_->GetStatistics(&stat);
+  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat.total_reports, 1);
+  EXPECT_EQ(stat.reports_from_flush, 0);
+  EXPECT_EQ(stat.reports_in_flight, 0);
+  EXPECT_EQ(stat.send_report_operations, 0);
+
   EXPECT_OK(done_status1);
 
   // Verifies that mock_transport_::Report() is NOT called.
@@ -1131,6 +1159,13 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportUsingThread) {
   // this report should be cached,  one_done() should be called right away
   client_->Report(ctx_, report_request2_, &report_response,
                   [&done_status2](Status status) { done_status2 = status; });
+  stat_status = client_->GetStatistics(&stat);
+  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat.total_reports, 2);
+  EXPECT_EQ(stat.reports_from_flush, 0);
+  EXPECT_EQ(stat.reports_in_flight, 0);
+  EXPECT_EQ(stat.send_report_operations, 1);
+
   EXPECT_OK(done_status2);
 
   EXPECT_TRUE(MessageDifferencer::Equals(mock_transport_->report_request_,
@@ -1199,6 +1234,14 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportWithInplaceCallback) {
   client_->Report(ctx_, report_request1_, &report_response,
                   [&done_status](Status status) { done_status = status; });
 
+  Statistics stat;
+  Status stat_status = client_->GetStatistics(&stat);
+  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat.total_reports, 1);
+  EXPECT_EQ(stat.reports_from_flush, 0);
+  EXPECT_EQ(stat.reports_in_flight, 1);
+  EXPECT_EQ(stat.send_report_operations, 1);
+
   // one_done should be called for now.
   EXPECT_ERROR_CODE(Code::PERMISSION_DENIED, done_status);
 
@@ -1228,6 +1271,14 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportUsingThread) {
   client_->Report(
       ctx_, report_request1_, &report_response,
       [&status_promise](Status status) { status_promise.set_value(status); });
+
+  Statistics stat;
+  Status stat_status = client_->GetStatistics(&stat);
+  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat.total_reports, 1);
+  EXPECT_EQ(stat.reports_from_flush, 0);
+  EXPECT_EQ(stat.reports_in_flight, 1);
+  EXPECT_EQ(stat.send_report_operations, 1);
 
   // Since it is not cached, transport should be called.
   EXPECT_TRUE(MessageDifferencer::Equals(mock_transport_->report_request_,
