@@ -1,6 +1,51 @@
 Revision: 807739a85e56b48aa559f6a8f1be4bcc5b946b98
 Patch-set: 1
+File: include/service_control_client.h
+
+61:2-61:10
+Tue Apr 12 21:57:05 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: ebbdfaca_67edbada
+Bytes: 143
+add comment for this variable.
+
+how about name  them as
+
+total_called_checks;
+send_checks_by_flush;
+send_checks_in_flight;
+
+Similar for report.
+
+62:5-62:10
+Tue Apr 12 21:57:05 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: ebbdfaca_c7d3ee1b
+Bytes: 47
+Check sends to server from flushed cache items.
+
+64:12-64:19
+Tue Apr 12 21:57:05 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: ebbdfaca_07dec624
+Bytes: 49
+Check sends to remote sever during Check() calls.
+
+67:11-67:24
+Tue Apr 12 21:57:05 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: ebbdfaca_6704da6a
+Bytes: 11
+add comment
+
 File: src/service_control_client_impl.cc
+
+26:33-26:44
+Tue Apr 12 21:57:05 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: ebbdfaca_c72ccede
+Bytes: 23
+use sizeof(statistics_)
 
 87
 Tue Apr 12 21:34:08 2016 +0000
@@ -15,4 +60,38 @@ Author: Lizan Zhou <5455@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: ebbdfaca_a7a432cd
 Bytes: 79
 potential race condition? probably need use std::atomic as type of the numbers.
+
+102
+Tue Apr 12 21:57:05 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: ebbdfaca_a7a432cd
+UUID: ebbdfaca_478c3e2c
+Bytes: 60
+You are right.  we may need to use std::atomic_uint_fast64_t
+
+174:23-174:34
+Tue Apr 12 21:57:05 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: ebbdfaca_078246f1
+Bytes: 204
+If we have to use std::atomic.  then we need two structs;
+one for external and one for internal.  The internal one use std::atomic for each field and external one just uint64_t
+
+here copy the fields over.
+
+182:12-182:24
+Tue Apr 12 21:57:05 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: ebbdfaca_87965636
+Bytes: 16
+always return OK
+
+File: src/service_control_client_impl_test.cc
+
+1167:17-1167:39
+Tue Apr 12 21:57:05 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: ebbdfaca_87e8169b
+Bytes: 118
+this 1 send_report_operations is wrong if reports_from_flush and reports_in_flight are all 0.  we need to find out why
 
