@@ -75,7 +75,7 @@ ServiceControlClientImpl::~ServiceControlClientImpl() {
 void ServiceControlClientImpl::CheckFlushCallback(
     const CheckRequest& check_request) {
   CheckResponse* check_response = new CheckResponse;
-  transport_->Check(NULL, check_request, check_response,
+  transport_->Check(check_request, check_response,
                     [check_response](Status status) {
                       delete check_response;
                       if (!status.ok()) {
@@ -88,7 +88,7 @@ void ServiceControlClientImpl::CheckFlushCallback(
 void ServiceControlClientImpl::ReportFlushCallback(
     const ReportRequest& report_request) {
   ReportResponse* report_response = new ReportResponse;
-  transport_->Report(NULL, report_request, report_response,
+  transport_->Report(report_request, report_response,
                      [report_response](Status status) {
                        delete report_response;
                        if (!status.ok()) {
@@ -98,8 +98,7 @@ void ServiceControlClientImpl::ReportFlushCallback(
                      });
 }
 
-void ServiceControlClientImpl::Check(void* ctx,
-                                     const CheckRequest& check_request,
+void ServiceControlClientImpl::Check(const CheckRequest& check_request,
                                      CheckResponse* check_response,
                                      DoneCallback on_check_done) {
   if (transport_ == NULL) {
@@ -114,7 +113,7 @@ void ServiceControlClientImpl::Check(void* ctx,
     CheckRequest* check_request_copy = new CheckRequest(check_request);
     std::shared_ptr<CheckAggregator> check_aggregator_copy = check_aggregator_;
 
-    transport_->Check(ctx, *check_request_copy, check_response,
+    transport_->Check(*check_request_copy, check_response,
                       [check_aggregator_copy, check_request_copy,
                        check_response, on_check_done](Status status) {
                         if (status.ok()) {
@@ -132,21 +131,19 @@ void ServiceControlClientImpl::Check(void* ctx,
   on_check_done(status);
 }
 
-Status ServiceControlClientImpl::Check(void* ctx,
-                                       const CheckRequest& check_request,
+Status ServiceControlClientImpl::Check(const CheckRequest& check_request,
                                        CheckResponse* check_response) {
   StatusPromise status_promise;
   StatusFuture status_future = status_promise.get_future();
 
-  Check(ctx, check_request, check_response,
+  Check(check_request, check_response,
         [&status_promise](Status status) { status_promise.set_value(status); });
 
   status_future.wait();
   return status_future.get();
 }
 
-void ServiceControlClientImpl::Report(void* ctx,
-                                      const ReportRequest& report_request,
+void ServiceControlClientImpl::Report(const ReportRequest& report_request,
                                       ReportResponse* report_response,
                                       DoneCallback on_report_done) {
   if (transport_ == NULL) {
@@ -156,20 +153,19 @@ void ServiceControlClientImpl::Report(void* ctx,
 
   Status status = report_aggregator_->Report(report_request);
   if (status.error_code() == Code::NOT_FOUND) {
-    transport_->Report(ctx, report_request, report_response, on_report_done);
+    transport_->Report(report_request, report_response, on_report_done);
     return;
   }
   on_report_done(status);
 }
 
-Status ServiceControlClientImpl::Report(void* ctx,
-                                        const ReportRequest& report_request,
+Status ServiceControlClientImpl::Report(const ReportRequest& report_request,
                                         ReportResponse* report_response) {
   StatusPromise status_promise;
   StatusFuture status_future = status_promise.get_future();
 
   Report(
-      ctx, report_request, report_response,
+      report_request, report_response,
       [&status_promise](Status status) { status_promise.set_value(status); });
 
   status_future.wait();
