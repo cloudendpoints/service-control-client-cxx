@@ -23,28 +23,24 @@ class ServiceControlClientImpl : public ServiceControlClient {
 
   // An async check call.
   void Check(
-      void* ctx,
       const ::google::api::servicecontrol::v1::CheckRequest& check_request,
       ::google::api::servicecontrol::v1::CheckResponse* check_response,
       DoneCallback on_check_done) override;
 
   // A sync check call.
   ::google::protobuf::util::Status Check(
-      void* ctx,
       const ::google::api::servicecontrol::v1::CheckRequest& check_request,
       ::google::api::servicecontrol::v1::CheckResponse* check_response)
       override;
 
   // An async report call.
   void Report(
-      void* ctx,
       const ::google::api::servicecontrol::v1::ReportRequest& report_request,
       ::google::api::servicecontrol::v1::ReportResponse* report_response,
       DoneCallback on_report_done) override;
 
   // A sync report call.
   ::google::protobuf::util::Status Report(
-      void* ctx,
       const ::google::api::servicecontrol::v1::ReportRequest& report_request,
       ::google::api::servicecontrol::v1::ReportResponse* report_response)
       override;

@@ -135,14 +135,14 @@ struct Statistics {
 //
 //    // Constructs a CheckRequest protobuf check_request;
 //    CheckResponse check_response;
-//    Status status = client->Check(ctx, check_request, &check_response);
+//    Status status = client->Check(check_request, &check_response);
 //    if (status.ok()) {
 //       // Inspects check_response;
 //    }
 //
 //    // Constructs a ReportRequest protobuf report_request;
 //    ReportResponse report_response;
-//    Status status = client->Report(ctx, report_request, &report_response);
+//    Status status = client->Report(report_request, &report_response);
 //    if (status.ok()) {
 //       // Inspects report_response;
 //    }
@@ -152,7 +152,7 @@ struct Statistics {
 //    // Constructs a CheckRequest protobuf check_request;
 //    // Calls async Check by providing a callback.
 //    CheckResponse check_response;
-//    client->Check(ctx, check_request, &check_response,
+//    client->Check(check_request, &check_response,
 //         [](const Status& status) {
 //             if (status.ok()) {
 //                 // Inspects check_response;
@@ -162,7 +162,7 @@ struct Statistics {
 //    // Constructs a ReportRequest protobuf report_request;
 //    // Calls async Report by providing a callback.
 //    ReportResponse report_response;
-//    client->Report(ctx, report_request, &report_response,
+//    client->Report(report_request, &report_response,
 //         [](const Status& status) {
 //             if (status.ok()) {
 //                 // Inspects report_response;
@@ -198,7 +198,6 @@ class ServiceControlClient {
   //
   // check_response must be alive until on_check_done is called.
   virtual void Check(
-      void* ctx,
       const ::google::api::servicecontrol::v1::CheckRequest& check_request,
       ::google::api::servicecontrol::v1::CheckResponse* check_response,
       DoneCallback on_check_done) = 0;
@@ -207,7 +206,6 @@ class ServiceControlClient {
   // If it is a cache miss, this function will call remote Chemist server, wait
   // for its response.
   virtual ::google::protobuf::util::Status Check(
-      void* ctx,
       const ::google::api::servicecontrol::v1::CheckRequest& check_request,
       ::google::api::servicecontrol::v1::CheckResponse* check_response) = 0;
 
@@ -225,7 +223,6 @@ class ServiceControlClient {
   // This is async call. on_report_done is always called when the
   // report request is finished.
   virtual void Report(
-      void* ctx,
       const ::google::api::servicecontrol::v1::ReportRequest& report_request,
       ::google::api::servicecontrol::v1::ReportResponse* report_response,
       DoneCallback on_report_done) = 0;
@@ -235,7 +232,6 @@ class ServiceControlClient {
   // important operations), this function will send the data to remote server,
   // and wait for its response.
   virtual ::google::protobuf::util::Status Report(
-      void* ctx,
       const ::google::api::servicecontrol::v1::ReportRequest& report_request,
       ::google::api::servicecontrol::v1::ReportResponse* report_response) = 0;
 

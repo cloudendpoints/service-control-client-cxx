@@ -20,7 +20,6 @@ class Transport {
   // Sends check_request protobuf to service control server.
   // check_response is valid after on_check_done() is called and status is OK.
   virtual void Check(
-      void* ctx,
       const ::google::api::servicecontrol::v1::CheckRequest& check_request,
       ::google::api::servicecontrol::v1::CheckResponse* check_response,
       DoneCallback on_check_done) = 0;
@@ -29,7 +28,6 @@ class Transport {
   // resport_response is valid after on_report_done() is called and status is
   // OK.
   virtual void Report(
-      void* ctx,
       const ::google::api::servicecontrol::v1::ReportRequest& report_request,
       ::google::api::servicecontrol::v1::ReportResponse* report_response,
       DoneCallback on_report_done) = 0;
