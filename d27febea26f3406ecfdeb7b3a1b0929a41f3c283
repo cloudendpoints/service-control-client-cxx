@@ -19,3 +19,11 @@ UUID: 8b3abef4_c629567e
 Bytes: 113
 It seems that we need to use struct to implement typedef template, which is lengthy. Just changed the names here.
 
+16:13-16:19
+Tue Apr 12 00:04:08 2016 +0000
+Author: Lizan Zhou <5455@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 8b3abef4_c629567e
+UUID: 8b3abef4_a639b283
+Bytes: 39
+probably a "using" directive will work?
+
