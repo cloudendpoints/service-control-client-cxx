@@ -1,0 +1,18 @@
+Revision: 807739a85e56b48aa559f6a8f1be4bcc5b946b98
+Patch-set: 1
+File: src/service_control_client_impl.cc
+
+87
+Tue Apr 12 21:34:08 2016 +0000
+Author: Lizan Zhou <5455@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: ebbdfaca_679bfa91
+Bytes: 21
+pre-increment always.
+
+102
+Tue Apr 12 21:34:08 2016 +0000
+Author: Lizan Zhou <5455@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: ebbdfaca_a7a432cd
+Bytes: 79
+potential race condition? probably need use std::atomic as type of the numbers.
+
