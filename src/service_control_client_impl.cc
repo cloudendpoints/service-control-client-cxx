@@ -1,7 +1,6 @@
 #include "src/service_control_client_impl.h"
 
 #include "google/protobuf/stubs/logging.h"
-#include "include/periodic_timer.h"
 #include "utils/thread.h"
 
 using std::string;
@@ -47,7 +46,7 @@ ServiceControlClientImpl::ServiceControlClientImpl(
     std::shared_ptr<CheckAggregator> check_aggregator_copy = check_aggregator_;
     std::shared_ptr<ReportAggregator> report_aggregator_copy =
         report_aggregator_;
-    flush_timer_ = options.periodic_timer->StartTimer(
+    flush_timer_ = options.periodic_timer(
         flush_interval, [check_aggregator_copy, report_aggregator_copy]() {
           Status status = check_aggregator_copy->Flush();
           if (!status.ok()) {
@@ -84,36 +83,36 @@ ServiceControlClientImpl::~ServiceControlClientImpl() {
 void ServiceControlClientImpl::CheckFlushCallback(
     const CheckRequest& check_request) {
   CheckResponse* check_response = new CheckResponse;
-  check_transport_->Check(check_request, check_response,
-                          [check_response](Status status) {
-                            delete check_response;
-                            if (!status.ok()) {
-                              GOOGLE_LOG(ERROR) << "Failed in Check call: "
-                                                << status.error_message();
-                            }
-                          });
+  check_transport_(check_request, check_response,
+                   [check_response](Status status) {
+                     delete check_response;
+                     if (!status.ok()) {
+                       GOOGLE_LOG(ERROR) << "Failed in Check call: "
+                                         << status.error_message();
+                     }
+                   });
   ++send_checks_by_flush_;
 }
 
 void ServiceControlClientImpl::ReportFlushCallback(
     const ReportRequest& report_request) {
   ReportResponse* report_response = new ReportResponse;
-  report_transport_->Report(report_request, report_response,
-                     [report_response](Status status) {
-                       delete report_response;
-                       if (!status.ok()) {
-                         GOOGLE_LOG(ERROR) << "Failed in Report call: "
-                                           << status.error_message();
-                       }
-                     });
+  report_transport_(report_request, report_response,
+                    [report_response](Status status) {
+                      delete report_response;
+                      if (!status.ok()) {
+                        GOOGLE_LOG(ERROR) << "Failed in Report call: "
+                                          << status.error_message();
+                      }
+                    });
   ++send_reports_by_flush_;
   send_report_operations_ += report_request.operations_size();
 }
 
-void ServiceControlClientImpl::InternalCheck(CheckTransport* check_transport,
-                                             const CheckRequest& check_request,
-                                             CheckResponse* check_response,
-                                             DoneCallback on_check_done) {
+void ServiceControlClientImpl::Check(const CheckRequest& check_request,
+                                     CheckResponse* check_response,
+                                     DoneCallback on_check_done,
+                                     TransportCheckFunc check_transport) {
   ++total_called_checks_;
   if (check_transport == NULL) {
     on_check_done(Status(Code::INVALID_ARGUMENT, "transport is NULL."));
@@ -126,19 +125,19 @@ void ServiceControlClientImpl::InternalCheck(CheckTransport* check_transport,
     // it to call CacheResponse.
     CheckRequest* check_request_copy = new CheckRequest(check_request);
     std::shared_ptr<CheckAggregator> check_aggregator_copy = check_aggregator_;
-    check_transport->Check(*check_request_copy, check_response,
-                           [check_aggregator_copy, check_request_copy,
-                            check_response, on_check_done](Status status) {
-                             if (status.ok()) {
-                               check_aggregator_copy->CacheResponse(
-                                   *check_request_copy, *check_response);
-                             } else {
-                               GOOGLE_LOG(ERROR) << "Failed in Check call: "
-                                                 << status.error_message();
-                             }
-                             delete check_request_copy;
-                             on_check_done(status);
-                           });
+    check_transport(*check_request_copy, check_response,
+                    [check_aggregator_copy, check_request_copy, check_response,
+                     on_check_done](Status status) {
+                      if (status.ok()) {
+                        check_aggregator_copy->CacheResponse(
+                            *check_request_copy, *check_response);
+                      } else {
+                        GOOGLE_LOG(ERROR) << "Failed in Check call: "
+                                          << status.error_message();
+                      }
+                      delete check_request_copy;
+                      on_check_done(status);
+                    });
     ++send_checks_in_flight_;
     return;
   }
@@ -148,8 +147,7 @@ void ServiceControlClientImpl::InternalCheck(CheckTransport* check_transport,
 void ServiceControlClientImpl::Check(const CheckRequest& check_request,
                                      CheckResponse* check_response,
                                      DoneCallback on_check_done) {
-  InternalCheck(check_transport_.get(), check_request, check_response,
-                on_check_done);
+  Check(check_request, check_response, on_check_done, check_transport_);
 }
 
 Status ServiceControlClientImpl::Check(const CheckRequest& check_request,
@@ -164,17 +162,10 @@ Status ServiceControlClientImpl::Check(const CheckRequest& check_request,
   return status_future.get();
 }
 
-void ServiceControlClientImpl::Check(
-    CheckTransport* check_transport,
-    const ::google::api::servicecontrol::v1::CheckRequest& check_request,
-    ::google::api::servicecontrol::v1::CheckResponse* check_response,
-    DoneCallback on_check_done) {
-  InternalCheck(check_transport, check_request, check_response, on_check_done);
-}
-
-void ServiceControlClientImpl::InternalReport(
-    ReportTransport* report_transport, const ReportRequest& report_request,
-    ReportResponse* report_response, DoneCallback on_report_done) {
+void ServiceControlClientImpl::Report(const ReportRequest& report_request,
+                                      ReportResponse* report_response,
+                                      DoneCallback on_report_done,
+                                      TransportReportFunc report_transport) {
   ++total_called_reports_;
   if (report_transport == NULL) {
     on_report_done(Status(Code::INVALID_ARGUMENT, "transport is NULL."));
@@ -183,7 +174,7 @@ void ServiceControlClientImpl::InternalReport(
 
   Status status = report_aggregator_->Report(report_request);
   if (status.error_code() == Code::NOT_FOUND) {
-    report_transport->Report(report_request, report_response, on_report_done);
+    report_transport(report_request, report_response, on_report_done);
     ++send_reports_in_flight_;
     send_report_operations_ += report_request.operations_size();
     return;
@@ -194,8 +185,7 @@ void ServiceControlClientImpl::InternalReport(
 void ServiceControlClientImpl::Report(const ReportRequest& report_request,
                                       ReportResponse* report_response,
                                       DoneCallback on_report_done) {
-  InternalReport(report_transport_.get(), report_request, report_response,
-                 on_report_done);
+  Report(report_request, report_response, on_report_done, report_transport_);
 }
 
 Status ServiceControlClientImpl::Report(const ReportRequest& report_request,
@@ -203,21 +193,12 @@ Status ServiceControlClientImpl::Report(const ReportRequest& report_request,
   StatusPromise status_promise;
   StatusFuture status_future = status_promise.get_future();
 
-  Report(
-      report_request, report_response,
-      [&status_promise](Status status) { status_promise.set_value(status); });
+  Report(report_request, report_response, [&status_promise](Status status) {
+    status_promise.set_value(status);
+  });
 
   status_future.wait();
   return status_future.get();
-}
-
-void ServiceControlClientImpl::Report(
-    ReportTransport* report_transport,
-    const ::google::api::servicecontrol::v1::ReportRequest& report_request,
-    ::google::api::servicecontrol::v1::ReportResponse* report_response,
-    DoneCallback on_report_done) {
-  InternalReport(report_transport, report_request, report_response,
-                 on_report_done);
 }
 
 Status ServiceControlClientImpl::GetStatistics(Statistics* stat) const {

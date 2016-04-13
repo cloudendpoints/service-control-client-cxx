@@ -12,11 +12,45 @@
 // A public exposed header can only include local headers in the same folder.
 // When including, not to put folder name in the include, just the file name.
 #include "aggregation_options.h"
-#include "periodic_timer.h"
-#include "transport.h"
 
 namespace google {
 namespace service_control_client {
+
+// Defines a function prototype used when an asynchronous transport call
+// is completed.
+using TransportDoneFunc =
+    std::function<void(const ::google::protobuf::util::Status&)>;
+
+// Defines a function prototype to make an asynchronous Check call to
+// the service control server.
+using TransportCheckFunc = std::function<void(
+    const ::google::api::servicecontrol::v1::CheckRequest& request,
+    ::google::api::servicecontrol::v1::CheckResponse* response,
+    TransportDoneFunc on_done)>;
+
+// Defines a function prototype to make an asynchronous Report call to
+// the service control server.
+using TransportReportFunc = std::function<void(
+    const ::google::api::servicecontrol::v1::ReportRequest& request,
+    ::google::api::servicecontrol::v1::ReportResponse* response,
+    TransportDoneFunc on_done)>;
+
+// Defines a periodic timer created by PeriodicTimerCreateFunc.
+// Its only purpose is to cancel the timer instance.
+class PeriodicTimer {
+ public:
+  // Destructor
+  virtual ~PeriodicTimer() {}
+
+  // Cancels the timer.
+  virtual void Stop() = 0;
+};
+
+// Defines a function to create a periodic timer calling the function
+// with desired interval. The returned object can be used to cancel
+// the instance.
+using PeriodicTimerCreateFunc = std::function<std::unique_ptr<PeriodicTimer>(
+    int interval_ms, std::function<void()> timer_func)>;
 
 // Defines the options to create an instance of ServiceControlClient interface.
 struct ServiceControlClientOptions {
@@ -39,20 +73,20 @@ struct ServiceControlClientOptions {
   // If a metric is not specified in this map, use DELTA as its kind.
   std::shared_ptr<MetricKindMap> metric_kinds;
 
-  // Transport objects are used to send request to service control server.
+  // Transport functions are used to send request to service control server.
   // It can be implemented many ways based on the environments.
   // If not provided, the GRPC transport will be used.
-  std::shared_ptr<CheckTransport> check_transport;
-  std::shared_ptr<ReportTransport> report_transport;
+  TransportCheckFunc check_transport;
+  TransportReportFunc report_transport;
 
   // This is only used when transport is NOT provided. The library will
   // use this GRPC server name to create a GRPC transport.
   std::string service_control_grpc_server;
 
-  // The object to create a periodic timer for the library to flush out
+  // The function to create a periodic timer for the library to flush out
   // expired items. If not provided, the library will create a thread
   // based periodic timer.
-  std::shared_ptr<PeriodicTimer> periodic_timer;
+  PeriodicTimerCreateFunc periodic_timer;
 };
 
 // The statistics recorded by library.
@@ -170,22 +204,22 @@ struct Statistics {
 //
 // 2.3) Makes async calls with per_request transport.
 //
-//    class YourCheckTransport : public CheckTransport {
-//        void Check(request, response, on_done) override {
-//            env_->RemoteCall(ctx_, reqeust, response, on_done);
-//        }
-//     private:
-//       your_per_request_context ctx_;
-//       your_remote_call_env  env_;
-//    };
+// In some special cases, you may need to pass a per_request context
+// from your calling stack to your transport layer. The library allows
+// you to pass in a per_request transport instead of using the global
+// transport provided during creation.  Here is how you can use it:
 //
 //    CheckResponse check_response;
-//    YourCheckTransport check_transport(your_request_context);
-//    client->Check(check_transport, check_request, &check_response,
+//    client->Check(check_request, &check_response,
+//         // This is on_done function.
 //         [](const Status& status) {
 //             if (status.ok()) {
 //                 // Inspects check_response;
 //             }
+//         },
+//         // This is the per_request transport function.
+//         [per_reqeust_context](reqeust, response, on_done) {
+//            Remote(per_request_context, request, response, on_done);
 //         });
 //
 class ServiceControlClient {
@@ -232,10 +266,9 @@ class ServiceControlClient {
   // Only some special platforms may need to use this function.
   // It allows caller to pass in a per_request transport function.
   virtual void Check(
-      CheckTransport* check_transport,
       const ::google::api::servicecontrol::v1::CheckRequest& check_request,
       ::google::api::servicecontrol::v1::CheckResponse* check_response,
-      DoneCallback on_check_done) = 0;
+      DoneCallback on_check_done, TransportCheckFunc check_transport) = 0;
 
   // Reports operations to the Controller service for billing, logging,
   // monitoring, etc.
@@ -267,10 +300,9 @@ class ServiceControlClient {
   // Only some special platforms may need to use this function.
   // It allows callers to pass in a per_request transport function.
   virtual void Report(
-      ReportTransport* report_transport,
       const ::google::api::servicecontrol::v1::ReportRequest& report_request,
       ::google::api::servicecontrol::v1::ReportResponse* report_response,
-      DoneCallback on_report_done) = 0;
+      DoneCallback on_report_done, TransportReportFunc report_transport) = 0;
 
   // Get statistics.
   virtual ::google::protobuf::util::Status GetStatistics(

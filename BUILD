@@ -37,9 +37,7 @@ cc_library(
     ],
     hdrs = [
           "include/aggregation_options.h",
-          "include/periodic_timer.h",
           "include/service_control_client.h",
-          "include/transport.h",
           "utils/distribution_helper.h",
           "utils/simple_lru_cache_inl.h",
           "utils/simple_lru_cache.h",
