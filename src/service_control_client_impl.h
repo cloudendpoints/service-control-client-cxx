@@ -35,7 +35,7 @@ class ServiceControlClientImpl : public ServiceControlClient {
 
   // A check call with per_request transport.
   void Check(
-      CheckTransport* check_transport,
+      TransportCheckFunc check_transport,
       const ::google::api::servicecontrol::v1::CheckRequest& check_request,
       ::google::api::servicecontrol::v1::CheckResponse* check_response,
       DoneCallback on_check_done) override;
@@ -56,7 +56,7 @@ class ServiceControlClientImpl : public ServiceControlClient {
       Statistics* stat) const override;
   // A report call with per_request transport.
   void Report(
-      ReportTransport* report_transport,
+      TransportReportFunc report_transport,
       const ::google::api::servicecontrol::v1::ReportRequest& report_request,
       ::google::api::servicecontrol::v1::ReportResponse* report_response,
       DoneCallback on_report_done) override;
@@ -79,27 +79,13 @@ class ServiceControlClientImpl : public ServiceControlClient {
   // Flushes out expired items.
   ::google::protobuf::util::Status Flush();
 
-  // The actual check logic code.
-  void InternalCheck(
-      CheckTransport* check_transport,
-      const ::google::api::servicecontrol::v1::CheckRequest& check_request,
-      ::google::api::servicecontrol::v1::CheckResponse* check_response,
-      DoneCallback on_check_done);
-
-  // The actual report logic code.
-  void InternalReport(
-      ReportTransport* report_transport,
-      const ::google::api::servicecontrol::v1::ReportRequest& report_request,
-      ::google::api::servicecontrol::v1::ReportResponse* report_response,
-      DoneCallback on_report_done);
-
-  // The check transport object.
-  std::shared_ptr<CheckTransport> check_transport_;
-  // The report transport object.
-  std::shared_ptr<ReportTransport> report_transport_;
+  // The check transport function.
+  TransportCheckFunc check_transport_;
+  // The report transport function.
+  TransportReportFunc report_transport_;
 
   // The Timer object.
-  std::shared_ptr<PeriodicTimer::Timer> flush_timer_;
+  std::shared_ptr<PeriodicTimer> flush_timer_;
 
   // Atomic object to deal with multi-threads situation.
   std::atomic_int_fast64_t total_called_checks_;
