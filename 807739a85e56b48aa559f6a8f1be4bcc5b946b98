@@ -17,12 +17,28 @@ send_checks_in_flight;
 
 Similar for report.
 
+61:2-61:10
+Wed Apr 13 16:03:01 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: ebbdfaca_67edbada
+UUID: ebbdfaca_074a4652
+Bytes: 4
+Done
+
 62:5-62:10
 Tue Apr 12 21:57:05 2016 +0000
 Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: ebbdfaca_c7d3ee1b
 Bytes: 47
 Check sends to server from flushed cache items.
+
+62:5-62:10
+Wed Apr 13 16:03:01 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: ebbdfaca_c7d3ee1b
+UUID: ebbdfaca_e7238a98
+Bytes: 4
+Done
 
 64:12-64:19
 Tue Apr 12 21:57:05 2016 +0000
@@ -31,12 +47,28 @@ UUID: ebbdfaca_07dec624
 Bytes: 49
 Check sends to remote sever during Check() calls.
 
+64:12-64:19
+Wed Apr 13 16:03:01 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: ebbdfaca_07dec624
+UUID: ebbdfaca_c7268eab
+Bytes: 4
+Done
+
 67:11-67:24
 Tue Apr 12 21:57:05 2016 +0000
 Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: ebbdfaca_6704da6a
 Bytes: 11
 add comment
+
+67:11-67:24
+Wed Apr 13 16:03:01 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: ebbdfaca_6704da6a
+UUID: ebbdfaca_873576d1
+Bytes: 4
+Done
 
 File: src/service_control_client_impl.cc
 
@@ -47,12 +79,28 @@ UUID: ebbdfaca_c72ccede
 Bytes: 23
 use sizeof(statistics_)
 
+26:33-26:44
+Wed Apr 13 16:03:01 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: ebbdfaca_c72ccede
+UUID: ebbdfaca_e7154a21
+Bytes: 4
+Done
+
 87
 Tue Apr 12 21:34:08 2016 +0000
 Author: Lizan Zhou <5455@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: ebbdfaca_679bfa91
 Bytes: 21
 pre-increment always.
+
+87
+Wed Apr 13 16:03:01 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: ebbdfaca_679bfa91
+UUID: ebbdfaca_6754dad0
+Bytes: 4
+Done
 
 102
 Tue Apr 12 21:34:08 2016 +0000
@@ -68,6 +116,22 @@ Parent: ebbdfaca_a7a432cd
 UUID: ebbdfaca_478c3e2c
 Bytes: 60
 You are right.  we may need to use std::atomic_uint_fast64_t
+
+102
+Wed Apr 13 16:03:01 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: ebbdfaca_a7a432cd
+UUID: 4bcb66e2_e6cb1e22
+Bytes: 4
+Done
+
+102
+Wed Apr 13 16:03:01 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: ebbdfaca_478c3e2c
+UUID: 4bcb66e2_a6d126d4
+Bytes: 4
+Done
 
 174:23-174:34
 Tue Apr 12 21:57:05 2016 +0000
@@ -86,6 +150,14 @@ UUID: ebbdfaca_87965636
 Bytes: 16
 always return OK
 
+182:12-182:24
+Wed Apr 13 16:03:01 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: ebbdfaca_87965636
+UUID: ebbdfaca_0745e618
+Bytes: 4
+Done
+
 File: src/service_control_client_impl_test.cc
 
 1167:17-1167:39
@@ -94,4 +166,12 @@ Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: ebbdfaca_87e8169b
 Bytes: 118
 this 1 send_report_operations is wrong if reports_from_flush and reports_in_flight are all 0.  we need to find out why
+
+1167:17-1167:39
+Wed Apr 13 16:03:01 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: ebbdfaca_87e8169b
+UUID: 4bcb66e2_26c6d618
+Bytes: 4
+Done
 
