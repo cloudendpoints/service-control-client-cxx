@@ -1,0 +1,20 @@
+Revision: a9fa08abc13e38fc1f25e68d9984b11d303a8baa
+Patch-set: 2
+File: include/service_control_client.h
+
+50
+Wed Apr 13 23:34:55 2016 +0000
+Author: Lizan Zhou <5455@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 4bcb66e2_a0bc66de
+Bytes: 92
+worth a comment what each parameter means, since with std::function we lost parameter names.
+
+File: src/service_control_client_impl_test.cc
+
+244:21-244:28
+Wed Apr 13 23:34:55 2016 +0000
+Author: Lizan Zhou <5455@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 4bcb66e2_003f3a0a
+Bytes: 62
+instead of GetFunc, keep the inheritance and mocks operator()?
+
