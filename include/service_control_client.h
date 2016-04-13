@@ -12,11 +12,43 @@
 // A public exposed header can only include local headers in the same folder.
 // When including, not to put folder name in the include, just the file name.
 #include "aggregation_options.h"
-#include "periodic_timer.h"
-#include "transport.h"
 
 namespace google {
 namespace service_control_client {
+
+// Defines a function prototype used when an asynchronous transport call
+// is completed.
+using TransportDoneFunc =
+    std::function<void(const ::google::protobuf::util::Status&)>;
+
+// Defines a function prototype to make an asynchronous Check call to
+// the service control server.
+using TransportCheckFunc = std::function<void(
+    const ::google::api::servicecontrol::v1::CheckRequest&,
+    ::google::api::servicecontrol::v1::CheckResponse*, TransportDoneFunc)>;
+
+// Defines a function prototype to make an asynchronous Report call to
+// the service control server.
+using TransportReportFunc = std::function<void(
+    const ::google::api::servicecontrol::v1::ReportRequest&,
+    ::google::api::servicecontrol::v1::ReportResponse*, TransportDoneFunc)>;
+
+// Defines a periodic timer created by PeriodicTimerCreateFunc.
+// Its only purpose is to cancel the timer instance.
+class PeriodicTimer {
+ public:
+  // Destructor
+  virtual ~PeriodicTimer() {}
+
+  // Cancels the timer.
+  virtual void Stop() = 0;
+};
+
+// Defines a function to create a periodic timer calling the function
+// with desired interval. The returned object can be used to cancel
+// the instance.
+using PeriodicTimerCreateFunc =
+  std::function<std::unique_ptr<PeriodicTimer>(int, std::function<void()>)>;
 
 // Defines the options to create an instance of ServiceControlClient interface.
 struct ServiceControlClientOptions {
@@ -39,20 +71,20 @@ struct ServiceControlClientOptions {
   // If a metric is not specified in this map, use DELTA as its kind.
   std::shared_ptr<MetricKindMap> metric_kinds;
 
-  // Transport objects are used to send request to service control server.
+  // Transport functions are used to send request to service control server.
   // It can be implemented many ways based on the environments.
   // If not provided, the GRPC transport will be used.
-  std::shared_ptr<CheckTransport> check_transport;
-  std::shared_ptr<ReportTransport> report_transport;
+  TransportCheckFunc check_transport;
+  TransportReportFunc report_transport;
 
   // This is only used when transport is NOT provided. The library will
   // use this GRPC server name to create a GRPC transport.
   std::string service_control_grpc_server;
 
-  // The object to create a periodic timer for the library to flush out
+  // The function to create a periodic timer for the library to flush out
   // expired items. If not provided, the library will create a thread
   // based periodic timer.
-  std::shared_ptr<PeriodicTimer> periodic_timer;
+  PeriodicTimerCreateFunc periodic_timer;
 };
 
 // The statistics recorded by library.
@@ -232,7 +264,7 @@ class ServiceControlClient {
   // Only some special platforms may need to use this function.
   // It allows caller to pass in a per_request transport function.
   virtual void Check(
-      CheckTransport& check_transport,
+      TransportCheckFunc check_transport,
       const ::google::api::servicecontrol::v1::CheckRequest& check_request,
       ::google::api::servicecontrol::v1::CheckResponse* check_response,
       DoneCallback on_check_done) = 0;
@@ -267,7 +299,7 @@ class ServiceControlClient {
   // Only some special platforms may need to use this function.
   // It allows callers to pass in a per_request transport function.
   virtual void Report(
-      ReportTransport& report_transport,
+      TransportReportFunc report_transport,
       const ::google::api::servicecontrol::v1::ReportRequest& report_request,
       ::google::api::servicecontrol::v1::ReportResponse* report_response,
       DoneCallback on_report_done) = 0;
