@@ -9,6 +9,14 @@ UUID: 0b524ead_5f2a0f73
 Bytes: 42
 fix comment, this method no longer exists.
 
+45:5-45:24
+Wed Apr 13 02:58:52 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 0b524ead_5f2a0f73
+UUID: 0b524ead_c241661a
+Bytes: 4
+Done
+
 File: include/transport.h
 
 12
@@ -27,4 +35,14 @@ typedef Transport<CheckRequest, CheckResponse> CheckTransport;
 typedef Transport<ReportRequest, ReportResponse> ReportTransport;
 
 ?
+
+12
+Wed Apr 13 02:58:52 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 0b524ead_9fe09743
+UUID: 0b524ead_025f4eef
+Bytes: 286
+The method name is different, one is Check() and another is Report().   I could have them all call Run().  But there will be too many renames in other places.
+
+I am thinking about using std::function for them.  Each interface is just one method,  it will be better to use std::function.
 
