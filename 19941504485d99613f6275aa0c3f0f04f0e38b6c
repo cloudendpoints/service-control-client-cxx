@@ -1,0 +1,14 @@
+Revision: 19941504485d99613f6275aa0c3f0f04f0e38b6c
+Patch-set: 5
+File: include/service_control_client.h
+
+235:6-235:20
+Wed Apr 13 22:30:00 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 4bcb66e2_15fbfe8b
+Bytes: 112
+const CheckTransport&
+if this cannot be const, use pointer, per google c++ style
+
+please update other places too
+
