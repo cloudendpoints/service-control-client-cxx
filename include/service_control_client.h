@@ -39,12 +39,11 @@ struct ServiceControlClientOptions {
   // If a metric is not specified in this map, use DELTA as its kind.
   std::shared_ptr<MetricKindMap> metric_kinds;
 
-  // Transport object is used to send request to service control server.
+  // Transport objects are used to send request to service control server.
   // It can be implemented many ways based on the environments.
-  // A GRPC transport can be created by calling
-  // CreateGrpcTransport() defined in transport.h
   // If not provided, the GRPC transport will be used.
-  std::shared_ptr<Transport> transport;
+  std::shared_ptr<CheckTransport> check_transport;
+  std::shared_ptr<ReportTransport> report_transport;
 
   // This is only used when transport is NOT provided. The library will
   // use this GRPC server name to create a GRPC transport.
@@ -169,6 +168,26 @@ struct Statistics {
 //             }
 //         });
 //
+// 2.3) Makes async calls with per_request transport.
+//
+//    class YourCheckTransport : public CheckTransport {
+//        void Check(request, response, on_done) override {
+//            env_->RemoteCall(ctx_, reqeust, response, on_done);
+//        }
+//     private:
+//       your_per_request_context ctx_;
+//       your_remote_call_env  env_;
+//    };
+//
+//    CheckResponse check_response;
+//    YourCheckTransport check_transport(your_request_context);
+//    client->Check(check_transport, check_request, &check_response,
+//         [](const Status& status) {
+//             if (status.ok()) {
+//                 // Inspects check_response;
+//             }
+//         });
+//
 class ServiceControlClient {
  public:
   using DoneCallback =
@@ -209,6 +228,15 @@ class ServiceControlClient {
       const ::google::api::servicecontrol::v1::CheckRequest& check_request,
       ::google::api::servicecontrol::v1::CheckResponse* check_response) = 0;
 
+  // A check call with provided per_request transport function.
+  // Only some special platforms may need to use this function.
+  // It allows caller to pass in a per_request transport function.
+  virtual void Check(
+      CheckTransport* check_transport,
+      const ::google::api::servicecontrol::v1::CheckRequest& check_request,
+      ::google::api::servicecontrol::v1::CheckResponse* check_response,
+      DoneCallback on_check_done) = 0;
+
   // Reports operations to the Controller service for billing, logging,
   // monitoring, etc.
   // High importance operations are sent directly to the server without any
@@ -235,6 +263,16 @@ class ServiceControlClient {
       const ::google::api::servicecontrol::v1::ReportRequest& report_request,
       ::google::api::servicecontrol::v1::ReportResponse* report_response) = 0;
 
+  // A report call with provided per_request transport function.
+  // Only some special platforms may need to use this function.
+  // It allows callers to pass in a per_request transport function.
+  virtual void Report(
+      ReportTransport* report_transport,
+      const ::google::api::servicecontrol::v1::ReportRequest& report_request,
+      ::google::api::servicecontrol::v1::ReportResponse* report_response,
+      DoneCallback on_report_done) = 0;
+
+  // Get statistics.
   virtual ::google::protobuf::util::Status GetStatistics(
       Statistics* stat) const = 0;
 };
