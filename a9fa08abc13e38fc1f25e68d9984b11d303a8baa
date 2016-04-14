@@ -51,3 +51,22 @@ void operator()(const CheckRequest&, CheckResponse*, TransportDoneFunc) {
 
 work?
 
+244:21-244:28
+Thu Apr 14 02:55:34 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 4bcb66e2_9b89dfae
+UUID: 4bcb66e2_4d620a12
+Bytes: 303
+options.check_transport is a TransportCheckFunc type.
+
+I need to create one and assign to it.
+
+MockCheckTransport mock_transport;
+
+// I don't think this will work with your operator()
+options.check_transport = mock_transport();  
+
+That is why I need:
+
+options.check_transport = mock_transport.GetFunc();
+
