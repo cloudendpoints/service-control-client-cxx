@@ -36,3 +36,18 @@ We could not have inheritance since we don't have CheckTransport interface any m
 
 I like to use operator() to replace GetFunc(), but failed to figure out how.
 
+244:21-244:28
+Thu Apr 14 01:34:49 2016 +0000
+Author: Lizan Zhou <5455@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 4bcb66e2_dbb6b7fa
+UUID: 4bcb66e2_9b89dfae
+Bytes: 128
+didn't
+
+
+void operator()(const CheckRequest&, CheckResponse*, TransportDoneFunc) {
+  Check(request, response, on_done);
+}
+
+work?
+
