@@ -69,6 +69,11 @@ class ReportAggregatorImpl : public ReportAggregator,
   // Takes ownership of the iop.
   void OnCacheEntryDelete(OperationAggregator* iop);
 
+  // Tries to merge two report requests.
+  bool MergeItem(
+      const ::google::api::servicecontrol::v1::ReportRequest& new_item,
+      ::google::api::servicecontrol::v1::ReportRequest* old_item) override;
+
   // The service name.
   const std::string service_name_;
 
