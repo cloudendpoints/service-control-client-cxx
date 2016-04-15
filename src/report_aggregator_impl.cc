@@ -15,6 +15,10 @@ namespace google {
 namespace service_control_client {
 namespace {
 
+// A report can carry many operations, merge multiple report requests
+// into one report request until its number of operations reach this limit.
+const int kMaxOperationsToSend = 1000;
+
 // Returns whether the given report request has high value operations.
 bool HasHighImportantOperation(const ReportRequest& request) {
   for (const auto& operation : request.operations()) {
@@ -100,6 +104,17 @@ void ReportAggregatorImpl::OnCacheEntryDelete(OperationAggregator* iop) {
   delete iop;
 
   AddRemovedItem(request);
+}
+
+bool ReportAggregatorImpl::MergeItem(const ReportRequest& new_item,
+                                     ReportRequest* old_item) {
+  if (old_item->service_name() != new_item.service_name() ||
+      old_item->operations().size() + new_item.operations().size() >
+          kMaxOperationsToSend) {
+    return false;
+  }
+  old_item->MergeFrom(new_item);
+  return true;
 }
 
 // When the next Flush() should be called.
