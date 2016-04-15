@@ -16,3 +16,21 @@ UUID: 083414db_cf2da1d8
 Bytes: 7
 reaches
 
+60:20-60:26
+Fri Apr 15 19:18:43 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 083414db_4cdd3ffc
+Bytes: 54
+until the number of operations reaches a certain size.
+
+File: src/report_aggregator_impl.cc
+
+112:16-112:26
+Fri Apr 15 19:18:43 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 083414db_2cb433ac
+Bytes: 171
+can we also check the payload size against 1MB?
+
+https://cs.corp.google.com/piper///depot/google3/google/api/servicecontrol/v1/service_controller.proto?rcl=119703206&l=119
+
