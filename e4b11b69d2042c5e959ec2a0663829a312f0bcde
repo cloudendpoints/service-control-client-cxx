@@ -1,0 +1,18 @@
+Revision: e4b11b69d2042c5e959ec2a0663829a312f0bcde
+Patch-set: 1
+File: src/cache_removed_items_handler.h
+
+59:31-59:40
+Fri Apr 15 19:14:10 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 083414db_6f1d8dad
+Bytes: 8
+multiple
+
+60:41-60:47
+Fri Apr 15 19:14:10 2016 +0000
+Author: Qian Sun <5520@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 083414db_cf2da1d8
+Bytes: 7
+reaches
+
