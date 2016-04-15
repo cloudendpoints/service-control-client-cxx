@@ -54,6 +54,14 @@ class CacheRemovedItemsHandler {
     }
   }
 
+  // Checks if an new item can be merged into an old item.
+  // Derived class will implement this: CheckRequest will never merge.
+  // A ReportRequest can carry multiple operations, it can merge many
+  // reuqests until number of operations reaches certain size.
+  virtual bool MergeItem(const RequestType& new_item, RequestType* old_item) {
+    return false;
+  }
+
   // Class StackBuffer is designed to maintain the stack allocated vector which
   // can be used to insert cache removed items. This class has to be
   // instantiated at stack. It should be used outside of cache_mutex lock.
@@ -67,7 +75,12 @@ class CacheRemovedItemsHandler {
       }
     }
 
-    void Add(const RequestType& item) { items_.push_back(item); }
+    void Add(const RequestType& item) {
+      if (items_.empty() ||
+          !handler_->MergeItem(item, &items_[items_.size() - 1])) {
+        items_.push_back(item);
+      }
+    }
 
     // Class Swapper is used to swap stack_buffer_ variable in the
     // CacheRemovedItemsHandle class. It should be used within cache_mutex lock.
