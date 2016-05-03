@@ -1,10 +1,15 @@
 # The Service Control Client library for c/c++ #
 
-The Google service control server provides essential API services
-such as billing, quota management and monitoring.
+The service control client library provides C++ APIs for:
 
-This repository contains the client library for c/c++ to talk to
-the service control service.
+* access control check on API key validation
+* reporting API related data for google cloud logging and google cloud monitoring
+
+It offers:
+
+* fast access control check through caching
+* high scalability by significantly reducing outgoing check and report requests
+  through aggregation
 
 [TOC]
 
@@ -37,12 +42,8 @@ Recommended workflow to setup, build and test service control client code:
     git submodule update --init --recursive
 
     # Use Bazel to build
-    bazel build //utils:all
-    bazel build //src:all
+    bazel build :all
 
     # Use Bazel to test
-    bazel test //utils:all
-    bazel test //src:all
-
-
+    bazel test :all
 
