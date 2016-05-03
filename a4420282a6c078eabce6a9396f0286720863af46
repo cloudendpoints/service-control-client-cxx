@@ -23,3 +23,11 @@ also update the README.md to be consistent
 
 Also in README.md, for build, shall simply document bazel build :all for consistency?
 
+32:4-33:24
+Tue May 03 17:31:20 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: cd004ff2_849aecd2
+UUID: cd004ff2_2fee5198
+Bytes: 4
+Yes.
+
