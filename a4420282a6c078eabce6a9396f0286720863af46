@@ -1,0 +1,13 @@
+Revision: a4420282a6c078eabce6a9396f0286720863af46
+Patch-set: 1
+File: CONTRIBUTING
+
+32:4-33:24
+Tue May 03 16:42:50 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: cd004ff2_244af86f
+Bytes: 50
+this is wrong.  It should be just
+
+bazel test :all
+
