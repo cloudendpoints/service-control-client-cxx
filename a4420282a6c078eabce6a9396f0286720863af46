@@ -11,3 +11,15 @@ this is wrong.  It should be just
 
 bazel test :all
 
+32:4-33:24
+Tue May 03 16:52:10 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: cd004ff2_244af86f
+UUID: cd004ff2_849aecd2
+Bytes: 135
+done
+
+also update the README.md to be consistent
+
+Also in README.md, for build, shall simply document bazel build :all for consistency?
+
