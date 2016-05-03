@@ -41,8 +41,5 @@ Recommended workflow to setup, build and test service control client code:
     bazel build //src:all
 
     # Use Bazel to test
-    bazel test //utils:all
-    bazel test //src:all
-
-
+    bazel test :all
 
