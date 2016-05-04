@@ -9,6 +9,14 @@ UUID: cd484fa3_6a4ac770
 Bytes: 40
 remove license header of all BUILD files
 
+1:11-1:12
+Wed May 04 16:29:39 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: cd484fa3_6a4ac770
+UUID: cd484fa3_8404676d
+Bytes: 4
+Done
+
 File: third_party/boringssl_error_gen.py
 
 1:17-1:23
@@ -17,4 +25,12 @@ Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
 UUID: cd484fa3_8a459363
 Bytes: 113
 remove license headers. I'll consult OSS reviewer regarding the right license headers for third party code later.
+
+1:17-1:23
+Wed May 04 16:29:39 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: cd484fa3_8a459363
+UUID: cd484fa3_440a5f7a
+Bytes: 4
+Done
 
