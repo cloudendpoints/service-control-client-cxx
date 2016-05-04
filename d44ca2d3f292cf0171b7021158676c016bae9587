@@ -1,0 +1,20 @@
+Revision: d44ca2d3f292cf0171b7021158676c016bae9587
+Patch-set: 1
+File: third_party/BUILD
+
+1:11-1:12
+Wed May 04 03:34:08 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: cd484fa3_6a4ac770
+Bytes: 40
+remove license header of all BUILD files
+
+File: third_party/boringssl_error_gen.py
+
+1:17-1:23
+Wed May 04 03:34:08 2016 +0000
+Author: Wencheng Lu <5175@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: cd484fa3_8a459363
+Bytes: 113
+remove license headers. I'll consult OSS reviewer regarding the right license headers for third party code later.
+
