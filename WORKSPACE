@@ -16,7 +16,7 @@
 
 new_git_repository(
     name = "googletest_git",
-    build_file = "BUILD.googletest",
+    build_file = "third_party/BUILD.googletest",
     commit = "13206d6f53aaff844f2d3595a01ac83a29e383db",
     remote = "https://github.com/google/googletest.git",
 )
@@ -39,12 +39,12 @@ bind(
 # table generator.
 bind(
     name = "boringssl_error_gen",
-    actual = "//tools:boringssl_error_gen",
+    actual = "//third_party:boringssl_error_gen",
 )
 
 new_git_repository(
     name = "boringssl_git",
-    build_file = "BUILD.boringssl",
+    build_file = "third_party/BUILD.boringssl",
     commit = "c4f25ce0c6e3822eb639b2a5649a51ea42b46490",
     remote = "https://boringssl.googlesource.com/boringssl",
 )
