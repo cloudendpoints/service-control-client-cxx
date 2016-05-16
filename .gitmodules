@@ -6,3 +6,6 @@
 	path = google/protobuf
 	url = https://github.com/google/protobuf.git
 	ignore = untracked
+[submodule "third_party/googleapis"]
+	path = third_party/googleapis
+	url = https://github.com/googleapis/googleapis.git
