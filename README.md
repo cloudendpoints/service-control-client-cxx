@@ -3,7 +3,8 @@
 The service control client library provides C++ APIs for:
 
 * access control check on API key validation
-* reporting API related data for google cloud logging and google cloud monitoring
+* reporting API related data for google cloud logging and google cloud
+  monitoring
 
 It offers:
 
