@@ -1,0 +1,11 @@
+Revision: 7e65285098754d91a5be03f63e8f5fb8f551bdae
+Patch-set: 1
+File: third_party/config
+
+1:18-1:58
+Tue May 31 21:00:10 2016 +0000
+Author: Wayne Zhang <5025@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: b99c452b_01434e07
+Bytes: 36
+This is the wrong version of config.
+
