@@ -19,3 +19,14 @@ Not sure how we could do that as we need the future object here and potentially 
 
 Am I missing something?
 
+170:0-174:56
+Tue Jun 07 22:40:06 2016 +0000
+Author: Lizan Zhou <5455@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 23aca4b4_676400d4
+UUID: 23aca4b4_e7937069
+Bytes: 187
+I meant to move only promise, nothing to do with future. The future should be still usable after moving promise.
+
+See the sample code here:
+http://en.cppreference.com/w/cpp/thread/promise
+
