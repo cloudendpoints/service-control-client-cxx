@@ -30,3 +30,17 @@ I meant to move only promise, nothing to do with future. The future should be st
 See the sample code here:
 http://en.cppreference.com/w/cpp/thread/promise
 
+170:0-174:56
+Tue Jun 07 23:32:45 2016 +0000
+Author: Gurgen Hrachyan <5425@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 23aca4b4_e7937069
+UUID: 23aca4b4_32b75846
+Bytes: 326
+I see. The thing is I can't bind as an r-value reference in c++11. So I'd need to sneak-in the reference and then std::move(), which should work, but seems too subtle and dangerous. Something like this:
+
+Check(..., [&status_promise](Status status) {
+   std::move(status_promise)->set_value(status);
+}
+
+Do you have better idea?
+
