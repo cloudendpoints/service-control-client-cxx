@@ -44,3 +44,16 @@ Check(..., [&status_promise](Status status) {
 
 Do you have better idea?
 
+170:0-174:56
+Tue Jun 07 23:39:29 2016 +0000
+Author: Lizan Zhou <5455@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 23aca4b4_32b75846
+UUID: 23aca4b4_92cbccb8
+Bytes: 296
+Nothing better than reference and move in C++11. But note std::move is just a cast so you need bind it to a variable so the move can actually happen. so it will be:
+
+Check(..., [&status_promise](Status status) {
+  StatusPromise promise(std::move(status_promise));
+  promise.set_value(status);
+});
+
