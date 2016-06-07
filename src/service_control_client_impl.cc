@@ -167,11 +167,16 @@ void ServiceControlClientImpl::Check(const CheckRequest& check_request,
 
 Status ServiceControlClientImpl::Check(const CheckRequest& check_request,
                                        CheckResponse* check_response) {
-  StatusPromise status_promise;
-  StatusFuture status_future = status_promise.get_future();
+  // Need to use a shared_ptr for the promise as we pass it to the lambda below
+  // that might be running on a separate thread.
+  // If we use a stack object, std::promise::set_value() will unblock the
+  // current thread and the promise object might get destroyed before
+  // std::promise::set_value() has a chance to complete.
+  auto status_promise = std::make_shared<StatusPromise>();
+  StatusFuture status_future = status_promise->get_future();
 
   Check(check_request, check_response,
-        [&status_promise](Status status) { status_promise.set_value(status); });
+        [status_promise](Status status) { status_promise->set_value(status); });
 
   status_future.wait();
   return status_future.get();
@@ -205,11 +210,16 @@ void ServiceControlClientImpl::Report(const ReportRequest& report_request,
 
 Status ServiceControlClientImpl::Report(const ReportRequest& report_request,
                                         ReportResponse* report_response) {
-  StatusPromise status_promise;
-  StatusFuture status_future = status_promise.get_future();
+  // Need to use a shared_ptr for the promise as we pass it to the lambda below
+  // that might be running on a separate thread.
+  // If we use a stack object, std::promise::set_value() will unblock the
+  // current thread and the promise object might get destroyed before
+  // std::promise::set_value() has a chance to complete.
+  auto status_promise = std::make_shared<StatusPromise>();
+  StatusFuture status_future = status_promise->get_future();
 
-  Report(report_request, report_response, [&status_promise](Status status) {
-    status_promise.set_value(status);
+  Report(report_request, report_response, [status_promise](Status status) {
+    status_promise->set_value(status);
   });
 
   status_future.wait();

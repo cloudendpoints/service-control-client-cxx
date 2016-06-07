@@ -576,12 +576,12 @@ class ServiceControlClientImplTest : public ::testing::Test {
     mock_check_transport_.done_status_ = transport_status;
     mock_check_transport_.check_response_ = transport_response;
 
-    StatusPromise status_promise;
-    StatusFuture status_future = status_promise.get_future();
+    auto status_promise = std::make_shared<StatusPromise>();
+    StatusFuture status_future = status_promise->get_future();
 
     CheckResponse check_response;
-    client_->Check(request, &check_response, [&status_promise](Status status) {
-      status_promise.set_value(status);
+    client_->Check(request, &check_response, [status_promise](Status status) {
+      status_promise->set_value(status);
     });
 
     // Since it is not cached, transport should be called.
@@ -773,12 +773,12 @@ class ServiceControlClientImplTest : public ::testing::Test {
     mock_check_transport_.done_status_ = transport_status2;
     mock_check_transport_.check_response_ = transport_response2;
 
-    StatusPromise status_promise;
-    StatusFuture status_future = status_promise.get_future();
+    auto status_promise = std::make_shared<StatusPromise>();
+    StatusFuture status_future = status_promise->get_future();
 
     CheckResponse check_response;
-    client_->Check(request2, &check_response, [&status_promise](Status status) {
-      status_promise.set_value(status);
+    client_->Check(request2, &check_response, [status_promise](Status status) {
+      status_promise->set_value(status);
     });
 
     // on_check_done is called with right status.
@@ -1733,8 +1733,8 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportUsingThread) {
   // Set the report status to be used in the on_report_done
   mock_report_transport_.done_status_ = Status(Code::PERMISSION_DENIED, "");
 
-  StatusPromise status_promise;
-  StatusFuture status_future = status_promise.get_future();
+  auto status_promise = std::make_shared<StatusPromise>();
+  StatusFuture status_future = status_promise->get_future();
 
   ReportResponse report_response;
   // This request is high important, so it will not be cached.
@@ -1742,7 +1742,7 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportUsingThread) {
   report_request1_.mutable_operations(0)->set_importance(Operation::HIGH);
   client_->Report(
       report_request1_, &report_response,
-      [&status_promise](Status status) { status_promise.set_value(status); });
+      [status_promise](Status status) { status_promise->set_value(status); });
 
   Statistics stat;
   Status stat_status = client_->GetStatistics(&stat);
