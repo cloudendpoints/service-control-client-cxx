@@ -1,0 +1,11 @@
+Revision: 17ebe27c3834e0c77e8ed99961e68bb2759651a6
+Patch-set: 1
+File: src/service_control_client_impl.cc
+
+170:0-174:56
+Tue Jun 07 20:56:55 2016 +0000
+Author: Lizan Zhou <5455@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+UUID: 23aca4b4_24b71646
+Bytes: 81
+actually did a little more research on this, can we move the promise into lambda?
+
