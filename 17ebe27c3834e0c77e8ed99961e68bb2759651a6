@@ -9,3 +9,13 @@ UUID: 23aca4b4_24b71646
 Bytes: 81
 actually did a little more research on this, can we move the promise into lambda?
 
+170:0-174:56
+Tue Jun 07 22:17:51 2016 +0000
+Author: Gurgen Hrachyan <5425@3ccfd165-32a1-3a7c-ba90-d72e43bc4584>
+Parent: 23aca4b4_24b71646
+UUID: 23aca4b4_676400d4
+Bytes: 136
+Not sure how we could do that as we need the future object here and potentially before the lambda gets invoked.
+
+Am I missing something?
+
