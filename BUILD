@@ -66,6 +66,7 @@ cc_test(
     name = "check_aggregator_impl_test",
     size = "small",
     srcs = ["src/check_aggregator_impl_test.cc"],
+    linkstatic = 1,
     deps = [
         ":service_control_client_lib",
         "//external:googletest_main",
@@ -76,6 +77,7 @@ cc_test(
     name = "distribution_helper_test",
     size = "small",
     srcs = ["utils/distribution_helper_test.cc"],
+    linkstatic = 1,
     deps = [
         ":distribution_helper_lib",
         "//external:googletest_main",
@@ -86,6 +88,7 @@ cc_test(
     name = "md5_test",
     size = "small",
     srcs = ["utils/md5_test.cc"],
+    linkstatic = 1,
     deps = [
         ":service_control_client_lib",
         "//external:googletest_main",
@@ -96,6 +99,7 @@ cc_test(
     name = "money_utils_test",
     size = "small",
     srcs = ["src/money_utils_test.cc"],
+    linkstatic = 1,
     deps = [
         ":service_control_client_lib",
         "//external:googletest_main",
@@ -107,6 +111,7 @@ cc_test(
     size = "small",
     srcs = ["src/operation_aggregator_test.cc"],
     linkopts = ["-lm"],
+    linkstatic = 1,
     deps = [
         ":service_control_client_lib",
         "//external:googletest_main",
@@ -117,6 +122,7 @@ cc_test(
     name = "report_aggregator_impl_test",
     size = "small",
     srcs = ["src/report_aggregator_impl_test.cc"],
+    linkstatic = 1,
     deps = [
         ":service_control_client_lib",
         "//external:googletest_main",
@@ -128,6 +134,7 @@ cc_test(
     size = "small",
     srcs = ["src/service_control_client_impl_test.cc"],
     linkopts = ["-lm"],
+    linkstatic = 1,
     deps = [
         ":service_control_client_lib",
         "//external:googletest_main",
@@ -138,6 +145,7 @@ cc_test(
     name = "signature_test",
     size = "small",
     srcs = ["src/signature_test.cc"],
+    linkstatic = 1,
     deps = [
         ":service_control_client_lib",
         "//external:googletest_main",
@@ -152,6 +160,7 @@ cc_test(
         "-lm",
         "-lpthread",
     ],
+    linkstatic = 1,
     deps = [
         ":simple_lru_cache",
         "//external:googletest_main",

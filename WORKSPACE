@@ -31,21 +31,9 @@ bind(
     actual = "@googletest_git//:googletest_main",
 )
 
-# Reimplementation of error table generator Boring SSL uses in build.
-# Boring SSL implementation is in go which doesn't yet have complete Bazel
-# support and the temporary support used in nginx workspace
-# https://nginx.googlesource.com/workspace does not work well with
-# Bazel sandboxing. Therefore, we temporarily reimplement the error
-# table generator.
-bind(
-    name = "boringssl_error_gen",
-    actual = "//third_party:boringssl_error_gen",
-)
-
-new_git_repository(
+git_repository(
     name = "boringssl_git",
-    build_file = "third_party/BUILD.boringssl",
-    commit = "c4f25ce0c6e3822eb639b2a5649a51ea42b46490",
+    commit = "f7cc893d5032d11ae32646f93ace1c1237b9f463",  # 2016-07-07
     remote = "https://boringssl.googlesource.com/boringssl",
 )
 
