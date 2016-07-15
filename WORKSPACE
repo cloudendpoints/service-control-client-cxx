@@ -32,12 +32,12 @@ bind(
 )
 
 git_repository(
-    name = "boringssl_git",
-    commit = "f7cc893d5032d11ae32646f93ace1c1237b9f463",  # 2016-07-07
+    name = "boringssl",
+    commit = "2f29d38cc5e6c1bfae4ce22b4b032fb899cdb705",  # 2016-07-12
     remote = "https://boringssl.googlesource.com/boringssl",
 )
 
 bind(
     name = "boringssl_crypto",
-    actual = "@boringssl_git//:crypto",
+    actual = "@boringssl//:crypto",
 )
