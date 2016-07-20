@@ -1,5 +1,5 @@
 licenses(["notice"])
-load("/google/protobuf/protobuf", "cc_proto_library")
+load("@protobuf_git//:protobuf.bzl", "cc_proto_library")
 
 cc_proto_library(
     name = "service_config",
@@ -26,6 +26,8 @@ cc_proto_library(
     include = "googleapis",
     visibility = ["//visibility:public"],
     deps = [
-        "//google/protobuf:cc_wkt_protos",
+        "//external:cc_wkt_protos",
     ],
+    protoc = "//external:protoc",
+    default_runtime = "//external:protobuf",
 )

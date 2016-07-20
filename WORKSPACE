@@ -41,3 +41,29 @@ bind(
     name = "boringssl_crypto",
     actual = "@boringssl//:crypto",
 )
+
+git_repository(
+    name = "protobuf_git",
+    commit = "56855f6f002eeee8cf03021eaf2ece2adff2a297", # 3.0.0-beta-4
+    remote = "https://github.com/google/protobuf.git",
+)
+
+bind(
+    name = "protoc",
+    actual = "@protobuf_git//:protoc",
+)
+
+bind(
+    name = "protobuf",
+    actual = "@protobuf_git//:protobuf",
+)
+
+bind(
+    name = "cc_wkt_protos",
+    actual = "@protobuf_git//:cc_wkt_protos",
+)
+
+bind(
+    name = "cc_wkt_protos_genproto",
+    actual = "@protobuf_git//:cc_wkt_protos_genproto",
+)
