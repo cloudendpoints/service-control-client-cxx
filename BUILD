@@ -1,5 +1,7 @@
 licenses(["notice"])
 
+exports_files(["LICENSE"])
+
 cc_library(
     name = "distribution_helper_lib",
     srcs = ["utils/distribution_helper.cc"],
