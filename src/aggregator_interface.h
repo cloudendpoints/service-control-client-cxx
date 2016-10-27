@@ -117,12 +117,14 @@ class CheckAggregator {
 
 // Creates a report aggregator.
 std::unique_ptr<ReportAggregator> CreateReportAggregator(
-    const std::string& service_name, const ReportAggregationOptions& options,
+    const std::string& service_name, const std::string& service_config_id,
+    const ReportAggregationOptions& options,
     std::shared_ptr<MetricKindMap> metric_kind);
 
 // Creates a check aggregator.
 std::unique_ptr<CheckAggregator> CreateCheckAggregator(
-    const std::string& service_name, const CheckAggregationOptions& options,
+    const std::string& service_name, const std::string& service_config_id,
+    const CheckAggregationOptions& options,
     std::shared_ptr<MetricKindMap> metric_kind);
 
 }  // namespace service_control_client

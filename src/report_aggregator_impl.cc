@@ -47,9 +47,11 @@ bool HasHighImportantOperation(const ReportRequest& request) {
 }  // namespace
 
 ReportAggregatorImpl::ReportAggregatorImpl(
-    const string& service_name, const ReportAggregationOptions& options,
+    const string& service_name, const std::string& service_config_id,
+    const ReportAggregationOptions& options,
     std::shared_ptr<MetricKindMap> metric_kinds)
     : service_name_(service_name),
+      service_config_id_(service_config_id),
       options_(options),
       metric_kinds_(metric_kinds) {
   if (options.num_entries > 0) {
@@ -114,6 +116,7 @@ void ReportAggregatorImpl::OnCacheEntryDelete(OperationAggregator* iop) {
   // are already protected by cache_mutex.
   ReportRequest request;
   request.set_service_name(service_name_);
+  request.set_service_config_id(service_config_id_);
   // TODO(qiwzhang): Remove this copy
   *(request.add_operations()) = iop->ToOperationProto();
   delete iop;
@@ -167,10 +170,11 @@ Status ReportAggregatorImpl::FlushAll() {
 }
 
 std::unique_ptr<ReportAggregator> CreateReportAggregator(
-    const std::string& service_name, const ReportAggregationOptions& options,
+    const std::string& service_name, const std::string& service_config_id,
+    const ReportAggregationOptions& options,
     std::shared_ptr<MetricKindMap> metric_kind) {
-  return std::unique_ptr<ReportAggregator>(
-      new ReportAggregatorImpl(service_name, options, metric_kind));
+  return std::unique_ptr<ReportAggregator>(new ReportAggregatorImpl(
+      service_name, service_config_id, options, metric_kind));
 }
 
 }  // namespace service_control_client

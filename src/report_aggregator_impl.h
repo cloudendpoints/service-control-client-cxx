@@ -46,6 +46,7 @@ class ReportAggregatorImpl : public ReportAggregator,
  public:
   // Constructor.
   ReportAggregatorImpl(const std::string& service_name,
+                       const std::string& service_config_id,
                        const ReportAggregationOptions& options,
                        std::shared_ptr<MetricKindMap> metric_kind);
 
@@ -91,6 +92,8 @@ class ReportAggregatorImpl : public ReportAggregator,
 
   // The service name.
   const std::string service_name_;
+  // The service config id.
+  const std::string service_config_id_;
 
   ReportAggregationOptions options_;
 

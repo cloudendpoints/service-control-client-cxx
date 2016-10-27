@@ -37,12 +37,14 @@ namespace service_control_client {
 namespace {
 
 const char kServiceName[] = "library.googleapis.com";
+const char kServiceConfigId[] = "2016-09-19r0";
 
 const int kFlushIntervalMs = 100;
 const int kExpirationMs = 200;
 
 const char kRequest1[] = R"(
 service_name: "library.googleapis.com"
+service_config_id: "2016-09-19r0"
 operation {
   consumer_id: "project:some-consumer"
   start_time {
@@ -78,6 +80,7 @@ check_errors {
 
 const char kRequest2[] = R"(
 service_name: "library.googleapis.com"
+service_config_id: "2016-09-19r0"
 operation {
   consumer_id: "project:some-consumer"
   operation_id: "operation-2"
@@ -132,7 +135,7 @@ class CheckAggregatorImplTest : public ::testing::Test {
                                     kExpirationMs);
 
     aggregator_ = CreateCheckAggregator(
-        kServiceName, options,
+        kServiceName, kServiceConfigId, options,
         std::shared_ptr<MetricKindMap>(new MetricKindMap));
     ASSERT_TRUE((bool)(aggregator_));
     aggregator_->SetFlushCallback(std::bind(
@@ -182,8 +185,9 @@ TEST_F(CheckAggregatorImplTest, TestHighValueOperationSuccess) {
 
 TEST_F(CheckAggregatorImplTest, TestDisableCache) {
   CheckAggregationOptions options(0 /*entries*/, 1000, 2000);
-  aggregator_ = CreateCheckAggregator(
-      kServiceName, options, std::shared_ptr<MetricKindMap>(new MetricKindMap));
+  aggregator_ =
+      CreateCheckAggregator(kServiceName, kServiceConfigId, options,
+                            std::shared_ptr<MetricKindMap>(new MetricKindMap));
   ASSERT_TRUE((bool)(aggregator_));
   CheckResponse response;
   EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request1_, &response));

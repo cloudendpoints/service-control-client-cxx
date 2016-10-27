@@ -41,9 +41,10 @@ void CheckAggregatorImpl::CacheElem::Aggregate(
 }
 
 CheckRequest CheckAggregatorImpl::CacheElem::ReturnCheckRequestAndClear(
-    const string& service_name) {
+    const string& service_name, const std::string& service_config_id) {
   CheckRequest request;
   request.set_service_name(service_name);
+  request.set_service_config_id(service_config_id);
 
   if (operation_aggregator_ != NULL) {
     *(request.mutable_operation()) = operation_aggregator_->ToOperationProto();
@@ -53,9 +54,11 @@ CheckRequest CheckAggregatorImpl::CacheElem::ReturnCheckRequestAndClear(
 }
 
 CheckAggregatorImpl::CheckAggregatorImpl(
-    const string& service_name, const CheckAggregationOptions& options,
+    const string& service_name, const std::string& service_config_id,
+    const CheckAggregationOptions& options,
     std::shared_ptr<MetricKindMap> metric_kinds)
     : service_name_(service_name),
+      service_config_id_(service_config_id),
       options_(options),
       metric_kinds_(metric_kinds) {
   // Converts flush_interval_ms to Cycle used by SimpleCycleTimer.
@@ -226,7 +229,7 @@ void CheckAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
   }
 
   CheckRequest request;
-  request = elem->ReturnCheckRequestAndClear(service_name_);
+  request = elem->ReturnCheckRequestAndClear(service_name_, service_config_id_);
   AddRemovedItem(request);
   delete elem;
 }
@@ -247,10 +250,11 @@ Status CheckAggregatorImpl::FlushAll() {
 }
 
 std::unique_ptr<CheckAggregator> CreateCheckAggregator(
-    const std::string& service_name, const CheckAggregationOptions& options,
+    const std::string& service_name, const std::string& service_config_id,
+    const CheckAggregationOptions& options,
     std::shared_ptr<MetricKindMap> metric_kind) {
-  return std::unique_ptr<CheckAggregator>(
-      new CheckAggregatorImpl(service_name, options, metric_kind));
+  return std::unique_ptr<CheckAggregator>(new CheckAggregatorImpl(
+      service_name, service_config_id, options, metric_kind));
 }
 
 }  // namespace service_control_client

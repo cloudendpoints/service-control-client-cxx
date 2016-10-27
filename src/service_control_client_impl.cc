@@ -30,11 +30,14 @@ namespace google {
 namespace service_control_client {
 
 ServiceControlClientImpl::ServiceControlClientImpl(
-    const string& service_name, ServiceControlClientOptions& options) {
-  check_aggregator_ = CreateCheckAggregator(service_name, options.check_options,
-                                            options.metric_kinds);
-  report_aggregator_ = CreateReportAggregator(
-      service_name, options.report_options, options.metric_kinds);
+    const string& service_name, const std::string& service_config_id,
+    ServiceControlClientOptions& options) {
+  check_aggregator_ =
+      CreateCheckAggregator(service_name, service_config_id,
+                            options.check_options, options.metric_kinds);
+  report_aggregator_ =
+      CreateReportAggregator(service_name, service_config_id,
+                             options.report_options, options.metric_kinds);
 
   check_transport_ = options.check_transport;
   report_transport_ = options.report_transport;
@@ -276,9 +279,10 @@ Status ServiceControlClientImpl::FlushAll() {
 
 // Creates a ServiceControlClient object.
 std::unique_ptr<ServiceControlClient> CreateServiceControlClient(
-    const std::string& service_name, ServiceControlClientOptions& options) {
+    const std::string& service_name, const std::string& service_config_id,
+    ServiceControlClientOptions& options) {
   return std::unique_ptr<ServiceControlClient>(
-      new ServiceControlClientImpl(service_name, options));
+      new ServiceControlClientImpl(service_name, service_config_id, options));
 }
 
 }  // namespace service_control_client

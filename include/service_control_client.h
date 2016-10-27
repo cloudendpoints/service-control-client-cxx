@@ -326,7 +326,8 @@ class ServiceControlClient {
 
 // Creates a ServiceControlClient object.
 std::unique_ptr<ServiceControlClient> CreateServiceControlClient(
-    const std::string& service_name, ServiceControlClientOptions& options);
+    const std::string& service_name, const std::string& service_config_id,
+    ServiceControlClientOptions& options);
 
 }  // namespace service_control_client
 }  // namespace google

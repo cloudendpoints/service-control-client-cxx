@@ -31,6 +31,7 @@ class ServiceControlClientImpl : public ServiceControlClient {
  public:
   // Constructor.
   ServiceControlClientImpl(const std::string& service_name,
+                           const std::string& service_config_id,
                            ServiceControlClientOptions& options);
 
   // Override the destructor.

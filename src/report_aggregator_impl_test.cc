@@ -40,9 +40,11 @@ namespace service_control_client {
 namespace {
 
 const char kServiceName[] = "library.googleapis.com";
+const char kServiceConfigId[] = "2016-09-19r0";
 
 const char kRequest1[] = R"(
 service_name: "library.googleapis.com"
+service_config_id: "2016-09-19r0"
 operations: {
   operation_id: "operation-1"
   consumer_id: "project:some-consumer"
@@ -80,6 +82,7 @@ operations: {
 
 const char kRequest2[] = R"(
 service_name: "library.googleapis.com"
+service_config_id: "2016-09-19r0"
 operations: {
    operation_id: "operation-2"
   consumer_id: "project:some-consumer"
@@ -118,6 +121,7 @@ operations: {
 // Result of Merging request 1 into request 2, assuming they have delta metrics.
 const char kDeltaMerged12[] = R"(
 service_name: "library.googleapis.com"
+service_config_id: "2016-09-19r0"
 operations: {
   operation_id: "operation-1"
   consumer_id: "project:some-consumer"
@@ -172,7 +176,7 @@ class ReportAggregatorImplTest : public ::testing::Test {
 
     ReportAggregationOptions options(1 /*entries*/, 1000 /*flush_interval_ms*/);
     aggregator_ = CreateReportAggregator(
-        kServiceName, options,
+        kServiceName, kServiceConfigId, options,
         std::shared_ptr<MetricKindMap>(new MetricKindMap));
     ASSERT_TRUE((bool)(aggregator_));
     aggregator_->SetFlushCallback(std::bind(
@@ -289,8 +293,9 @@ TEST_F(ReportAggregatorImplTest, TestHighValueOperationSuccess) {
 
 TEST_F(ReportAggregatorImplTest, TestDisableCache) {
   ReportAggregationOptions options(0 /*entries*/, 1000 /*flush_interval_ms*/);
-  aggregator_ = CreateReportAggregator(
-      kServiceName, options, std::shared_ptr<MetricKindMap>(new MetricKindMap));
+  aggregator_ =
+      CreateReportAggregator(kServiceName, kServiceConfigId, options,
+                             std::shared_ptr<MetricKindMap>(new MetricKindMap));
   ASSERT_TRUE((bool)(aggregator_));
   aggregator_->SetFlushCallback(std::bind(
       &ReportAggregatorImplTest::FlushCallback, this, std::placeholders::_1));

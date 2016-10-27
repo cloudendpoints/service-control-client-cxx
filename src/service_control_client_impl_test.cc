@@ -43,9 +43,11 @@ namespace service_control_client {
 namespace {
 
 const char kServiceName[] = "library.googleapis.com";
+const char kServiceConfigId[] = "2016-09-19r0";
 
 const char kCheckRequest1[] = R"(
 service_name: "library.googleapis.com"
+service_config_id: "2016-09-19r0"
 operation {
   consumer_id: "project:some-consumer"
   start_time {
@@ -81,6 +83,7 @@ check_errors {
 
 const char kCheckRequest2[] = R"(
 service_name: "library.googleapis.com"
+service_config_id: "2016-09-19r0"
 operation {
   consumer_id: "project:some-consumer"
   operation_id: "operation-2"
@@ -116,6 +119,7 @@ check_errors {
 
 const char kReportRequest1[] = R"(
 service_name: "library.googleapis.com"
+service_config_id: "2016-09-19r0"
 operations: {
   operation_id: "operation-1"
   consumer_id: "project:some-consumer"
@@ -153,6 +157,7 @@ operations: {
 
 const char kReportRequest2[] = R"(
 service_name: "library.googleapis.com"
+service_config_id: "2016-09-19r0"
 operations: {
    operation_id: "operation-2"
   consumer_id: "project:some-consumer"
@@ -191,6 +196,7 @@ operations: {
 // Result of Merging request 1 into request 2, assuming they have delta metrics.
 const char kReportDeltaMerged12[] = R"(
 service_name: "library.googleapis.com"
+service_config_id: "2016-09-19r0"
 operations: {
   operation_id: "operation-1"
   consumer_id: "project:some-consumer"
@@ -441,7 +447,8 @@ class ServiceControlClientImplTest : public ::testing::Test {
         ReportAggregationOptions(1 /* entries */, 500 /*flush_interval_ms*/));
     options.check_transport = mock_check_transport_.GetFunc();
     options.report_transport = mock_report_transport_.GetFunc();
-    client_ = CreateServiceControlClient(kServiceName, options);
+    client_ =
+        CreateServiceControlClient(kServiceName, kServiceConfigId, options);
   }
 
   // Tests non cached check request. Mocked transport::Check() is storing
@@ -1798,7 +1805,7 @@ TEST_F(ServiceControlClientImplTest, TestFlushIntervalReportNeverFlush) {
       .WillOnce(Invoke(&mock_timer, &MockPeriodicTimer::MyStartTimer));
 
   std::unique_ptr<ServiceControlClient> client =
-      CreateServiceControlClient(kServiceName, options);
+      CreateServiceControlClient(kServiceName, kServiceConfigId, options);
   ASSERT_EQ(mock_timer.interval_ms_, 1000);
 }
 
@@ -1818,7 +1825,7 @@ TEST_F(ServiceControlClientImplTest, TestFlushIntervalCheckNeverFlush) {
       .WillOnce(Invoke(&mock_timer, &MockPeriodicTimer::MyStartTimer));
 
   std::unique_ptr<ServiceControlClient> client =
-      CreateServiceControlClient(kServiceName, options);
+      CreateServiceControlClient(kServiceName, kServiceConfigId, options);
   ASSERT_EQ(mock_timer.interval_ms_, 500);
 }
 
@@ -1836,7 +1843,7 @@ TEST_F(ServiceControlClientImplTest, TestFlushInterval) {
       .WillOnce(Invoke(&mock_timer, &MockPeriodicTimer::MyStartTimer));
 
   std::unique_ptr<ServiceControlClient> client =
-      CreateServiceControlClient(kServiceName, options);
+      CreateServiceControlClient(kServiceName, kServiceConfigId, options);
   ASSERT_EQ(mock_timer.interval_ms_, 800);
 }
 
@@ -1853,7 +1860,7 @@ TEST_F(ServiceControlClientImplTest, TestFlushCalled) {
   EXPECT_CALL(mock_timer, StartTimer(_, _))
       .WillOnce(Invoke(&mock_timer, &MockPeriodicTimer::MyStartTimer));
 
-  client_ = CreateServiceControlClient(kServiceName, options);
+  client_ = CreateServiceControlClient(kServiceName, kServiceConfigId, options);
   ASSERT_TRUE(mock_timer.callback_ != NULL);
 
   ReportResponse report_response;
@@ -1893,7 +1900,7 @@ TEST_F(ServiceControlClientImplTest,
   EXPECT_CALL(mock_timer, StartTimer(_, _))
       .WillOnce(Invoke(&mock_timer, &MockPeriodicTimer::MyStartTimer));
 
-  client_ = CreateServiceControlClient(kServiceName, options);
+  client_ = CreateServiceControlClient(kServiceName, kServiceConfigId, options);
   ASSERT_TRUE(mock_timer.callback_ != NULL);
 
   ReportResponse report_response;
