@@ -33,9 +33,9 @@ namespace service_control_client {
 
 namespace {
 
-// Each logEntry is about 0.5 KB. LogEntries can only been appended.
+// Each logEntry is about 0.5 KB. LogEntries can only be appended.
 // Not to append too many logEntries in one operation in order to
-// limit the final report size to be < 1MB.
+// limit the final report size.
 const int kMaxLogEntries = 100;
 
 // Returns whether timestamp a is before b or not.
