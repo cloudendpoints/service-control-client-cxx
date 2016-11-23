@@ -231,6 +231,16 @@ TEST_F(ReportAggregatorImplTest, TestAddOperation1) {
   EXPECT_TRUE(MessageDifferencer::Equals(flushed_[0], request1_));
 }
 
+TEST_F(ReportAggregatorImplTest, TestFlushOutMaxLogEntry) {
+  // Each operation can append up to 100 log entries.
+  for (int i = 0; i < 100; ++i) {
+    EXPECT_OK(aggregator_->Report(request1_));
+  }
+  // With 100 log entries, the item should be flushed out.
+  EXPECT_EQ(flushed_.size(), 1);
+  EXPECT_EQ(flushed_[0].operations(0).log_entries_size(), 100);
+}
+
 TEST_F(ReportAggregatorImplTest, TestAddOperation12) {
   EXPECT_OK(aggregator_->Report(request1_));
   // Item cached, not flushed out

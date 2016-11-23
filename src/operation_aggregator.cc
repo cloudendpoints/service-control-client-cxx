@@ -33,6 +33,11 @@ namespace service_control_client {
 
 namespace {
 
+// Each logEntry is about 0.5 KB. LogEntries can only been appended.
+// Not to append too many logEntries in one operation in order to
+// limit the final report size to be < 1MB.
+const int kMaxLogEntries = 100;
+
 // Returns whether timestamp a is before b or not.
 bool TimestampBefore(const Timestamp& a, const Timestamp& b) {
   return a.seconds() < b.seconds() ||
@@ -136,6 +141,10 @@ void OperationAggregator::MergeOperation(const Operation& operation) {
 
   MergeMetricValueSets(operation);
   MergeLogEntries(operation);
+}
+
+bool OperationAggregator::TooBig() const {
+  return operation_.log_entries_size() >= kMaxLogEntries;
 }
 
 Operation OperationAggregator::ToOperationProto() const {

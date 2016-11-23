@@ -30,10 +30,10 @@ namespace google {
 namespace service_control_client {
 namespace {
 
-// A report can carry many operations, merge multiple report requests
-// into one report request until its number of operations reach this limit.
-// Each report is about 4KB now. Maximum allowed size from server is 1MB.
-const int kMaxOperationsToSend = 100;
+// Service control server limits each report data size to 1MB.
+// Roughly, each operation may have up to 50KB based on maximum of 100
+// aggregated logEntries (each log entry is about 500 bytes).
+const int kMaxOperationsToSend = 10;
 
 // Returns whether the given report request has high value operations.
 bool HasHighImportantOperation(const ReportRequest& request) {
@@ -99,13 +99,22 @@ Status ReportAggregatorImpl::Report(
   for (const auto& operation : request.operations()) {
     string signature = GenerateReportOperationSignature(operation);
 
-    ReportCache::ScopedLookup lookup(cache_.get(), signature);
-    if (lookup.Found()) {
-      lookup.value()->MergeOperation(operation);
-    } else {
-      OperationAggregator* iop =
-          new OperationAggregator(operation, metric_kinds_.get());
-      cache_->Insert(signature, iop, 1);
+    bool too_big = false;
+    {
+      ReportCache::ScopedLookup lookup(cache_.get(), signature);
+      if (lookup.Found()) {
+        lookup.value()->MergeOperation(operation);
+        too_big = lookup.value()->TooBig();
+      } else {
+        OperationAggregator* iop =
+            new OperationAggregator(operation, metric_kinds_.get());
+        cache_->Insert(signature, iop, 1);
+      }
+    }
+    // If the merged operation is too big, remove it from the cache
+    // to flush it out. Make sure to do that outside of lookup scope.
+    if (too_big) {
+      cache_->Remove(signature);
     }
   }
   return Status::OK;

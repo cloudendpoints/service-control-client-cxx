@@ -47,6 +47,9 @@ class OperationAggregator {
   // Transforms to Operation proto message.
   ::google::api::servicecontrol::v1::Operation ToOperationProto() const;
 
+  // Check if the operation is too big.
+  bool TooBig() const;
+
  private:
   // Merges the metric value sets in the given operation into this operation.
   void MergeMetricValueSets(
