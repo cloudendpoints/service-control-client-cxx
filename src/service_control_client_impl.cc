@@ -84,8 +84,8 @@ ServiceControlClientImpl::ServiceControlClientImpl(
                          report_aggregator_copy]() {
           Status status = check_aggregator_copy->Flush();
           if (!status.ok()) {
-            GOOGLE_LOG(ERROR)
-                << "Failed in Check::Flush() " << status.error_message();
+            GOOGLE_LOG(ERROR) << "Failed in Check::Flush() "
+                              << status.error_message();
           }
 
           status = quota_aggregator_copy->Flush();
