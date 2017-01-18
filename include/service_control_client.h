@@ -43,6 +43,13 @@ using TransportCheckFunc = std::function<void(
     ::google::api::servicecontrol::v1::CheckResponse* response,
     TransportDoneFunc on_done)>;
 
+// Defines a function prototype to make an asynchronous Quota call to
+// the service control server.
+using TransportQuotaFunc = std::function<void(
+    const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request,
+    ::google::api::servicecontrol::v1::AllocateQuotaResponse* response,
+    TransportDoneFunc on_done)>;
+
 // Defines a function prototype to make an asynchronous Report call to
 // the service control server.
 using TransportReportFunc = std::function<void(
@@ -80,6 +87,8 @@ struct ServiceControlClientOptions {
   // Check aggregation options.
   CheckAggregationOptions check_options;
 
+	// TODO:: JAEBONG
+  QuotaAggregationOptions quota_options;
   // Report aggregation options.
   ReportAggregationOptions report_options;
 
@@ -92,6 +101,8 @@ struct ServiceControlClientOptions {
   // It can be implemented many ways based on the environments.
   // If not provided, the GRPC transport will be used.
   TransportCheckFunc check_transport;
+  // TODO:: JAEBONG
+  TransportQuotaFunc quota_transport;
   TransportReportFunc report_transport;
 
   // This is only used when transport is NOT provided. The library will
@@ -284,6 +295,15 @@ class ServiceControlClient {
       const ::google::api::servicecontrol::v1::CheckRequest& check_request,
       ::google::api::servicecontrol::v1::CheckResponse* check_response,
       DoneCallback on_check_done, TransportCheckFunc check_transport) = 0;
+
+	// TODO:: JAEBONG
+  // A check call with provided per_request transport function.
+  // Only some special platforms may need to use this function.
+  // It allows caller to pass in a per_request transport function.
+  virtual void Quota(
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest& quota_request,
+      ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response,
+      DoneCallback on_quota_done, TransportQuotaFunc quota_transport) = 0;
 
   // Reports operations to the Controller service for billing, logging,
   // monitoring, etc.
