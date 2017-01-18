@@ -96,8 +96,8 @@ ServiceControlClientImpl::ServiceControlClientImpl(
 
           status = report_aggregator_copy->Flush();
           if (!status.ok()) {
-            GOOGLE_LOG(ERROR)
-                << "Failed in Report::Flush() " << status.error_message();
+            GOOGLE_LOG(ERROR) << "Failed in Report::Flush() "
+                              << status.error_message();
           }
         });
   }
