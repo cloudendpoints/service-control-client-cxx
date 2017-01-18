@@ -23,6 +23,8 @@ cc_library(
         "src/money_utils.h",
         "src/operation_aggregator.cc",
         "src/operation_aggregator.h",
+        "src/quota_aggregator_impl.cc",
+        "src/quota_aggregator_impl.h",
         "src/report_aggregator_impl.cc",
         "src/report_aggregator_impl.h",
         "src/service_control_client_impl.cc",

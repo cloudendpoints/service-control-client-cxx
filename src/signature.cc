@@ -20,6 +20,8 @@ using std::string;
 using google::api::servicecontrol::v1::CheckRequest;
 using google::api::servicecontrol::v1::MetricValue;
 using google::api::servicecontrol::v1::Operation;
+using google::api::servicecontrol::v1::AllocateQuotaRequest;
+using google::api::servicecontrol::v1::QuotaOperation;
 
 namespace google {
 namespace service_control_client {
@@ -91,6 +93,39 @@ string GenerateCheckRequestSignature(const CheckRequest& request) {
 
   return hasher.Digest();
 }
+
+
+// TODO:: jaebong:: This is the copy of GenerateCheckRequestSignature above.
+// This function might be changed later
+string GenerateAllocateQuotaRequestSignature(const AllocateQuotaRequest& request) {
+  MD5 hasher;
+
+  const QuotaOperation& operation = request.allocate_operation();
+
+	// the value of the operation_id field seems to be different
+  // hasher.Update(operation.operation_id());
+  // hasher.Update(kDelimiter, kDelimiterLength);
+
+  hasher.Update(operation.consumer_id());
+
+  hasher.Update(kDelimiter, kDelimiterLength);
+  UpdateHashLabels(operation.labels(), &hasher);
+
+  for (const auto& metric_value_set : operation.quota_metrics()) {
+    hasher.Update(kDelimiter, kDelimiterLength);
+    hasher.Update(metric_value_set.metric_name());
+
+    for (const auto& metric_value : metric_value_set.metric_values()) {
+      UpdateHashMetricValue(metric_value, &hasher);
+    }
+  }
+
+  hasher.Update(kDelimiter, kDelimiterLength);
+
+  return hasher.Digest();
+}
+
+
 
 }  // namespace service_control_client
 }  // namespace google

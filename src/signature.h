@@ -53,6 +53,9 @@ std::string GenerateReportMetricValueSignature(
 std::string GenerateCheckRequestSignature(
     const ::google::api::servicecontrol::v1::CheckRequest& request);
 
+std::string GenerateAllocateQuotaRequestSignature(
+    const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request);
+
 }  // namespace service_control_client
 }  // namespace google
 

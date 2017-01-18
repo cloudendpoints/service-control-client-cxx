@@ -21,6 +21,8 @@ limitations under the License.
 using std::string;
 using ::google::api::servicecontrol::v1::CheckRequest;
 using ::google::api::servicecontrol::v1::CheckResponse;
+using ::google::api::servicecontrol::v1::AllocateQuotaRequest;
+using ::google::api::servicecontrol::v1::AllocateQuotaResponse;
 using ::google::api::servicecontrol::v1::ReportRequest;
 using ::google::api::servicecontrol::v1::ReportResponse;
 using ::google::protobuf::util::Status;
@@ -35,10 +37,16 @@ ServiceControlClientImpl::ServiceControlClientImpl(
   check_aggregator_ =
       CreateCheckAggregator(service_name, service_config_id,
                             options.check_options, options.metric_kinds);
+
+  quota_aggregator_ = CreateAllocateQuotaAggregator(
+      service_name, service_config_id, options.quota_options,
+      options.metric_kinds);
+
   report_aggregator_ =
       CreateReportAggregator(service_name, service_config_id,
                              options.report_options, options.metric_kinds);
 
+  quota_transport_ = options.quota_transport;
   check_transport_ = options.check_transport;
   report_transport_ = options.report_transport;
 
@@ -53,6 +61,11 @@ ServiceControlClientImpl::ServiceControlClientImpl(
   check_aggregator_->SetFlushCallback(
       std::bind(&ServiceControlClientImpl::CheckFlushCallback, this,
                 std::placeholders::_1));
+
+  quota_aggregator_->SetFlushCallback(
+      std::bind(&ServiceControlClientImpl::AllocateQuotaFlushCallback, this,
+                std::placeholders::_1));
+
   report_aggregator_->SetFlushCallback(
       std::bind(&ServiceControlClientImpl::ReportFlushCallback, this,
                 std::placeholders::_1));
@@ -62,15 +75,25 @@ ServiceControlClientImpl::ServiceControlClientImpl(
     // Class members cannot be captured in lambda. We need to make a copy to
     // support C++11.
     std::shared_ptr<CheckAggregator> check_aggregator_copy = check_aggregator_;
+    std::shared_ptr<QuotaAggregator> quota_aggregator_copy = quota_aggregator_;
     std::shared_ptr<ReportAggregator> report_aggregator_copy =
         report_aggregator_;
+
     flush_timer_ = options.periodic_timer(
-        flush_interval, [check_aggregator_copy, report_aggregator_copy]() {
+        flush_interval, [check_aggregator_copy, quota_aggregator_copy,
+                         report_aggregator_copy]() {
           Status status = check_aggregator_copy->Flush();
           if (!status.ok()) {
             GOOGLE_LOG(ERROR) << "Failed in Check::Flush() "
                               << status.error_message();
           }
+
+          status = quota_aggregator_copy->Flush();
+          if (!status.ok()) {
+            GOOGLE_LOG(ERROR) << "Failed in AllocateQuota::Flush() "
+                              << status.error_message();
+          }
+
           status = report_aggregator_copy->Flush();
           if (!status.ok()) {
             GOOGLE_LOG(ERROR) << "Failed in Report::Flush() "
@@ -96,6 +119,21 @@ ServiceControlClientImpl::~ServiceControlClientImpl() {
   // we are OK.
   check_aggregator_->SetFlushCallback(NULL);
   report_aggregator_->SetFlushCallback(NULL);
+}
+
+void ServiceControlClientImpl::AllocateQuotaFlushCallback(
+    const AllocateQuotaRequest& quota_request) {
+  AllocateQuotaResponse* quota_response = new AllocateQuotaResponse;
+
+  quota_transport_(
+      quota_request, quota_response, [quota_response](Status status) {
+        delete quota_response;
+        if (!status.ok()) {
+          GOOGLE_LOG(ERROR)
+              << "Failed in AllocateQuota call: " << status.error_message();
+        }
+      });
+  ++send_quotas_by_flush_;
 }
 
 void ServiceControlClientImpl::CheckFlushCallback(
@@ -174,6 +212,83 @@ Status ServiceControlClientImpl::Check(const CheckRequest& check_request,
   StatusFuture status_future = status_promise.get_future();
 
   Check(check_request, check_response, [&status_promise](Status status) {
+    // Need to move the promise as it must be owned by the thread where this
+    // lambda is executed rather than the thread where the original Check()
+    // call is executed.
+    // Otherwise, if we call std::promise::set_value(), the original thread will
+    // be unblocked and it might destroy the promise object before set_value()
+    // has a chance to finish.
+    StatusPromise moved_promise(std::move(status_promise));
+    moved_promise.set_value(status);
+  });
+
+  status_future.wait();
+  return status_future.get();
+}
+
+void ServiceControlClientImpl::Quota(
+    const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
+        quota_request,
+    ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response,
+    DoneCallback on_quota_done, TransportQuotaFunc check_transport) {
+  ++total_called_checks_;
+  if (check_transport == NULL) {
+    on_quota_done(Status(Code::INVALID_ARGUMENT, "transport is NULL."));
+    return;
+  }
+
+  Status status = quota_aggregator_->Quota(quota_request, quota_response);
+
+  if (status.error_code() == Code::NOT_FOUND) {
+    // Makes a copy of check_request so that on_done() callback can use
+    // it to call CacheResponse.
+    ::google::api::servicecontrol::v1::AllocateQuotaRequest*
+        quota_request_copy =
+            new ::google::api::servicecontrol::v1::AllocateQuotaRequest(
+                quota_request);
+
+    std::shared_ptr<QuotaAggregator> quota_aggregator_copy = quota_aggregator_;
+
+    check_transport(*quota_request_copy, quota_response,
+                    [quota_aggregator_copy, quota_request_copy, quota_response,
+                     on_quota_done](Status status) {
+
+                      if (status.ok()) {
+                        quota_aggregator_copy->CacheResponse(
+                            *quota_request_copy, *quota_response);
+                      } else {
+                        GOOGLE_LOG(ERROR) << "Failed in Check call: "
+                                          << status.error_message();
+                      }
+
+                      delete quota_request_copy;
+                      on_quota_done(status);
+                    });
+
+    ++send_checks_in_flight_;
+    return;
+  }
+  on_quota_done(status);
+}
+
+// An async quota call.
+void ServiceControlClientImpl::Quota(
+    const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
+        quota_request,
+    ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response,
+    DoneCallback on_quota_done) {
+  Quota(quota_request, quota_response, on_quota_done, quota_transport_);
+}
+
+// A sync quota call.
+::google::protobuf::util::Status ServiceControlClientImpl::Quota(
+    const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
+        quota_request,
+    ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response) {
+  StatusPromise status_promise;
+  StatusFuture status_future = status_promise.get_future();
+
+  Quota(quota_request, quota_response, [&status_promise](Status status) {
     // Need to move the promise as it must be owned by the thread where this
     // lambda is executed rather than the thread where the original Check()
     // call is executed.

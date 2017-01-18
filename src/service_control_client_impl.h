@@ -54,6 +54,23 @@ class ServiceControlClientImpl : public ServiceControlClient {
       ::google::api::servicecontrol::v1::CheckResponse* check_response,
       DoneCallback on_check_done, TransportCheckFunc check_transport);
 
+  // An async quota call.
+  virtual void Quota(
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest& quota_request,
+      ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response,
+      DoneCallback on_quota_done);
+
+  // A sync quota call.
+  virtual ::google::protobuf::util::Status Quota(
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest& quota_request,
+      ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response);
+
+  // A quota call with per_request transport.
+  virtual void Quota(
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest& quota_request,
+      ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response,
+      DoneCallback on_quota_done, TransportQuotaFunc quota_transport);
+
   // An async report call.
   virtual void Report(
       const ::google::api::servicecontrol::v1::ReportRequest& report_request,
@@ -78,6 +95,10 @@ class ServiceControlClientImpl : public ServiceControlClient {
   void CheckFlushCallback(
       const ::google::api::servicecontrol::v1::CheckRequest& check_request);
 
+  // A flush callback for check.
+  void AllocateQuotaFlushCallback(
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest& quota_request);
+
   // A flush callback for report.
   void ReportFlushCallback(
       const ::google::api::servicecontrol::v1::ReportRequest& report_request);
@@ -92,6 +113,8 @@ class ServiceControlClientImpl : public ServiceControlClient {
   ::google::protobuf::util::Status Flush();
 
   // The check transport function.
+  TransportQuotaFunc quota_transport_;
+  // The check transport function.
   TransportCheckFunc check_transport_;
   // The report transport function.
   TransportReportFunc report_transport_;
@@ -100,9 +123,14 @@ class ServiceControlClientImpl : public ServiceControlClient {
   std::shared_ptr<PeriodicTimer> flush_timer_;
 
   // Atomic object to deal with multi-threads situation.
+  std::atomic_int_fast64_t total_called_quotas_;
+  std::atomic_int_fast64_t send_quotas_by_flush_;
+  std::atomic_int_fast64_t send_quotas_in_flight_;
+
   std::atomic_int_fast64_t total_called_checks_;
   std::atomic_int_fast64_t send_checks_by_flush_;
   std::atomic_int_fast64_t send_checks_in_flight_;
+
   std::atomic_int_fast64_t total_called_reports_;
   std::atomic_int_fast64_t send_reports_by_flush_;
   std::atomic_int_fast64_t send_reports_in_flight_;
@@ -113,6 +141,8 @@ class ServiceControlClientImpl : public ServiceControlClient {
   // CacheResponse() function. The callback function needs to hold a ref_count
   // of check_aggregator_ to make sure it is not freed.
   std::shared_ptr<CheckAggregator> check_aggregator_;
+
+  std::shared_ptr<QuotaAggregator> quota_aggregator_;
 
   // The report aggregator object. report_aggregator_ has to be shared_ptr since
   // it will be passed to flush_timer callback.
