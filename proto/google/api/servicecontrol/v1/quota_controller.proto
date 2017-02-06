@@ -1,0 +1,271 @@
+syntax = "proto3";
+
+package google.api.servicecontrol.v1;
+
+import "google/api/annotations.proto";
+import "google/api/servicecontrol/v1/metric_value.proto";
+//import "logs/proto/logs_annotations/logs_annotations.proto";
+
+option java_package = "com.google.api.servicecontrol.v1";
+option java_outer_classname = "QuotaControllerProto";
+option java_multiple_files = true;
+option cc_enable_arenas = true;
+
+//option (logs_proto.file_not_used_for_logging_except_enums) = true;
+
+// [Google Quota Control API](/service-control/overview)
+// (-- See //google/api/servicecontrol/doc/overview.md for details. --)
+//
+// Allows clients to allocate and release quota against
+// a [managed service][google.api.servicemanagement.v1.ManagedService].
+service QuotaController {
+  // Attempts to allocate quota for the specified consumer. It should be called
+  // before the operation is executed.
+  //
+  // This method requires the `servicemanagement.services.quota`
+  // permission on the specified service. For more information, see
+  // [Google Cloud IAM](https://cloud.google.com/iam).
+  rpc AllocateQuota(AllocateQuotaRequest) returns (AllocateQuotaResponse) {
+    option (google.api.http) = {
+      post: "/v1/services/{service_name}:allocateQuota"
+      body: "*"
+    };
+  }
+}
+
+// Request message for the AllocateQuota method.
+message AllocateQuotaRequest {
+  // Name of the service as specified in the service configuration. For example,
+  // `"pubsub.googleapis.com"`.
+  //
+  // See [google.api.Service][] for the definition of a service name.
+  string service_name = 1;
+
+  // Operation that describes the quota allocation.
+  QuotaOperation allocate_operation = 2;
+
+  // Supported allocation modes.
+  enum AllocationMode {
+    UNSPECIFIED = 0;
+
+    // Allocates quota for the amount specified in the service configuration or
+    // specified using the quota_metrics. If the amount is higher than the
+    // available quota, allocation error will be returned and no quota will be
+    // allocated.
+    NORMAL = 1;
+
+    // Allocates quota for the amount specified in the service configuration or
+    // specified using the quota_metrics. If the amount is higher than the
+    // available quota, request does not fail but all available quota will be
+    // allocated.
+    BEST_EFFORT = 2;
+
+    // Only checks if there is enough quota available and does not change the
+    // available quota. No lock is placed on the available quota either.
+    CHECK_ONLY = 3;
+  }
+
+  // Allocation mode for this operation.
+  // Deprecated: use QuotaMode inside the QuotaOperation.
+  AllocationMode allocation_mode = 3 [deprecated = true];
+
+  // Specifies which version of service configuration should be used to process
+  // the request. If unspecified or no matching version can be found, the latest
+  // one will be used.
+  string service_config_id = 4;
+}
+
+// Represents information regarding a quota operation.
+message QuotaOperation {
+  // Identity of the operation. This must be unique within the scope of the
+  // service that generated the operation. If the service calls AllocateQuota
+  // and ReleaseQuota on the same operation, the two calls should carry the
+  // same ID.
+  //
+  // UUID version 4 is recommended, though not required. In scenarios where an
+  // operation is computed from existing information and an idempotent id is
+  // desirable for deduplication purpose, UUID version 5 is recommended. See
+  // RFC 4122 for details.
+  string operation_id = 1;
+
+  // Fully qualified name of the API method for which this quota operation is
+  // requested. This name is used for matching quota rules or metric rules and
+  // billing status rules defined in service configuration. This field is not
+  // required if the quota operation is performed on non-API resources.
+  //
+  // Example of an RPC method name:
+  //     google.example.library.v1.LibraryService.CreateShelf
+  string method_name = 2;
+
+  // Identity of the consumer for whom this quota operation is being performed.
+  //
+  // This can be in one of the following formats:
+  //   project:<project_id>,
+  //   project_number:<project_number>,
+  //   api_key:<api_key>.
+  // (--GOOGLE_INTERNAL:
+  //   spatula_header:<spatula_header> and
+  //   loas:<loas_role> are also accepted.
+  // --)
+  string consumer_id = 3;
+
+  // Labels describing the operation.
+  map<string, string> labels = 4;
+
+  // Represents information about this operation. Each MetricValueSet
+  // corresponds to a metric defined in the service configuration.
+  // The data type used in the MetricValueSet must agree with
+  // the data type specified in the metric definition.
+  //
+  // Within a single operation, it is not allowed to have more than one
+  // MetricValue instances that have the same metric names and identical
+  // label value combinations. If a request has such duplicated MetricValue
+  // instances, the entire request is rejected with
+  // an invalid argument error.
+  repeated MetricValueSet quota_metrics = 5;
+
+  // Supported quota modes. This can be specified only when the operation is
+  // associated with a AllocateQuota and ReleaseQuota request.
+  enum QuotaMode {
+    UNSPECIFIED = 0;
+
+    // For AllocateQuota request, allocates quota for the amount specified in
+    // the service configuration or specified using the quota metrics. If the
+    // amount is higher than the available quota, allocation error will be
+    // returned and no quota will be allocated.
+    // For ReleaseQuota request, this mode is supported only for precise quota
+    // limits. In this case, this operation releases quota for the amount
+    // specified in the service configuration or specified using the quota
+    // metrics. If the release can make available quota negative, release error
+    // will be returned and no quota will be released.
+    NORMAL = 1;
+
+    // For AllocateQuota request, this mode is supported only for imprecise
+    // quota limits. In this case, the operation allocates quota for the amount
+    // specified in the service configuration or specified using the quota
+    // metrics. If the amount is higher than the available quota, request does
+    // not fail but all available quota will be allocated.
+    // For ReleaseQuota request, this mode is supported for both precise quota
+    // limits and imprecise quota limits. In this case, this operation releases
+    // quota for the amount specified in the service configuration or specified
+    // using the quota metrics. If the release can make available quota
+    // negative, request does not fail but only the available quota will be
+    // released. After the ReleaseQuota request completes, the available quota
+    // will be 0, and never goes to negative.
+    BEST_EFFORT = 2;
+
+    // For AllocateQuota request, only checks if there is enough quota
+    // available and does not change the available quota. No lock is placed on
+    // the available quota either. Not supported for ReleaseQuota request.
+    CHECK_ONLY = 3;
+  }
+
+  // Quota mode for this operation.
+  QuotaMode quota_mode = 6;
+}
+
+// Response message for the AllocateQuota method.
+message AllocateQuotaResponse {
+  // The same operation_id value used in the AllocateQuotaRequest. Used for
+  // logging and diagnostics purposes.
+  string operation_id = 1;
+
+  // Indicates the decision of the allocate.
+  repeated QuotaError allocate_errors = 2;
+
+  // Quota metrics to indicate the result of allocation. Depending on the
+  // request, one or more of the following metrics will be included:
+  //
+  // 1. For rate quota, per quota group or per quota metric incremental usage
+  // will be specified using the following delta metric:
+  //   "serviceruntime.googleapis.com/api/consumer/quota_used_count"
+  //
+  // 2. For allocation quota, per quota metric total usage will be specified
+  // using the following gauge metric:
+  //   "serviceruntime.googleapis.com/allocation/consumer/quota_used_count"
+  //
+  // 3. For both rate quota and allocation quota, the quota limit reached
+  // condition will be specified using the following boolean metric:
+  //   "serviceruntime.googleapis.com/quota/exceeded"
+  repeated MetricValueSet quota_metrics = 3;
+
+  // ID of the actual config used to process the request.
+  string service_config_id = 4;
+}
+
+message QuotaError {
+  // Error codes for allocate and release responses.
+  enum Code {
+    // This is never used.
+    UNSPECIFIED = 0;
+
+    // Quota allocation failed.
+    // Same as [google.rpc.Code.RESOURCE_EXHAUSTED][].
+    RESOURCE_EXHAUSTED = 8;
+
+    // Consumer project has been suspended.
+    PROJECT_SUSPENDED = 103;
+
+    // Consumer has not enabled the service.
+    SERVICE_NOT_ENABLED = 104;
+
+    // Consumer cannot access the service because billing is disabled.
+    BILLING_NOT_ACTIVE = 107;
+
+    // Consumer's project has been marked as deleted (soft deletion).
+    PROJECT_DELETED = 108;
+
+    // Consumer's project number or ID does not represent a valid project.
+    PROJECT_INVALID = 114;
+
+    // IP address of the consumer is invalid for the specific consumer
+    // project.
+    IP_ADDRESS_BLOCKED = 109;
+
+    // Referer address of the consumer request is invalid for the specific
+    // consumer project.
+    REFERER_BLOCKED = 110;
+
+    // Client application of the consumer request is invalid for the
+    // specific consumer project.
+    CLIENT_APP_BLOCKED = 111;
+
+    // Specified API key is invalid.
+    API_KEY_INVALID = 105;
+
+    // Specified API Key has expired.
+    API_KEY_EXPIRED = 112;
+
+    // Consumer's spatula header is invalid.
+    SPATULA_HEADER_INVALID = 115;
+
+    // The consumer's LOAS role is invalid.
+    LOAS_ROLE_INVALID = 118;
+
+    // The consumer's LOAS role has no associated project.
+    NO_LOAS_PROJECT = 119;
+
+    // The backend server for looking up project id/number is unavailable.
+    PROJECT_STATUS_UNVAILABLE = 300;
+
+    // The backend server for checking service status is unavailable.
+    SERVICE_STATUS_UNAVAILABLE = 301;
+
+    // The backend server for checking billing status is unavailable.
+    BILLING_STATUS_UNAVAILABLE = 302;
+
+    // The backend server for checking quota limits is unavailable.
+    QUOTA_SYSTEM_UNAVAILABLE = 303;
+  }
+
+  // Error code.
+  Code code = 1;
+
+  // Subject to whom this error applies. See the specific enum for more details
+  // on this field. For example, "clientip:<ip address of client>" or
+  // "project:<Google developer project id>".
+  string subject = 2;
+
+  // Free-form text that provides details on the cause of the error.
+  string description = 3;
+}
