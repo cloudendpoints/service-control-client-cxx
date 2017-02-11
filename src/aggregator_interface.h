@@ -174,8 +174,7 @@ std::unique_ptr<CheckAggregator> CreateCheckAggregator(
 // Creates a quota aggregator.
 std::unique_ptr<QuotaAggregator> CreateAllocateQuotaAggregator(
     const std::string& service_name, const std::string& service_config_id,
-    const QuotaAggregationOptions& options,
-    std::shared_ptr<MetricKindMap> metric_kind);
+    const QuotaAggregationOptions& options);
 
 }  // namespace service_control_client
 }  // namespace google

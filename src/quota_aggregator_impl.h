@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#ifndef BAZEL_ESP_EXTERNAL_SERVICECONTROL_CLIENT_GIT_SRC_QUOTA_AGGREGATOR_IMPL_H_
-#define BAZEL_ESP_EXTERNAL_SERVICECONTROL_CLIENT_GIT_SRC_QUOTA_AGGREGATOR_IMPL_H_
+#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_QUOTA_AGGREGATOR_IMPL_H_
+#define GOOGLE_SERVICE_CONTROL_CLIENT_QUOTA_AGGREGATOR_IMPL_H_
 
 #include <string>
 #include <unordered_map>
@@ -44,8 +44,7 @@ class QuotaAggregatorImpl : public QuotaAggregator,
   // than 0, aggregator needs to send a request inside the aggregator.
   QuotaAggregatorImpl(const std::string& service_name,
                       const std::string& service_config_id,
-                      const QuotaAggregationOptions& options,
-                      std::shared_ptr<MetricKindMap> metric_kinds);
+                      const QuotaAggregationOptions& options);
 
   virtual ~QuotaAggregatorImpl();
 
@@ -69,24 +68,16 @@ class QuotaAggregatorImpl : public QuotaAggregator,
       const ::google::api::servicecontrol::v1::AllocateQuotaResponse& response);
 
  private:
-  // void AddWait
-  // TODO(jaebong):: add method
-
   class CacheElem {
    public:
     CacheElem(const ::google::api::servicecontrol::v1::AllocateQuotaResponse&
                   response,
               const int64_t time)
-        : operation_aggregator_(nullptr),
-          quota_response_(response),
-          last_check_time_(time),
-          is_refreshing_(false),
-          is_aggregated_(false) {}
+        : operation_aggregator_(nullptr), quota_response_(response) {}
 
     // Aggregates the given request to this cache entry.
     void Aggregate(
-        const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request,
-        const MetricKindMap* metric_kinds);
+        const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request);
 
     // Returns the aggregated AllocateQuotaRequest and reset the cache entry.
     ::google::api::servicecontrol::v1::AllocateQuotaRequest
@@ -103,64 +94,31 @@ class QuotaAggregatorImpl : public QuotaAggregator,
             quota_response) {
       quota_response_ = quota_response;
     }
+
     // Getter for check response.
     inline const ::google::api::servicecontrol::v1::AllocateQuotaResponse&
-    check_response() const {
+    quota_response() const {
       return quota_response_;
     }
 
-    // Setter for last check time.
-    inline void set_last_check_time(const int64_t last_check_time) {
-      last_check_time_ = last_check_time;
+    // Return true if aggregated
+    inline bool is_aggregated() const {
+      return operation_aggregator_ ? operation_aggregator_->is_aggregated()
+                                   : false;
     }
-    // Getter for last check time.
-    inline const int64_t last_check_time() const { return last_check_time_; }
-
-    // Getter and Setter of is_refreshing_;
-    inline bool is_refreshing() const { return is_refreshing_; }
-    inline void set_is_refreshing(bool v) { is_refreshing_ = v; }
-
-    // Getter and Setter of is_aggregated_
-    inline bool is_aggregated() const { return is_aggregated_; }
-    inline void set_is_aggregated(bool v) { is_aggregated_ = v; }
 
     // Getter and Setter of signature_
     inline std::string signature() const { return signature_; }
     inline void set_signature(std::string v) { signature_ = v; }
 
-    inline std::unordered_map<std::string, int64_t>
-    quota_metrics_aggregation() {
-      return quota_metrics_aggregation_;
-    }
-
-    inline void clear_quota_metrics_aggregation() {
-      quota_metrics_aggregation_.clear();
-      is_aggregated_ = false;
-    }
-
    private:
     // Internal operation.
     std::unique_ptr<QuotaOperationAggregator> operation_aggregator_;
 
-    // TODO(jae):: cache aggregation?
-    std::unordered_map<std::string, int64_t> quota_metrics_aggregation_;
-
     // The check response for the last check request.
     ::google::api::servicecontrol::v1::AllocateQuotaResponse quota_response_;
 
-    // In general, this is the last time a check response is updated.
-    //
-    // During flush, we set it to be the request start time to prevent a next
-    // check request from triggering another flush. Note that this prevention
-    // works only during the flush interval, which means for long RPC, there
-    // could be up to RPC_time/flush_interval ongoing check requests.
-    int64_t last_check_time_;
-
-    // If true, is sending the request to server to get new response.
-    bool is_refreshing_;
-
-    bool is_aggregated_;
-
+    // maintain the sinature to move unnecessary signaure generation
     std::string signature_;
   };
 
@@ -179,7 +137,7 @@ class QuotaAggregatorImpl : public QuotaAggregator,
   // Returns in ms from now, or -1 for never
   virtual int GetNextFlushInterval();
 
-  // Invalidates expired allocate quota resposnes.
+  // Invalidates expired allocate quota responses.
   // Called at time specified by GetNextFlushInterval().
   virtual ::google::protobuf::util::Status Flush();
 
@@ -187,7 +145,11 @@ class QuotaAggregatorImpl : public QuotaAggregator,
   // Usually called at destructor.
   virtual ::google::protobuf::util::Status FlushAll();
 
-  // Methods from CacheRemovedItemsHandler
+ private:
+  void InternalCacheResponse(
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request,
+      const ::google::api::servicecontrol::v1::AllocateQuotaResponse& response,
+      bool is_refreshing);
 
  private:
   // The service name for this cache.
@@ -197,10 +159,6 @@ class QuotaAggregatorImpl : public QuotaAggregator,
 
   // The check aggregation options.
   QuotaAggregationOptions options_;
-
-  // Metric kinds. Key is the metric name and value is the metric kind.
-  // Defaults to DELTA if not specified. Not owned.
-  std::shared_ptr<MetricKindMap> metric_kinds_;
 
   // Mutex guarding the access of cache_;
   Mutex cache_mutex_;
@@ -215,4 +173,4 @@ class QuotaAggregatorImpl : public QuotaAggregator,
 }  // namespace service_control_client
 }  // namespace google
 
-#endif  // BAZEL_ESP_EXTERNAL_SERVICECONTROL_CLIENT_GIT_SRC_QUOTA_AGGREGATOR_IMPL_H_
+#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_QUOTA_AGGREGATOR_IMPL_H_

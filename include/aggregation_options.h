@@ -16,14 +16,12 @@ limitations under the License.
 #ifndef GOOGLE_SERVICE_CONTROL_CLIENT_AGGREGATOR_OPTIONS_H_
 #define GOOGLE_SERVICE_CONTROL_CLIENT_AGGREGATOR_OPTIONS_H_
 
-#include <unordered_map>
 #include <memory>
+#include <unordered_map>
 #include "google/api/metric.pb.h"
 
 namespace google {
 namespace service_control_client {
-
-
 
 typedef std::unordered_map<std::string, int64_t> metric_value_t;
 
@@ -32,10 +30,8 @@ typedef std::unordered_map<std::string,
                            ::google::api::MetricDescriptor::MetricKind>
     MetricKindMap;
 
-
 struct QuotaAggregationOptions {
-  QuotaAggregationOptions()
-      : num_entries(10000), flush_interval_ms(500), expiration_ms(1000) {}
+  QuotaAggregationOptions() : num_entries(10000), refresh_interval_ms(500) {}
 
   // Constructor.
   // cache_entries is the maximum number of cache entries that can be kept in
@@ -48,22 +44,15 @@ struct QuotaAggregationOptions {
   QuotaAggregationOptions(int cache_entries, int flush_cache_entry_interval_ms,
                           int response_expiration_ms)
       : num_entries(cache_entries),
-        flush_interval_ms(flush_cache_entry_interval_ms),
-        expiration_ms(response_expiration_ms) {
-  }
+        refresh_interval_ms(flush_cache_entry_interval_ms) {}
 
   // Maximum number of cache entries kept in the aggregation cache.
   // Set to 0 will disable caching and aggregation.
   int num_entries;
 
-  // Maximum milliseconds before aggregated check requests are flushed to the
-  // server. The flush is triggered by a check request.
-  int flush_interval_ms;
-
-  // Maximum milliseconds before a cached check response should be deleted. The
-  // deletion is triggered by a timer. This value must be larger than
-  // flush_interval_ms.
-  int expiration_ms;
+  // Maximum milliseconds before aggregated quota requests are refreshed to the
+  // server. The refresh is triggered by a timer task from the quota aggregator.
+  int refresh_interval_ms;
 
   // TODO(jaebong): add more description
   std::unordered_map<std::string, int64_t> metric_minimum;

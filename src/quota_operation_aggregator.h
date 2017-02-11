@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#ifndef SRC_QUOTA_OPERATION_AGGREGATOR_H_
-#define SRC_QUOTA_OPERATION_AGGREGATOR_H_
+#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_QUOTA_OPERATION_AGGREGATOR_H_
+#define GOOGLE_SERVICE_CONTROL_CLIENT_QUOTA_OPERATION_AGGREGATOR_H_
 
 #include "google/api/metric.pb.h"
 #include "google/api/servicecontrol/v1/quota_controller.pb.h"
@@ -25,13 +25,8 @@ namespace service_control_client {
 
 class QuotaOperationAggregator {
  public:
-  // Constructor. Does not take ownership of metric_kinds, which must outlive
-  // this instance.
   QuotaOperationAggregator(
-      const ::google::api::servicecontrol::v1::QuotaOperation& operation,
-      const std::unordered_map<std::string,
-                               ::google::api::MetricDescriptor::MetricKind>*
-          metric_kinds);
+      const ::google::api::servicecontrol::v1::QuotaOperation& operation);
   virtual ~QuotaOperationAggregator(){};
 
   // QuotaOperationsAggregator is neither copyable nor movable.
@@ -41,14 +36,13 @@ class QuotaOperationAggregator {
  public:
   // Merges the given operation with this operation, assuming the given
   // operation has the same operation signature.
-  bool MergeOperation(
+  void MergeOperation(
       const ::google::api::servicecontrol::v1::QuotaOperation& operation);
 
   // Transforms to Operation proto message.
   ::google::api::servicecontrol::v1::QuotaOperation ToOperationProto() const;
 
-  // Check if the operation is too big.
-  bool TooBig() const;
+  bool is_aggregated() { return is_aggregated_; }
 
  private:
   // Merges the metric value sets in the given operation into this operation.
@@ -67,12 +61,9 @@ class QuotaOperationAggregator {
                          ::google::api::servicecontrol::v1::MetricValue>>
       metric_value_sets_;
 
-  // Metric kinds. Key is the metric name and value is the metric kind.
-  // Defaults to DELTA if not specified.
-  const std::unordered_map<
-      std::string, ::google::api::MetricDescriptor::MetricKind>* metric_kinds_;
+  bool is_aggregated_;
 };
 
 }  // namespace service_control_client
 }  // namespace google
-#endif  // SRC_QUOTA_OPERATION_AGGREGATOR_H_
+#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_QUOTA_OPERATION_AGGREGATOR_H_

@@ -34,14 +34,12 @@ namespace google {
 namespace service_control_client {
 
 void QuotaAggregatorImpl::CacheElem::Aggregate(
-    const AllocateQuotaRequest& request, const MetricKindMap* metric_kinds) {
+    const AllocateQuotaRequest& request) {
   if (operation_aggregator_ == NULL) {
-    operation_aggregator_.reset(new QuotaOperationAggregator(
-        request.allocate_operation(), metric_kinds));
+    operation_aggregator_.reset(
+        new QuotaOperationAggregator(request.allocate_operation()));
   } else {
-    if(operation_aggregator_->MergeOperation(request.allocate_operation())) {
-      set_is_aggregated(true);
-    }
+    operation_aggregator_->MergeOperation(request.allocate_operation());
   }
 }
 
@@ -62,23 +60,17 @@ QuotaAggregatorImpl::CacheElem::ReturnAllocateQuotaRequestAndClear(
   return request;
 }
 
-QuotaAggregatorImpl::QuotaAggregatorImpl(
-    const std::string& service_name, const std::string& service_config_id,
-    const QuotaAggregationOptions& options,
-    std::shared_ptr<MetricKindMap> metric_kinds)
+QuotaAggregatorImpl::QuotaAggregatorImpl(const std::string& service_name,
+                                         const std::string& service_config_id,
+                                         const QuotaAggregationOptions& options)
     : service_name_(service_name),
       service_config_id_(service_config_id),
-      options_(options),
-      metric_kinds_(metric_kinds) {
-  // Converts flush_interval_ms to Cycle used by SimpleCycleTimer.
-  flush_interval_in_cycle_ =
-      options_.flush_interval_ms * SimpleCycleTimer::Frequency() / 1000;
-
+      options_(options) {
   if (options.num_entries > 0) {
     cache_.reset(new QuotaCache(
         options.num_entries, std::bind(&QuotaAggregatorImpl::OnCacheEntryDelete,
                                        this, std::placeholders::_1)));
-    cache_->SetAgeBasedEviction(options.expiration_ms / 1000.0);
+    cache_->SetAgeBasedEviction(options.refresh_interval_ms / 1000.0);
   }
 }
 
@@ -127,13 +119,19 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
   QuotaCache::ScopedLookup lookup(cache_.get(), request_signature);
 
   if (!lookup.Found()) {
+    // Create a temporary element which will be remained in the cache until
+    // actual response arrives
+    ::google::api::servicecontrol::v1::AllocateQuotaResponse temp_response;
+    InternalCacheResponse(request, temp_response, true);
+    GOOGLE_LOG(INFO) << "Inserted a new temporary cache for aggregation";
+
     // By returning NOT_FOUND, caller will send request to server.
     return Status(Code::NOT_FOUND, "");
   }
 
-  lookup.value()->Aggregate(request, metric_kinds_.get());
+  lookup.value()->Aggregate(request);
 
-  *response = lookup.value()->check_response();
+  *response = lookup.value()->quota_response();
 
   return ::google::protobuf::util::Status::OK;
 }
@@ -151,36 +149,45 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
   AllocateQuotaCacheRemovedItemsHandler::StackBuffer::Swapper swapper(
       this, &stack_buffer);
 
-  if (cache_) {
-    string request_signature = GenerateAllocateQuotaRequestSignature(request);
-    QuotaCache::ScopedLookup lookup(cache_.get(), request_signature);
-
-    CacheElem* cache_elem = new CacheElem(response, SimpleCycleTimer::Now());
-    cache_elem->set_signature(request_signature);
-
-    if (lookup.Found()) {
-      if (lookup.value()->is_refreshing() && lookup.value()->is_aggregated()) {
-        cache_elem->Aggregate(request, metric_kinds_.get());
-      }
-
-      // mark the element is refreshing to avoid
-      // refreshing again bye the cache deleter
-      lookup.value()->set_is_refreshing(true);
-      cache_->Remove(request_signature);
-    }
-
-    // insert aggregated the response to the cache
-    cache_->Insert(request_signature, cache_elem, 1);
-  }
+  InternalCacheResponse(request, response, false);
 
   return ::google::protobuf::util::Status::OK;
+}
+
+// This method must be called behind the cache_mutex_ lock
+void QuotaAggregatorImpl::InternalCacheResponse(
+    const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request,
+    const ::google::api::servicecontrol::v1::AllocateQuotaResponse& response,
+    bool is_refreshing) {
+  if (!cache_) {
+    return;
+  }
+
+  string request_signature = GenerateAllocateQuotaRequestSignature(request);
+  QuotaCache::ScopedLookup lookup(cache_.get(), request_signature);
+
+  CacheElem* cache_elem = new CacheElem(response, SimpleCycleTimer::Now());
+  cache_elem->set_signature(request_signature);
+
+  if (lookup.Found()) {
+    if (lookup.value()->is_aggregated()) {
+      // Cached response will be aggregated to the new element for the response
+      cache_elem->Aggregate(lookup.value()->ReturnAllocateQuotaRequestAndClear(
+          service_name_, service_config_id_));
+    }
+
+    cache_->Remove(request_signature);
+  }
+
+  // insert aggregated the response to the cache
+  cache_->Insert(request_signature, cache_elem, 1);
 }
 
 // When the next Flush() should be called.
 // Returns in ms from now, or -1 for never
 int QuotaAggregatorImpl::GetNextFlushInterval() {
   if (!cache_) return -1;
-  return options_.expiration_ms;
+  return options_.refresh_interval_ms;
 }
 
 // Invalidates expired allocate quota responses.
@@ -221,20 +228,15 @@ int QuotaAggregatorImpl::GetNextFlushInterval() {
 // response, tokens should be aggregated
 void QuotaAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
   // If the element is marked to refreshing, no refreshing it again
-  if (elem->is_refreshing() == false && elem->is_aggregated() == true) {
+  if (elem->is_aggregated() == true) {
     // create a new request instance
     AllocateQuotaRequest request = elem->ReturnAllocateQuotaRequestAndClear(
         service_name_, service_config_id_);
 
-    // mark the element is getting refreshed to avoid refresh it again.
-    elem->set_is_refreshing(true);
-
-    // Since tokens are already consumed, aggregated tokens should be cleared
-    elem->clear_quota_metrics_aggregation();
-
     // Insert the element back to the cache while aggregator is waiting for the
     // response.
     cache_->Insert(elem->signature(), elem, 1);
+
     // remove the instance
     AddRemovedItem(request);
   } else {
@@ -244,10 +246,9 @@ void QuotaAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
 
 std::unique_ptr<QuotaAggregator> CreateAllocateQuotaAggregator(
     const std::string& service_name, const std::string& service_config_id,
-    const QuotaAggregationOptions& options,
-    std::shared_ptr<MetricKindMap> metric_kind) {
-  return std::unique_ptr<QuotaAggregator>(new QuotaAggregatorImpl(
-      service_name, service_config_id, options, metric_kind));
+    const QuotaAggregationOptions& options) {
+  return std::unique_ptr<QuotaAggregator>(
+      new QuotaAggregatorImpl(service_name, service_config_id, options));
 }
 
 }  // namespace service_control_client

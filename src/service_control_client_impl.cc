@@ -41,8 +41,7 @@ ServiceControlClientImpl::ServiceControlClientImpl(
                             options.check_options, options.metric_kinds);
 
   quota_aggregator_ = CreateAllocateQuotaAggregator(
-      service_name, service_config_id, options.quota_options,
-      options.metric_kinds);
+      service_name, service_config_id, options.quota_options);
 
   report_aggregator_ =
       CreateReportAggregator(service_name, service_config_id,
@@ -136,18 +135,18 @@ void ServiceControlClientImpl::AllocateQuotaFlushCallback(
 
   quota_transport_(
       quota_request, quota_response,
-      [this, quota_request, quota_response](Status status) {
+      [this, &quota_request, quota_response](Status status) {
         GOOGLE_LOG(INFO) << "Refreshed the quota cache for "
                          << quota_response->operation_id();
-
-        this->quota_aggregator_->CacheResponse(quota_request, *quota_response);
-
-        delete quota_response;
 
         if (!status.ok()) {
           GOOGLE_LOG(ERROR)
               << "Failed in AllocateQuota call: " << status.error_message();
+        } else {
+          this->quota_aggregator_->CacheResponse(quota_request, *quota_response);
         }
+
+        delete quota_response;
       });
 
   ++send_quotas_by_flush_;
@@ -476,17 +475,21 @@ Status ServiceControlClientImpl::GetStatistics(Statistics* stat) const {
   return Status::OK;
 }
 
-// TODO(jaebong) Consider quotas interbal
 int ServiceControlClientImpl::GetNextFlushInterval() {
   int check_interval = check_aggregator_->GetNextFlushInterval();
-  // int quota_interval = check_aggregator_->GetNextFlushInterval();
+  int quota_interval = check_aggregator_->GetNextFlushInterval();
   int report_interval = report_aggregator_->GetNextFlushInterval();
+
   if (check_interval < 0) {
-    return report_interval;
+    return (quota_interval < 0) ? report_interval
+                                : std::min(quota_interval, report_interval);
+  } else if (quota_interval < 0) {
+    return (report_interval < 0) ? check_interval
+                                 : std::min(check_interval, report_interval);
   } else if (report_interval < 0) {
-    return check_interval;
+    return std::min(check_interval, quota_interval);
   } else {
-    return std::min(check_interval, report_interval);
+    return std::min(check_interval, std::min(report_interval, report_interval));
   }
 }
 

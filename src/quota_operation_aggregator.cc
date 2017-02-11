@@ -40,11 +40,6 @@ namespace {
 // Maximum 36 byte string for UUID
 const int kMaxUUIDBufSize = 40;
 
-const char kQuotaGroupMetricName[] =
-    "serviceruntime.googleapis.com/api/consumer/quota_used_count";
-
-const char kQuotaGroupLabelKeyName[] = "/quota_name";
-
 // Genereates a UUID string
 std::string GenerateUUID() {
   char uuid_buf[kMaxUUIDBufSize];
@@ -62,11 +57,7 @@ bool TimestampBefore(const Timestamp& a, const Timestamp& b) {
 
 // Merges two metric values, with metric kind being Delta.
 //
-// Time [from_start, from_end] and [to_start, to_end] will be merged to time
-// [min(from_start, to_start), max(from_end, to_end)]. It is OK to have gap or
-// overlap between the two time spans.
-//
-// For INT64/DOUBLE/MONEY/DISTRIBUTION, values will be added together,
+// For INT64, values will be added together,
 // except no change when the bucket options does not match.
 void MergeDeltaMetricValue(const MetricValue& from, MetricValue* to) {
   if (to->value_case() != from.value_case()) {
@@ -93,64 +84,52 @@ void MergeDeltaMetricValue(const MetricValue& from, MetricValue* to) {
     case MetricValue::kInt64Value:
       to->set_int64_value(to->int64_value() + from.int64_value());
       break;
-    case MetricValue::kDoubleValue:
-      to->set_double_value(to->double_value() + from.double_value());
-      break;
-    case MetricValue::kDistributionValue:
-      DistributionHelper::Merge(from.distribution_value(),
-                                to->mutable_distribution_value());
-      break;
     default:
       GOOGLE_LOG(WARNING) << "Unknown metric kind for: " << to->DebugString();
       break;
   }
 }
 
-// Merges two metric values, with metric kind being Cumulative or
-// Gauge.
-//
-// New value will override old value, based on the end time.
-void MergeCumulativeOrGaugeMetricValue(const MetricValue& from,
-                                       MetricValue* to) {
-  if (TimestampBefore(from.end_time(), to->end_time())) return;
-
-  *to = from;
-}
-
-// Merges one metric value into another.
-void MergeMetricValue(MetricDescriptor::MetricKind metric_kind,
-                      const MetricValue& from, MetricValue* to) {
-  if (metric_kind == MetricDescriptor::DELTA) {
-    MergeDeltaMetricValue(from, to);
-  } else {
-    MergeCumulativeOrGaugeMetricValue(from, to);
-  }
-}
-
 }  // namespace anonymous
 
 QuotaOperationAggregator::QuotaOperationAggregator(
-    const ::google::api::servicecontrol::v1::QuotaOperation& operation,
-    const std::unordered_map<
-        std::string, ::google::api::MetricDescriptor::MetricKind>* metric_kinds)
-    : operation_(operation), metric_kinds_(metric_kinds) {
-  MergeMetricValueSets(operation);
+    const ::google::api::servicecontrol::v1::QuotaOperation& operation)
+    : operation_(operation),
+      is_aggregated_(false) {
+  MergeOperation(operation);
 }
 
-bool QuotaOperationAggregator::MergeOperation(const QuotaOperation& operation) {
-  return MergeMetricValueSets(operation);
-}
+void QuotaOperationAggregator::MergeOperation(const QuotaOperation& operation) {
+  bool is_aggregated = false;
 
-bool QuotaOperationAggregator::TooBig() const {
-  // return operation_.log_entries_size() >= kMaxLogEntries;
-  return false;
+  for (const auto& metric_value_set : operation.quota_metrics()) {
+    // Intentionally use the side effect of [] to add missing keys.
+    std::unordered_map<string, MetricValue>& metric_values =
+        metric_value_sets_[metric_value_set.metric_name()];
+
+    for (const auto& metric_value : metric_value_set.metric_values()) {
+      string signature = GenerateReportMetricValueSignature(metric_value);
+      MetricValue* existing = FindOrNull(metric_values, signature);
+      if (existing == nullptr) {
+        metric_values.emplace(signature, metric_value);
+      } else {
+        MergeDeltaMetricValue(metric_value, existing);
+      }
+    }
+
+    is_aggregated = true;
+  }
+
+  if(is_aggregated) {
+    is_aggregated_ = true;
+  }
 }
 
 QuotaOperation QuotaOperationAggregator::ToOperationProto() const {
   QuotaOperation op(operation_);
 
-  // TODO(jaebong) For now, we disabled generating new operation id for refresh request.
-  // need to decide we need a new operation_id
+  // TODO(jaebong) For now, we disabled generating new operation id for refresh
+  // request. need to decide we need a new operation_id
 
   // op.set_operation_id(GenerateUUID());
 
@@ -176,37 +155,6 @@ QuotaOperation QuotaOperationAggregator::ToOperationProto() const {
   return op;
 }
 
-bool QuotaOperationAggregator::MergeMetricValueSets(
-    const QuotaOperation& operation) {
-  bool is_aggregated = false;
-
-  for (const auto& metric_value_set : operation.quota_metrics()) {
-    // Intentionally use the side effect of [] to add missing keys.
-    std::unordered_map<string, MetricValue>& metric_values =
-        metric_value_sets_[metric_value_set.metric_name()];
-
-    MetricDescriptor::MetricKind metric_kind = MetricDescriptor::DELTA;
-    if (metric_kinds_) {
-      metric_kind =
-          FindWithDefault(*metric_kinds_, metric_value_set.metric_name(),
-                          MetricDescriptor::DELTA);
-    }
-
-    for (const auto& metric_value : metric_value_set.metric_values()) {
-      string signature = GenerateReportMetricValueSignature(metric_value);
-      MetricValue* existing = FindOrNull(metric_values, signature);
-      if (existing == nullptr) {
-        metric_values.emplace(signature, metric_value);
-      } else {
-        MergeMetricValue(metric_kind, metric_value, existing);
-      }
-    }
-
-    is_aggregated = true;
-  }
-
-  return is_aggregated;
-}
 
 }  // namespace service_control_client
 }  // namespace google
