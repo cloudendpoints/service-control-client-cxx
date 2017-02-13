@@ -41,10 +41,8 @@ struct QuotaAggregationOptions {
   // response_expiration_ms is the maximum milliseconds before a cached check
   // response is invalidated. We make sure that it is at least
   // flush_cache_entry_interval_ms + 1.
-  QuotaAggregationOptions(int cache_entries, int flush_cache_entry_interval_ms,
-                          int response_expiration_ms)
-      : num_entries(cache_entries),
-        refresh_interval_ms(flush_cache_entry_interval_ms) {}
+  QuotaAggregationOptions(int cache_entries, int refresh_interval_ms)
+      : num_entries(cache_entries), refresh_interval_ms(refresh_interval_ms) {}
 
   // Maximum number of cache entries kept in the aggregation cache.
   // Set to 0 will disable caching and aggregation.
