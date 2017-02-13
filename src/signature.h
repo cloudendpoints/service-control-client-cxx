@@ -22,8 +22,8 @@ limitations under the License.
 #include <string>
 #include "google/api/servicecontrol/v1/metric_value.pb.h"
 #include "google/api/servicecontrol/v1/operation.pb.h"
-#include "google/api/servicecontrol/v1/service_controller.pb.h"
 #include "google/api/servicecontrol/v1/quota_controller.pb.h"
+#include "google/api/servicecontrol/v1/service_controller.pb.h"
 
 namespace google {
 namespace service_control_client {

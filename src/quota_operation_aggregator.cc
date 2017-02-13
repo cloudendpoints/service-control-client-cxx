@@ -94,8 +94,7 @@ void MergeDeltaMetricValue(const MetricValue& from, MetricValue* to) {
 
 QuotaOperationAggregator::QuotaOperationAggregator(
     const ::google::api::servicecontrol::v1::QuotaOperation& operation)
-    : operation_(operation),
-      is_aggregated_(false) {
+    : operation_(operation), is_aggregated_(false) {
   MergeOperation(operation);
 }
 
@@ -148,7 +147,6 @@ QuotaOperation QuotaOperationAggregator::ToOperationProto() const {
 
   return op;
 }
-
 
 }  // namespace service_control_client
 }  // namespace google

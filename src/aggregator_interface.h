@@ -20,8 +20,8 @@ limitations under the License.
 #include <memory>
 #include <string>
 
-#include "google/api/servicecontrol/v1/service_controller.pb.h"
 #include "google/api/servicecontrol/v1/quota_controller.pb.h"
+#include "google/api/servicecontrol/v1/service_controller.pb.h"
 #include "google/protobuf/stubs/status.h"
 #include "include/aggregation_options.h"
 
@@ -72,7 +72,7 @@ class QuotaAggregator {
  public:
   using FlushCallback = std::function<void(
       const ::google::api::servicecontrol::v1::AllocateQuotaRequest&)>;
-  virtual ~QuotaAggregator() {};
+  virtual ~QuotaAggregator(){};
 
   // Sets the flush callback function.
   // The callback function must be light and fast.  If it needs to make
@@ -91,7 +91,8 @@ class QuotaAggregator {
   // Caches a response from a remote Service Controller AllocateQuota call.
   virtual ::google::protobuf::util::Status CacheResponse(
       const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request,
-      const ::google::api::servicecontrol::v1::AllocateQuotaResponse& response) = 0;
+      const ::google::api::servicecontrol::v1::AllocateQuotaResponse&
+          response) = 0;
 
   // When the next Flush() should be called.
   // Returns in ms from now, or -1 for never
@@ -108,8 +109,6 @@ class QuotaAggregator {
  protected:
   QuotaAggregator() {}
 };
-
-
 
 // Aggregate Service_Control Check requests.
 // This interface is thread safe.

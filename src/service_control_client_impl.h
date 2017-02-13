@@ -56,18 +56,21 @@ class ServiceControlClientImpl : public ServiceControlClient {
 
   // An async quota call.
   virtual void Quota(
-      const ::google::api::servicecontrol::v1::AllocateQuotaRequest& quota_request,
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
+          quota_request,
       ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response,
       DoneCallback on_quota_done);
 
   // A sync quota call.
   virtual ::google::protobuf::util::Status Quota(
-      const ::google::api::servicecontrol::v1::AllocateQuotaRequest& quota_request,
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
+          quota_request,
       ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response);
 
   // A quota call with per_request transport.
   virtual void Quota(
-      const ::google::api::servicecontrol::v1::AllocateQuotaRequest& quota_request,
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
+          quota_request,
       ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response,
       DoneCallback on_quota_done, TransportQuotaFunc quota_transport);
 
@@ -100,7 +103,8 @@ class ServiceControlClientImpl : public ServiceControlClient {
 
   // A flush callback for check.
   void AllocateQuotaFlushCallback(
-      const ::google::api::servicecontrol::v1::AllocateQuotaRequest& quota_request);
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
+          quota_request);
 
   // A flush callback for report.
   void ReportFlushCallback(

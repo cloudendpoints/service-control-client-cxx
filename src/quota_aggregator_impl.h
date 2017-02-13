@@ -85,9 +85,7 @@ class QuotaAggregatorImpl : public QuotaAggregator,
                                        const std::string& service_config_id);
 
     // Change the negative response to the positive response for refreshing
-    void ClearAllocationErrors() {
-      quota_response_.clear_allocate_errors();
-    }
+    void ClearAllocationErrors() { quota_response_.clear_allocate_errors(); }
 
     bool HasPendingAllocateQuotaRequest() const {
       return operation_aggregator_ != NULL;

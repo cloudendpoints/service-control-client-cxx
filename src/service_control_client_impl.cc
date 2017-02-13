@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#include "src/quota_aggregator_impl.h"
 #include "src/service_control_client_impl.h"
+#include "src/quota_aggregator_impl.h"
 
 #include "google/protobuf/stubs/logging.h"
 #include "utils/thread.h"
@@ -93,8 +93,8 @@ ServiceControlClientImpl::ServiceControlClientImpl(
 
           Status status = check_aggregator_copy->Flush();
           if (!status.ok()) {
-            GOOGLE_LOG(ERROR)
-                << "Failed in Check::Flush() " << status.error_message();
+            GOOGLE_LOG(ERROR) << "Failed in Check::Flush() "
+                              << status.error_message();
           }
 
           status = quota_aggregator_copy->Flush();
@@ -105,8 +105,8 @@ ServiceControlClientImpl::ServiceControlClientImpl(
 
           status = report_aggregator_copy->Flush();
           if (!status.ok()) {
-            GOOGLE_LOG(ERROR)
-                << "Failed in Report::Flush() " << status.error_message();
+            GOOGLE_LOG(ERROR) << "Failed in Report::Flush() "
+                              << status.error_message();
           }
         });
   }
@@ -157,28 +157,28 @@ void ServiceControlClientImpl::AllocateQuotaFlushCallback(
 void ServiceControlClientImpl::CheckFlushCallback(
     const CheckRequest& check_request) {
   CheckResponse* check_response = new CheckResponse;
-  check_transport_(
-      check_request, check_response, [check_response](Status status) {
-        delete check_response;
-        if (!status.ok()) {
-          GOOGLE_LOG(ERROR)
-              << "Failed in Check call: " << status.error_message();
-        }
-      });
+  check_transport_(check_request, check_response,
+                   [check_response](Status status) {
+                     delete check_response;
+                     if (!status.ok()) {
+                       GOOGLE_LOG(ERROR) << "Failed in Check call: "
+                                         << status.error_message();
+                     }
+                   });
   ++send_checks_by_flush_;
 }
 
 void ServiceControlClientImpl::ReportFlushCallback(
     const ReportRequest& report_request) {
   ReportResponse* report_response = new ReportResponse;
-  report_transport_(
-      report_request, report_response, [report_response](Status status) {
-        delete report_response;
-        if (!status.ok()) {
-          GOOGLE_LOG(ERROR)
-              << "Failed in Report call: " << status.error_message();
-        }
-      });
+  report_transport_(report_request, report_response,
+                    [report_response](Status status) {
+                      delete report_response;
+                      if (!status.ok()) {
+                        GOOGLE_LOG(ERROR) << "Failed in Report call: "
+                                          << status.error_message();
+                      }
+                    });
   ++send_reports_by_flush_;
   send_report_operations_ += report_request.operations_size();
 }

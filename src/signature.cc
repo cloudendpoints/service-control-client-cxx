@@ -94,28 +94,27 @@ string GenerateCheckRequestSignature(const CheckRequest& request) {
   return hasher.Digest();
 }
 
-string GenerateAllocateQuotaRequestSignature(const AllocateQuotaRequest& request) {
+string GenerateAllocateQuotaRequestSignature(
+    const AllocateQuotaRequest& request) {
   MD5 hasher;
   const QuotaOperation& operation = request.allocate_operation();
   hasher.Update(operation.method_name());
 
   hasher.Update(kDelimiter, kDelimiterLength);
   hasher.Update(operation.consumer_id());
-/*
-  hasher.Update(kDelimiter, kDelimiterLength);
-  UpdateHashLabels(operation.labels(), &hasher);
-
-  for (const auto& metric_value_set : operation.quota_metrics()) {
+  /*
     hasher.Update(kDelimiter, kDelimiterLength);
-    hasher.Update(metric_value_set.metric_name());
-  }
+    UpdateHashLabels(operation.labels(), &hasher);
 
-  hasher.Update(kDelimiter, kDelimiterLength);
-*/
+    for (const auto& metric_value_set : operation.quota_metrics()) {
+      hasher.Update(kDelimiter, kDelimiterLength);
+      hasher.Update(metric_value_set.metric_name());
+    }
+
+    hasher.Update(kDelimiter, kDelimiterLength);
+  */
   return hasher.Digest();
 }
-
-
 
 }  // namespace service_control_client
 }  // namespace google
