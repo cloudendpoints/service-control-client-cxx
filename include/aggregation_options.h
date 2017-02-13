@@ -31,7 +31,7 @@ typedef std::unordered_map<std::string,
     MetricKindMap;
 
 struct QuotaAggregationOptions {
-  QuotaAggregationOptions() : num_entries(10000), refresh_interval_ms(500) {}
+  QuotaAggregationOptions() : num_entries(10000), refresh_interval_ms(1000) {}
 
   // Constructor.
   // cache_entries is the maximum number of cache entries that can be kept in
@@ -53,10 +53,6 @@ struct QuotaAggregationOptions {
   // Maximum milliseconds before aggregated quota requests are refreshed to the
   // server. The refresh is triggered by a timer task from the quota aggregator.
   int refresh_interval_ms;
-
-  // TODO(jaebong): add more description
-  std::unordered_map<std::string, int64_t> metric_minimum;
-  std::unordered_map<std::string, metric_value_t> metric_costs;
 };
 
 // Options controlling check aggregation behavior.

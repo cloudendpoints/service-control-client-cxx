@@ -122,8 +122,10 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
     // Create a temporary element which will be remained in the cache until
     // actual response arrives
     ::google::api::servicecontrol::v1::AllocateQuotaResponse temp_response;
-    InternalCacheResponse(request, temp_response, true);
-    GOOGLE_LOG(INFO) << "Inserted a new temporary cache for aggregation";
+    CacheElem* cache_elem =
+        new CacheElem(temp_response, SimpleCycleTimer::Now());
+    cache_elem->set_signature(request_signature);
+    cache_->Insert(request_signature, cache_elem, 1);
 
     // By returning NOT_FOUND, caller will send request to server.
     return Status(Code::NOT_FOUND, "");
@@ -144,43 +146,30 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
     return ::google::protobuf::util::Status::OK;
   }
 
+  string request_signature = GenerateAllocateQuotaRequestSignature(request);
+
+  CacheElem* cache_elem = new CacheElem(response, SimpleCycleTimer::Now());
+  cache_elem->set_signature(request_signature);
+
   AllocateQuotaCacheRemovedItemsHandler::StackBuffer stack_buffer(this);
   MutexLock lock(cache_mutex_);
   AllocateQuotaCacheRemovedItemsHandler::StackBuffer::Swapper swapper(
       this, &stack_buffer);
 
-  InternalCacheResponse(request, response, false);
-
-  return ::google::protobuf::util::Status::OK;
-}
-
-// This method must be called behind the cache_mutex_ lock
-void QuotaAggregatorImpl::InternalCacheResponse(
-    const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request,
-    const ::google::api::servicecontrol::v1::AllocateQuotaResponse& response,
-    bool is_refreshing) {
-  if (!cache_) {
-    return;
-  }
-
-  string request_signature = GenerateAllocateQuotaRequestSignature(request);
   QuotaCache::ScopedLookup lookup(cache_.get(), request_signature);
-
-  CacheElem* cache_elem = new CacheElem(response, SimpleCycleTimer::Now());
-  cache_elem->set_signature(request_signature);
-
   if (lookup.Found()) {
     if (lookup.value()->is_aggregated()) {
       // Cached response will be aggregated to the new element for the response
       cache_elem->Aggregate(lookup.value()->ReturnAllocateQuotaRequestAndClear(
           service_name_, service_config_id_));
     }
-
-    cache_->Remove(request_signature);
   }
 
-  // insert aggregated the response to the cache
+  // insert new (aggregated) response to the cache, old one will be removed
+  // internally
   cache_->Insert(request_signature, cache_elem, 1);
+
+  return ::google::protobuf::util::Status::OK;
 }
 
 // When the next Flush() should be called.
@@ -227,11 +216,15 @@ int QuotaAggregatorImpl::GetNextFlushInterval() {
 // if the element is refreshing and aggregated while waiting for the
 // response, tokens should be aggregated
 void QuotaAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
-  // If the element is marked to refreshing, no refreshing it again
   if (elem->is_aggregated() == true) {
     // create a new request instance
     AllocateQuotaRequest request = elem->ReturnAllocateQuotaRequestAndClear(
         service_name_, service_config_id_);
+
+    // Change the negative response to positive
+    if (elem->quota_response().allocate_errors_size() > 0) {
+      elem->ClearAllocationErrors();
+    }
 
     // Insert the element back to the cache while aggregator is waiting for the
     // response.

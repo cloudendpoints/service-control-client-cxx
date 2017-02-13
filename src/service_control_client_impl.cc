@@ -19,6 +19,8 @@ limitations under the License.
 #include "google/protobuf/stubs/logging.h"
 #include "utils/thread.h"
 
+#include <climits>
+
 using std::string;
 using ::google::api::servicecontrol::v1::CheckRequest;
 using ::google::api::servicecontrol::v1::CheckResponse;
@@ -131,23 +133,23 @@ ServiceControlClientImpl::~ServiceControlClientImpl() {
 
 void ServiceControlClientImpl::AllocateQuotaFlushCallback(
     const AllocateQuotaRequest& quota_request) {
+  AllocateQuotaRequest* quota_request_copy =
+      new AllocateQuotaRequest(quota_request);
   AllocateQuotaResponse* quota_response = new AllocateQuotaResponse;
 
-  quota_transport_(
-      quota_request, quota_response,
-      [this, &quota_request, quota_response](Status status) {
-        GOOGLE_LOG(INFO) << "Refreshed the quota cache for "
-                         << quota_response->operation_id();
+  quota_transport_(*quota_request_copy, quota_response,
+                   [this, quota_request_copy, quota_response](Status status) {
+                     if (!status.ok()) {
+                       GOOGLE_LOG(ERROR) << "Failed in AllocateQuota call: "
+                                         << status.error_message();
+                     } else {
+                       this->quota_aggregator_->CacheResponse(
+                           *quota_request_copy, *quota_response);
+                     }
 
-        if (!status.ok()) {
-          GOOGLE_LOG(ERROR)
-              << "Failed in AllocateQuota call: " << status.error_message();
-        } else {
-          this->quota_aggregator_->CacheResponse(quota_request, *quota_response);
-        }
-
-        delete quota_response;
-      });
+                     delete quota_request_copy;
+                     delete quota_response;
+                   });
 
   ++send_quotas_by_flush_;
 }
@@ -242,102 +244,13 @@ Status ServiceControlClientImpl::Check(const CheckRequest& check_request,
   return status_future.get();
 }
 
-Status ServiceControlClientImpl::convertResponseStatus(
-    const ::google::api::servicecontrol::v1::AllocateQuotaResponse& response) {
-  if (response.allocate_errors().size() == 0) {
-    return Status::OK;
-  }
-
-  const ::google::api::servicecontrol::v1::QuotaError& error =
-      response.allocate_errors().Get(0);
-
-  switch (error.code()) {
-    case ::google::api::servicecontrol::v1::QuotaError::UNSPECIFIED:
-      // This is never used.
-      break;
-
-    case ::google::api::servicecontrol::v1::QuotaError::RESOURCE_EXHAUSTED:
-      // Quota allocation failed.
-      // Same as [google.rpc.Code.RESOURCE_EXHAUSTED][].
-      return Status(Code::PERMISSION_DENIED, "Quota allocation failed.");
-
-    case ::google::api::servicecontrol::v1::QuotaError::PROJECT_SUSPENDED:
-      // Consumer project has been suspended.
-      return Status(Code::PERMISSION_DENIED, "Project suspended.");
-
-    case ::google::api::servicecontrol::v1::QuotaError::SERVICE_NOT_ENABLED:
-      // Consumer has not enabled the service.
-      return Status(Code::PERMISSION_DENIED,
-                    std::string("API ") + service_name_ +
-                        " is not enabled for the project.");
-
-    case ::google::api::servicecontrol::v1::QuotaError::BILLING_NOT_ACTIVE:
-      // Consumer cannot access the service because billing is disabled.
-      return Status(Code::PERMISSION_DENIED,
-                    std::string("API ") + service_name_ +
-                        " has billing disabled. Please enable it.");
-
-    case ::google::api::servicecontrol::v1::QuotaError::PROJECT_DELETED:
-    // Consumer's project has been marked as deleted (soft deletion).
-    case ::google::api::servicecontrol::v1::QuotaError::PROJECT_INVALID:
-      // Consumer's project number or ID does not represent a valid project.
-      return Status(Code::INVALID_ARGUMENT,
-                    "Client project not valid. Please pass a valid project.");
-
-    case ::google::api::servicecontrol::v1::QuotaError::IP_ADDRESS_BLOCKED:
-      // IP address of the consumer is invalid for the specific consumer
-      // project.
-      return Status(Code::PERMISSION_DENIED, "IP address blocked.");
-
-    case ::google::api::servicecontrol::v1::QuotaError::REFERER_BLOCKED:
-      // Referer address of the consumer request is invalid for the specific
-      // consumer project.
-      return Status(Code::PERMISSION_DENIED, "Referer blocked.");
-
-    case ::google::api::servicecontrol::v1::QuotaError::CLIENT_APP_BLOCKED:
-      // Client application of the consumer request is invalid for the
-      // specific consumer project.
-      return Status(Code::PERMISSION_DENIED, "Client app blocked.");
-
-    case ::google::api::servicecontrol::v1::QuotaError::API_KEY_INVALID:
-      // Specified API key is invalid.
-      return Status(Code::INVALID_ARGUMENT,
-                    "API key not valid. Please pass a valid API key.");
-
-    case ::google::api::servicecontrol::v1::QuotaError::API_KEY_EXPIRED:
-      // Specified API Key has expired.
-      return Status(Code::INVALID_ARGUMENT,
-                    "API key expired. Please renew the API key.");
-
-    case ::google::api::servicecontrol::v1::QuotaError::
-        PROJECT_STATUS_UNVAILABLE:
-    // The backend server for looking up project id/number is unavailable.
-    case ::google::api::servicecontrol::v1::QuotaError::
-        SERVICE_STATUS_UNAVAILABLE:
-    // The backend server for checking service status is unavailable.
-    case ::google::api::servicecontrol::v1::QuotaError::
-        BILLING_STATUS_UNAVAILABLE:
-      // The backend server for checking billing status is unavailable.
-      // Fail open for internal server errors per recommendation
-      return Status::OK;
-
-    default:
-      return Status(
-          Code::INTERNAL,
-          std::string("Request blocked due to unsupported error code: ") +
-              std::to_string(error.code()));
-  }
-
-  return Status::OK;
-}
-
 void ServiceControlClientImpl::Quota(
     const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
         quota_request,
     ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response,
-    DoneCallback on_quota_done, TransportQuotaFunc check_transport) {
+    DoneCallback on_quota_done, TransportQuotaFunc quota_transport) {
   ++total_called_quotas_;
-  if (check_transport == NULL) {
+  if (quota_transport == NULL) {
     on_quota_done(Status(Code::INVALID_ARGUMENT, "transport is NULL."));
     return;
   }
@@ -352,7 +265,7 @@ void ServiceControlClientImpl::Quota(
                 quota_request);
 
     std::shared_ptr<QuotaAggregator> quota_aggregator_copy = quota_aggregator_;
-    check_transport(*quota_request_copy, quota_response,
+    quota_transport(*quota_request_copy, quota_response,
                     [this, quota_aggregator_copy, quota_request_copy,
                      quota_response, on_quota_done](Status status) {
 
@@ -366,7 +279,7 @@ void ServiceControlClientImpl::Quota(
 
                       delete quota_request_copy;
 
-                      on_quota_done(convertResponseStatus(*quota_response));
+                      on_quota_done(status);
                     });
 
     ++send_quotas_in_flight_;
@@ -377,7 +290,7 @@ void ServiceControlClientImpl::Quota(
     on_quota_done(status);
   } else {
     // Status::OK, return response status from AllocateQuotaResponse
-    on_quota_done(convertResponseStatus(*quota_response));
+    on_quota_done(status);
   }
 }
 
@@ -477,27 +390,28 @@ Status ServiceControlClientImpl::GetStatistics(Statistics* stat) const {
 
 int ServiceControlClientImpl::GetNextFlushInterval() {
   int check_interval = check_aggregator_->GetNextFlushInterval();
-  int quota_interval = check_aggregator_->GetNextFlushInterval();
+  int quota_interval = quota_aggregator_->GetNextFlushInterval();
   int report_interval = report_aggregator_->GetNextFlushInterval();
 
-  if (check_interval < 0) {
-    return (quota_interval < 0) ? report_interval
-                                : std::min(quota_interval, report_interval);
-  } else if (quota_interval < 0) {
-    return (report_interval < 0) ? check_interval
-                                 : std::min(check_interval, report_interval);
-  } else if (report_interval < 0) {
-    return std::min(check_interval, quota_interval);
-  } else {
-    return std::min(check_interval, std::min(report_interval, report_interval));
-  }
+  check_interval =
+      (check_interval < 0) ? std::numeric_limits<int>::max() : check_interval;
+  quota_interval =
+      (quota_interval < 0) ? std::numeric_limits<int>::max() : quota_interval;
+  report_interval =
+      (report_interval < 0) ? std::numeric_limits<int>::max() : report_interval;
+
+  return std::min(check_interval, std::min(report_interval, report_interval));
 }
 
 Status ServiceControlClientImpl::Flush() {
   Status check_status = check_aggregator_->Flush();
+  Status quota_status = quota_aggregator_->Flush();
   Status report_status = report_aggregator_->Flush();
+
   if (!check_status.ok()) {
     return check_status;
+  } else if (!quota_status.ok()) {
+    return quota_status;
   } else {
     return report_status;
   }
@@ -505,9 +419,13 @@ Status ServiceControlClientImpl::Flush() {
 
 Status ServiceControlClientImpl::FlushAll() {
   Status check_status = check_aggregator_->FlushAll();
+  Status quota_status = quota_aggregator_->FlushAll();
   Status report_status = report_aggregator_->FlushAll();
+
   if (!check_status.ok()) {
     return check_status;
+  } else if (!quota_status.ok()) {
+    return quota_status;
   } else {
     return report_status;
   }

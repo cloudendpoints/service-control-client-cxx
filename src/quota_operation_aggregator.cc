@@ -100,8 +100,6 @@ QuotaOperationAggregator::QuotaOperationAggregator(
 }
 
 void QuotaOperationAggregator::MergeOperation(const QuotaOperation& operation) {
-  bool is_aggregated = false;
-
   for (const auto& metric_value_set : operation.quota_metrics()) {
     // Intentionally use the side effect of [] to add missing keys.
     std::unordered_map<string, MetricValue>& metric_values =
@@ -116,13 +114,9 @@ void QuotaOperationAggregator::MergeOperation(const QuotaOperation& operation) {
         MergeDeltaMetricValue(metric_value, existing);
       }
     }
-
-    is_aggregated = true;
   }
 
-  if(is_aggregated) {
-    is_aggregated_ = true;
-  }
+  is_aggregated_ = true;
 }
 
 QuotaOperation QuotaOperationAggregator::ToOperationProto() const {

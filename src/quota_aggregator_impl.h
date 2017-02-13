@@ -84,6 +84,11 @@ class QuotaAggregatorImpl : public QuotaAggregator,
     ReturnAllocateQuotaRequestAndClear(const std::string& service_name,
                                        const std::string& service_config_id);
 
+    // Change the negative response to the positive response for refreshing
+    void ClearAllocationErrors() {
+      quota_response_.clear_allocate_errors();
+    }
+
     bool HasPendingAllocateQuotaRequest() const {
       return operation_aggregator_ != NULL;
     }
@@ -144,12 +149,6 @@ class QuotaAggregatorImpl : public QuotaAggregator,
   // Flushes out all cached check responses; clears all cache items.
   // Usually called at destructor.
   virtual ::google::protobuf::util::Status FlushAll();
-
- private:
-  void InternalCacheResponse(
-      const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request,
-      const ::google::api::servicecontrol::v1::AllocateQuotaResponse& response,
-      bool is_refreshing);
 
  private:
   // The service name for this cache.
