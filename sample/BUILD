@@ -11,7 +11,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "@//:service_control_client_lib",
-        "@//third_party/config:servicecontrol",
+        "@//proto:servicecontrol",
     ],
 )
 

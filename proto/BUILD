@@ -59,3 +59,18 @@ cc_proto_library(
     protoc = "//external:protoc",
     default_runtime = "//external:protobuf",
 )
+
+cc_proto_library(
+    name = "cloud_trace",
+    srcs = [
+        "google/devtools/cloudtrace/v1/trace.proto",
+    ],
+    include = ".",
+    default_runtime = "//external:protobuf",
+    protoc = "//external:protoc",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":service_config",
+        "//external:cc_wkt_protos",
+    ],
+)
