@@ -81,15 +81,14 @@ bind(
 new_local_repository(
     name = "googleapis_git",
     path = "proto",
-    build_file = "third_party/BUILD.googleapis",
 )
 
 bind(
     name = "servicecontrol",
-    actual = "@googleapis_git//:servicecontrol",
+    actual = "@googleapis_git//proto:servicecontrol",
 )
 
 bind(
     name = "service_config",
-    actual = "@googleapis_git//:service_config",
+    actual = "@googleapis_git//proto:service_config",
 )
