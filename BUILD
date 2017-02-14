@@ -23,6 +23,10 @@ cc_library(
         "src/money_utils.h",
         "src/operation_aggregator.cc",
         "src/operation_aggregator.h",
+        "src/quota_aggregator_impl.cc",
+        "src/quota_aggregator_impl.h",
+        "src/quota_operation_aggregator.cc",
+        "src/quota_operation_aggregator.h",
         "src/report_aggregator_impl.cc",
         "src/report_aggregator_impl.h",
         "src/service_control_client_impl.cc",
@@ -47,6 +51,10 @@ cc_library(
     # A hack to use this BUILD as part of other projects.
     # The other projects will add this module as third_party/service-control-client-cxx
     copts = ["-Ithird_party/service-control-client-cxx"],
+    linkopts = [
+        "-lm",
+        "-luuid",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         "//external:boringssl_crypto",
@@ -62,16 +70,6 @@ cc_library(
         "utils/simple_lru_cache_inl.h",
     ],
     visibility = ["//visibility:public"],
-)
-
-cc_test(
-    name = "check_aggregator_impl_test",
-    size = "small",
-    srcs = ["src/check_aggregator_impl_test.cc"],
-    deps = [
-        ":service_control_client_lib",
-        "//external:googletest_main",
-    ],
 )
 
 cc_test(

@@ -68,19 +68,27 @@ bind(
     actual = "@protobuf_git//:cc_wkt_protos_genproto",
 )
 
-new_git_repository(
+# TODO(jaebong): Changed the protobuf repository from git to local copy
+# This move be rolledb back when updated public protobuf is published
+
+#new_git_repository(
+#    name = "googleapis_git",
+#    commit = "6c1d6d4067364a21f8ffefa3401b213d652bf121", # common-protos-1_3_1
+#    remote = "https://github.com/googleapis/googleapis.git",
+#    build_file = "third_party/BUILD.googleapis",
+#)
+
+new_local_repository(
     name = "googleapis_git",
-    commit = "6c1d6d4067364a21f8ffefa3401b213d652bf121", # common-protos-1_3_1
-    remote = "https://github.com/googleapis/googleapis.git",
-    build_file = "third_party/BUILD.googleapis",
+    path = "proto",
 )
 
 bind(
     name = "servicecontrol",
-    actual = "@googleapis_git//:servicecontrol",
+    actual = "@googleapis_git//proto:servicecontrol",
 )
 
 bind(
     name = "service_config",
-    actual = "@googleapis_git//:service_config",
+    actual = "@googleapis_git//proto:service_config",
 )
