@@ -69,7 +69,7 @@ bind(
 )
 
 # TODO(jaebong): Changed the protobuf repository from git to local copy
-# This move be rolledb back when updated public protobuf is published
+# This move be rolled back when updated public protobuf is published
 
 #new_git_repository(
 #    name = "googleapis_git",

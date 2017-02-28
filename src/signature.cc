@@ -102,17 +102,7 @@ string GenerateAllocateQuotaRequestSignature(
 
   hasher.Update(kDelimiter, kDelimiterLength);
   hasher.Update(operation.consumer_id());
-  /*
-    hasher.Update(kDelimiter, kDelimiterLength);
-    UpdateHashLabels(operation.labels(), &hasher);
 
-    for (const auto& metric_value_set : operation.quota_metrics()) {
-      hasher.Update(kDelimiter, kDelimiterLength);
-      hasher.Update(metric_value_set.metric_name());
-    }
-
-    hasher.Update(kDelimiter, kDelimiterLength);
-  */
   return hasher.Digest();
 }
 

@@ -16,8 +16,8 @@ limitations under the License.
 #ifndef GOOGLE_SERVICE_CONTROL_CLIENT_SERVICE_CONTROL_CLIENT_IMPL_H_
 #define GOOGLE_SERVICE_CONTROL_CLIENT_SERVICE_CONTROL_CLIENT_IMPL_H_
 
-#include "src/quota_aggregator_impl.h"
 #include "include/service_control_client.h"
+#include "src/quota_aggregator_impl.h"
 #include "utils/google_macros.h"
 
 #include <atomic>

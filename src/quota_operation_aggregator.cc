@@ -15,7 +15,6 @@ limitations under the License.
 
 #include "src/quota_operation_aggregator.h"
 
-#include <uuid/uuid.h>
 #include <iostream>
 
 #include <google/protobuf/text_format.h>
@@ -36,18 +35,6 @@ namespace google {
 namespace service_control_client {
 
 namespace {
-
-// Maximum 36 byte string for UUID
-const int kMaxUUIDBufSize = 40;
-
-// Genereates a UUID string
-std::string GenerateUUID() {
-  char uuid_buf[kMaxUUIDBufSize];
-  uuid_t uuid;
-  uuid_generate(uuid);
-  uuid_unparse(uuid, uuid_buf);
-  return uuid_buf;
-}
 
 // Returns whether timestamp a is before b or not.
 bool TimestampBefore(const Timestamp& a, const Timestamp& b) {
@@ -120,11 +107,6 @@ void QuotaOperationAggregator::MergeOperation(const QuotaOperation& operation) {
 
 QuotaOperation QuotaOperationAggregator::ToOperationProto() const {
   QuotaOperation op(operation_);
-
-  // TODO(jaebong) For now, we disabled generating new operation id for refresh
-  // request. need to decide we need a new operation_id
-
-  // op.set_operation_id(GenerateUUID());
 
   op.clear_quota_metrics();
 

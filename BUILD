@@ -51,10 +51,6 @@ cc_library(
     # A hack to use this BUILD as part of other projects.
     # The other projects will add this module as third_party/service-control-client-cxx
     copts = ["-Ithird_party/service-control-client-cxx"],
-    linkopts = [
-        "-lm",
-        "-luuid",
-    ],
     visibility = ["//visibility:public"],
     deps = [
         "//external:boringssl_crypto",
