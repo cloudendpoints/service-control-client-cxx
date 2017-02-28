@@ -81,7 +81,7 @@ bind(
 new_local_repository(
     name = "googleapis_git",
     path = "proto",
-    build_file = "third_party/BUILD.googleapis",
+    build_file = "proto/BUILD",
 )
 
 bind(

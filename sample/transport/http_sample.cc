@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
     transport->Report(report_request, report_response, on_done);
   };
 
-  client = CreateServiceControlClient(service_name, options);
+  client = CreateServiceControlClient(service_name, "", options);
 
   // Call Check.
   std::promise<Status> check_promise_status;
