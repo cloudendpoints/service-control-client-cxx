@@ -20,6 +20,8 @@ limitations under the License.
 #include <unordered_map>
 #include <utility>
 
+#include "google/protobuf/text_format.h"
+
 #include "google/api/metric.pb.h"
 #include "google/api/servicecontrol/v1/operation.pb.h"
 #include "google/api/servicecontrol/v1/service_controller.pb.h"
@@ -71,8 +73,7 @@ class QuotaAggregatorImpl : public QuotaAggregator,
   class CacheElem {
    public:
     CacheElem(const ::google::api::servicecontrol::v1::AllocateQuotaResponse&
-                  response,
-              const int64_t time)
+                  response)
         : operation_aggregator_(nullptr), quota_response_(response) {}
 
     // Aggregates the given request to this cache entry.
@@ -163,6 +164,8 @@ class QuotaAggregatorImpl : public QuotaAggregator,
   std::unique_ptr<QuotaCache> cache_;
   // flush interval in cycles.
   int64_t flush_interval_in_cycle_;
+
+  bool is_refresh_stop_;
 
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(QuotaAggregatorImpl);
 };

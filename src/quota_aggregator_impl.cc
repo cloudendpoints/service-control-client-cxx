@@ -65,7 +65,8 @@ QuotaAggregatorImpl::QuotaAggregatorImpl(const std::string& service_name,
                                          const QuotaAggregationOptions& options)
     : service_name_(service_name),
       service_config_id_(service_config_id),
-      options_(options) {
+      options_(options),
+      is_refresh_stop_(false) {
   if (options.num_entries > 0) {
     cache_.reset(new QuotaCache(
         options.num_entries, std::bind(&QuotaAggregatorImpl::OnCacheEntryDelete,
@@ -116,22 +117,26 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
       this, &stack_buffer);
 
   string request_signature = GenerateAllocateQuotaRequestSignature(request);
-  QuotaCache::ScopedLookup lookup(cache_.get(), request_signature);
 
+  QuotaCache::ScopedLookup lookup(cache_.get(), request_signature);
   if (!lookup.Found()) {
-    // Create a temporary element which will be remained in the cache until
-    // actual response arrives
+    // To prevent other connections from sending their own AllocateQuoteRequest,
+    // insert a temporary positive response to the cache. Requests from other
+    // connections will be aggregated to this temporary element until the
+    // response for the actual request arrives.
     ::google::api::servicecontrol::v1::AllocateQuotaResponse temp_response;
-    CacheElem* cache_elem =
-        new CacheElem(temp_response, SimpleCycleTimer::Now());
+    CacheElem* cache_elem = new CacheElem(temp_response);
     cache_elem->set_signature(request_signature);
     cache_->Insert(request_signature, cache_elem, 1);
 
-    // By returning NOT_FOUND, caller will send request to server.
+    // By returning NOT_FOUND, caller will send AllocateQuotaRequest
     return Status(Code::NOT_FOUND, "");
   }
 
-  lookup.value()->Aggregate(request);
+  // Aggregate tokens if the cached response is positive
+  if (lookup.value()->quota_response().allocate_errors_size() == 0) {
+    lookup.value()->Aggregate(request);
+  }
 
   *response = lookup.value()->quota_response();
 
@@ -148,26 +153,33 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
 
   string request_signature = GenerateAllocateQuotaRequestSignature(request);
 
-  CacheElem* cache_elem = new CacheElem(response, SimpleCycleTimer::Now());
-  cache_elem->set_signature(request_signature);
-
   AllocateQuotaCacheRemovedItemsHandler::StackBuffer stack_buffer(this);
   MutexLock lock(cache_mutex_);
   AllocateQuotaCacheRemovedItemsHandler::StackBuffer::Swapper swapper(
       this, &stack_buffer);
 
-  QuotaCache::ScopedLookup lookup(cache_.get(), request_signature);
-  if (lookup.Found()) {
-    if (lookup.value()->is_aggregated()) {
-      // Cached response will be aggregated to the new element for the response
-      cache_elem->Aggregate(lookup.value()->ReturnAllocateQuotaRequestAndClear(
-          service_name_, service_config_id_));
+  CacheElem* cache_elem = nullptr;
+
+  if (response.allocate_errors_size() == 0) {
+    // If the current response is positive and the signature is already in the
+    // cache, aggregation is not required. Tokens are already used to allocated
+    // quota for the current request.
+    QuotaCache::ScopedLookup lookup(cache_.get(), request_signature);
+    if (!lookup.Found()) {
+      cache_elem = new CacheElem(response);
+    } else {
+      lookup.value()->set_quota_response(response);
     }
+  } else {
+    // If the response is negative, insert new or replace existing element from
+    // the current response.
+    cache_elem = new CacheElem(response);
   }
 
-  // insert new (aggregated) response to the cache, old one will be removed
-  // internally
-  cache_->Insert(request_signature, cache_elem, 1);
+  if (cache_elem != nullptr) {
+    cache_elem->set_signature(request_signature);
+    cache_->Insert(request_signature, cache_elem, 1);
+  }
 
   return ::google::protobuf::util::Status::OK;
 }
@@ -202,6 +214,8 @@ int QuotaAggregatorImpl::GetNextFlushInterval() {
   AllocateQuotaCacheRemovedItemsHandler::StackBuffer::Swapper swapper(
       this, &stack_buffer);
 
+  is_refresh_stop_ = true;
+
   GOOGLE_LOG(INFO) << "Remove all entries of check aggregator.";
   if (cache_) {
     cache_->RemoveAll();
@@ -216,7 +230,7 @@ int QuotaAggregatorImpl::GetNextFlushInterval() {
 // if the element is refreshing and aggregated while waiting for the
 // response, tokens should be aggregated
 void QuotaAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
-  if (elem->is_aggregated() == true) {
+  if (elem->is_aggregated() == true && is_refresh_stop_ == false) {
     // create a new request instance
     AllocateQuotaRequest request = elem->ReturnAllocateQuotaRequestAndClear(
         service_name_, service_config_id_);

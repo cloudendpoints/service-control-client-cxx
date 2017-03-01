@@ -69,6 +69,27 @@ cc_library(
 )
 
 cc_test(
+    name = "quota_aggregator_impl_test",
+    size = "small",
+    srcs = ["src/quota_aggregator_impl_test.cc"],
+    deps = [
+        ":service_control_client_lib",
+        "//external:googletest_main",
+    ],
+)
+
+cc_test(
+    name = "quota_operation_aggregator_test",
+    size = "small",
+    srcs = ["src/quota_operation_aggregator_test.cc"],
+    linkopts = ["-lm"],
+    deps = [
+        ":service_control_client_lib",
+        "//external:googletest_main",
+    ],
+)
+
+cc_test(
     name = "distribution_helper_test",
     size = "small",
     srcs = ["utils/distribution_helper_test.cc"],

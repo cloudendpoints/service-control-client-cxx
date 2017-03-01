@@ -92,7 +92,12 @@ void QuotaOperationAggregator::MergeOperation(const QuotaOperation& operation) {
         metric_value_sets_[metric_value_set.metric_name()];
 
     for (const auto& metric_value : metric_value_set.metric_values()) {
+      if(metric_value.int64_value() > 0) {
+        is_aggregated_ = true;
+      }
+
       string signature = GenerateReportMetricValueSignature(metric_value);
+
       MetricValue* existing = FindOrNull(metric_values, signature);
       if (existing == nullptr) {
         metric_values.emplace(signature, metric_value);
@@ -101,29 +106,18 @@ void QuotaOperationAggregator::MergeOperation(const QuotaOperation& operation) {
       }
     }
   }
-
-  is_aggregated_ = true;
 }
 
 QuotaOperation QuotaOperationAggregator::ToOperationProto() const {
   QuotaOperation op(operation_);
-
   op.clear_quota_metrics();
 
-  for (const auto& quota_metric : operation_.quota_metrics()) {
-    auto metric_value_sets =
-        metric_value_sets_.find(quota_metric.metric_name());
-    if (metric_value_sets != metric_value_sets_.end()) {
-      MetricValueSet* set = op.add_quota_metrics();
-      set->set_metric_name(quota_metric.metric_name());
+  for(auto metric_values : metric_value_sets_) {
+    MetricValueSet* set = op.add_quota_metrics();
+    set->set_metric_name(metric_values.first);
 
-      for (auto metric : quota_metric.metric_values()) {
-        auto metric_value_set = metric_value_sets->second.find(
-            GenerateReportMetricValueSignature(metric));
-        if (metric_value_set != metric_value_sets->second.end()) {
-          *(set->add_metric_values()) = metric_value_set->second;
-        }
-      }
+    for (auto metric : metric_values.second) {
+      *(set->add_metric_values()) = metric.second;
     }
   }
 

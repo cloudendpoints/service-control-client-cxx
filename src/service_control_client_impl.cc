@@ -284,10 +284,6 @@ void ServiceControlClientImpl::Quota(
 
     ++send_quotas_in_flight_;
     return;
-
-  } else if (status.error_code() == Code::INVALID_ARGUMENT ||
-             status.error_code() == Code::UNAVAILABLE) {
-    on_quota_done(status);
   } else {
     // Status::OK, return response status from AllocateQuotaResponse
     on_quota_done(status);
