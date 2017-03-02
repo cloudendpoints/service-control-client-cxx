@@ -119,7 +119,7 @@ struct ServiceControlClientOptions {
 
 // The statistics recorded by library.
 struct Statistics {
-  // Total number of Check() calls received.
+  // Total number of Quota() calls received.
   uint64_t total_called_quotas;
   // Check sends to server from flushed cache items.
   uint64_t send_quotas_by_flush;
@@ -305,7 +305,7 @@ class ServiceControlClient {
       ::google::api::servicecontrol::v1::CheckResponse* check_response,
       DoneCallback on_check_done, TransportCheckFunc check_transport) = 0;
 
-  // A check call with provided per_request transport function.
+  // A allocateQuota call with provided per_request transport function.
   // Only some special platforms may need to use this function.
   // It allows caller to pass in a per_request transport function.
   virtual void Quota(

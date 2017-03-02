@@ -102,7 +102,7 @@ class QuotaAggregator {
   // Called at time specified by GetNextFlushInterval().
   virtual ::google::protobuf::util::Status Flush() = 0;
 
-  // Flushes out all cached check responses; clears all cache items.
+  // Flushes out all cached quota responses; clears all cache items.
   // Usually called at destructor.
   virtual ::google::protobuf::util::Status FlushAll() = 0;
 
