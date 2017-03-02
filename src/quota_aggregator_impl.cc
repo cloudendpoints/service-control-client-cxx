@@ -218,7 +218,7 @@ void QuotaAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
         service_name_, service_config_id_);
 
     // Change the negative response to positive
-    if (elem->is_positive_response()) {
+    if (!elem->is_positive_response()) {
       elem->ClearAllocationErrors();
     }
 
