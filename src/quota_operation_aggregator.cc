@@ -92,7 +92,7 @@ void QuotaOperationAggregator::MergeOperation(const QuotaOperation& operation) {
         metric_value_sets_[metric_value_set.metric_name()];
 
     for (const auto& metric_value : metric_value_set.metric_values()) {
-      if(metric_value.int64_value() > 0) {
+      if (metric_value.int64_value() > 0) {
         is_aggregated_ = true;
       }
 
@@ -112,7 +112,7 @@ QuotaOperation QuotaOperationAggregator::ToOperationProto() const {
   QuotaOperation op(operation_);
   op.clear_quota_metrics();
 
-  for(auto metric_values : metric_value_sets_) {
+  for (auto metric_values : metric_value_sets_) {
     MetricValueSet* set = op.add_quota_metrics();
     set->set_metric_name(metric_values.first);
 

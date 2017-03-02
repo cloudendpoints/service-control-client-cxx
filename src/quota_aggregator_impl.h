@@ -115,6 +115,10 @@ class QuotaAggregatorImpl : public QuotaAggregator,
     inline std::string signature() const { return signature_; }
     inline void set_signature(std::string v) { signature_ = v; }
 
+    inline bool is_positive_response() {
+      return quota_response().allocate_errors_size() == 0;
+    }
+
    private:
     // Internal operation.
     std::unique_ptr<QuotaOperationAggregator> operation_aggregator_;
@@ -165,7 +169,7 @@ class QuotaAggregatorImpl : public QuotaAggregator,
   // flush interval in cycles.
   int64_t flush_interval_in_cycle_;
 
-  bool is_refresh_stop_;
+  bool in_flush_all_;
 
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(QuotaAggregatorImpl);
 };

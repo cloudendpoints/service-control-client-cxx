@@ -301,9 +301,12 @@ TEST_F(QuotaAggregatorImplTest, TestCacheRefreshAllAggregated) {
   AllocateQuotaResponse response1;
   AllocateQuotaResponse response2;
 
+  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request1_, &response1));
   EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request2_, &response2));
   EXPECT_OK(aggregator_->CacheResponse(request2_, pass_response2_));
+
   EXPECT_OK(aggregator_->Quota(request1_, &response1));
   EXPECT_OK(aggregator_->Quota(request2_, &response2));
   EXPECT_TRUE(MessageDifferencer::Equals(response1, pass_response1_));
@@ -328,8 +331,11 @@ TEST_F(QuotaAggregatorImplTest, TestCacheRefreshOneAggregated) {
   AllocateQuotaResponse response1;
   AllocateQuotaResponse response2;
 
+  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request1_, &response1));
   EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request2_, &response2));
   EXPECT_OK(aggregator_->CacheResponse(request2_, pass_response2_));
   EXPECT_OK(aggregator_->Quota(request1_, &response1));
   EXPECT_TRUE(MessageDifferencer::Equals(response1, pass_response1_));
