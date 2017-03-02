@@ -88,10 +88,6 @@ class QuotaAggregatorImpl : public QuotaAggregator,
     // Change the negative response to the positive response for refreshing
     void ClearAllocationErrors() { quota_response_.clear_allocate_errors(); }
 
-    bool HasPendingAllocateQuotaRequest() const {
-      return operation_aggregator_ != NULL;
-    }
-
     // Setter for AllocateQuota response.
     inline void set_quota_response(
         const ::google::api::servicecontrol::v1::AllocateQuotaResponse&
@@ -107,8 +103,7 @@ class QuotaAggregatorImpl : public QuotaAggregator,
 
     // Return true if aggregated
     inline bool is_aggregated() const {
-      return operation_aggregator_ ? operation_aggregator_->is_aggregated()
-                                   : false;
+      return operation_aggregator_ != nullptr;
     }
 
     // Getter and Setter of signature_

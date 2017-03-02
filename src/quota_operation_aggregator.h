@@ -42,8 +42,6 @@ class QuotaOperationAggregator {
   // Transforms to Operation proto message.
   ::google::api::servicecontrol::v1::QuotaOperation ToOperationProto() const;
 
-  bool is_aggregated() { return is_aggregated_; }
-
  private:
   // Merges the metric value sets in the given operation into this operation.
   bool MergeMetricValueSets(
@@ -55,13 +53,9 @@ class QuotaOperationAggregator {
   // Aggregated metric values in the operation.
   // Key is metric_name.
   // Value is a map of metric value signature to aggregated metric value.
-  std::unordered_map<
-      std::string,
-      std::unordered_map<std::string,
-                         ::google::api::servicecontrol::v1::MetricValue>>
+  std::unordered_map<std::string,
+                     ::google::api::servicecontrol::v1::MetricValue>
       metric_value_sets_;
-
-  bool is_aggregated_;
 };
 
 }  // namespace service_control_client

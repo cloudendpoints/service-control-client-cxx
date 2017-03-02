@@ -81,29 +81,20 @@ void MergeDeltaMetricValue(const MetricValue& from, MetricValue* to) {
 
 QuotaOperationAggregator::QuotaOperationAggregator(
     const ::google::api::servicecontrol::v1::QuotaOperation& operation)
-    : operation_(operation), is_aggregated_(false) {
+    : operation_(operation) {
   MergeOperation(operation);
 }
 
 void QuotaOperationAggregator::MergeOperation(const QuotaOperation& operation) {
   for (const auto& metric_value_set : operation.quota_metrics()) {
-    // Intentionally use the side effect of [] to add missing keys.
-    std::unordered_map<string, MetricValue>& metric_values =
-        metric_value_sets_[metric_value_set.metric_name()];
+    GOOGLE_DCHECK(metric_value_set.metric_values_size() == 1);
 
-    for (const auto& metric_value : metric_value_set.metric_values()) {
-      if (metric_value.int64_value() > 0) {
-        is_aggregated_ = true;
-      }
-
-      string signature = GenerateReportMetricValueSignature(metric_value);
-
-      MetricValue* existing = FindOrNull(metric_values, signature);
-      if (existing == nullptr) {
-        metric_values.emplace(signature, metric_value);
-      } else {
-        MergeDeltaMetricValue(metric_value, existing);
-      }
+    auto found = metric_value_sets_.find(metric_value_set.metric_name());
+    if (found == metric_value_sets_.end()) {
+      metric_value_sets_[metric_value_set.metric_name()] =
+          metric_value_set.metric_values(0);
+    } else {
+      MergeDeltaMetricValue(metric_value_set.metric_values(0), &found->second);
     }
   }
 }
@@ -116,9 +107,7 @@ QuotaOperation QuotaOperationAggregator::ToOperationProto() const {
     MetricValueSet* set = op.add_quota_metrics();
     set->set_metric_name(metric_values.first);
 
-    for (auto metric : metric_values.second) {
-      *(set->add_metric_values()) = metric.second;
-    }
+    *(set->add_metric_values()) = metric_values.second;
   }
 
   return op;

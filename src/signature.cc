@@ -103,6 +103,11 @@ string GenerateAllocateQuotaRequestSignature(
   hasher.Update(kDelimiter, kDelimiterLength);
   hasher.Update(operation.consumer_id());
 
+  for (const auto& metric_value_set : operation.quota_metrics()) {
+    hasher.Update(kDelimiter, kDelimiterLength);
+    hasher.Update(metric_value_set.metric_name());
+  }
+
   return hasher.Digest();
 }
 

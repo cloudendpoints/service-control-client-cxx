@@ -63,13 +63,13 @@ allocate_operation {
   quota_metrics {
     metric_name: "metric_first"
     metric_values {
-      int64_value: 1
+      int64_value: 2
     }
   }
   quota_metrics {
     metric_name: "metric_second"
     metric_values {
-      int64_value: 1
+      int64_value: 3
     }
   }
   quota_mode: NORMAL
@@ -204,6 +204,18 @@ class QuotaAggregatorImplTest : public ::testing::Test {
     aggregator_->CacheResponse(request, pass_response1_);
   }
 
+  const std::set<std::pair<std::string, int>> covertMetricSets(
+      const ::google::api::servicecontrol::v1::QuotaOperation& operation) {
+    std::set<std::pair<std::string, int>> sets;
+
+    for (auto quota_metric : operation.quota_metrics()) {
+      sets.insert(std::make_pair(quota_metric.metric_name(),
+                                 quota_metric.metric_values(0).int64_value()));
+    }
+
+    return sets;
+  }
+
   AllocateQuotaRequest request1_;
   AllocateQuotaRequest request2_;
   AllocateQuotaRequest request3_;
@@ -298,62 +310,118 @@ TEST_F(QuotaAggregatorImplTest, TestAggregatedRecordNoRefresh) {
 }
 
 TEST_F(QuotaAggregatorImplTest, TestCacheRefreshAllAggregated) {
+  std::set<std::pair<std::string, int>> quota_metrics;
+  std::set<std::pair<std::string, int>> expected_costs;
+
   AllocateQuotaResponse response1;
   AllocateQuotaResponse response2;
 
+  // insert request1
   EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request1_, &response1));
   EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+  // insert request2
   EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request2_, &response2));
   EXPECT_OK(aggregator_->CacheResponse(request2_, pass_response2_));
 
+  // aggregate request1
   EXPECT_OK(aggregator_->Quota(request1_, &response1));
+
+  // aggregate request2
   EXPECT_OK(aggregator_->Quota(request2_, &response2));
+
+  // verify responses from cache
   EXPECT_TRUE(MessageDifferencer::Equals(response1, pass_response1_));
   EXPECT_TRUE(MessageDifferencer::Equals(response2, pass_response2_));
 
+  // check flushed out list is empty
   EXPECT_EQ(flushed_.size(), 0);
 
-  // expire request1
   std::this_thread::sleep_for(std::chrono::milliseconds(60));
 
+  // expire request1
   EXPECT_OK(aggregator_->Flush());
   EXPECT_EQ(flushed_.size(), 1);
 
-  // expire request2
+  EXPECT_TRUE(flushed_[0].has_allocate_operation());
+  quota_metrics = covertMetricSets(flushed_[0].allocate_operation());
+  expected_costs = {{"metric_first", 1}, {"metric_second", 1}};
+  ASSERT_EQ(expected_costs, quota_metrics);
+
   std::this_thread::sleep_for(std::chrono::milliseconds(60));
 
+  // expire request2
   EXPECT_OK(aggregator_->Flush());
   EXPECT_EQ(flushed_.size(), 2);
+
+  EXPECT_TRUE(flushed_[1].has_allocate_operation());
+  expected_costs = {{"metric_first", 2}, {"metric_second", 3}};
+  quota_metrics = covertMetricSets(flushed_[1].allocate_operation());
+  ASSERT_EQ(quota_metrics, expected_costs);
+
+  // expire temporary elements for refreshment from the cache
+  std::this_thread::sleep_for(std::chrono::milliseconds(110));
+  EXPECT_OK(aggregator_->Flush());
+  EXPECT_EQ(flushed_.size(), 2);
+
+  // lookup request 1 again
+  AllocateQuotaResponse response3;
+  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request1_, &response3));
+  EXPECT_TRUE(MessageDifferencer::Equals(response3, empty_response_));
 }
 
 TEST_F(QuotaAggregatorImplTest, TestCacheRefreshOneAggregated) {
+  std::set<std::pair<std::string, int>> quota_metrics;
+  std::set<std::pair<std::string, int>> expected_costs;
+
   AllocateQuotaResponse response1;
   AllocateQuotaResponse response2;
 
+  // insert request 1
   EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request1_, &response1));
   EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
+  // insert request 2
   EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request2_, &response2));
   EXPECT_OK(aggregator_->CacheResponse(request2_, pass_response2_));
+
+  // aggregate request 1
   EXPECT_OK(aggregator_->Quota(request1_, &response1));
+
+  // check responses from cache
   EXPECT_TRUE(MessageDifferencer::Equals(response1, pass_response1_));
   EXPECT_TRUE(MessageDifferencer::Equals(response2, empty_response_));
 
+  // nothing flushed out yet
   EXPECT_EQ(flushed_.size(), 0);
 
-  // expire request1
   std::this_thread::sleep_for(std::chrono::milliseconds(60));
 
+  // expire request1
   EXPECT_OK(aggregator_->Flush());
+
+  // check request1 has flushed out
   EXPECT_EQ(flushed_.size(), 1);
+
+  // verify flushed out 1
+  expected_costs = {{"metric_first", 1}, {"metric_second", 1}};
+  quota_metrics = covertMetricSets(flushed_[0].allocate_operation());
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(60));
 
   // expire request2
-  std::this_thread::sleep_for(std::chrono::milliseconds(60));
-
   EXPECT_OK(aggregator_->Flush());
+
+  // request2 hasn't been aggregated. No need to flushed out
   EXPECT_EQ(flushed_.size(), 1);
+
+  // verify flushed out 1 again
+  expected_costs = {{"metric_first", 1}, {"metric_second", 1}};
+  quota_metrics = covertMetricSets(flushed_[0].allocate_operation());
 }
 
 }  // namespace service_control_client
