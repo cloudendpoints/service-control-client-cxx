@@ -163,6 +163,18 @@ allocate_errors {
 const char kEmptyResponse[] = R"(
 )";
 
+const std::set<std::pair<std::string, int>> ExtractMetricSets(
+    const ::google::api::servicecontrol::v1::QuotaOperation& operation) {
+  std::set<std::pair<std::string, int>> sets;
+
+  for (auto quota_metric : operation.quota_metrics()) {
+    sets.insert(std::make_pair(quota_metric.metric_name(),
+                               quota_metric.metric_values(0).int64_value()));
+  }
+
+  return sets;
+}
+
 }  // namespace
 
 class QuotaAggregatorImplTest : public ::testing::Test {
@@ -202,18 +214,6 @@ class QuotaAggregatorImplTest : public ::testing::Test {
       const AllocateQuotaRequest& request) {
     flushed_.push_back(request);
     aggregator_->CacheResponse(request, pass_response1_);
-  }
-
-  const std::set<std::pair<std::string, int>> covertMetricSets(
-      const ::google::api::servicecontrol::v1::QuotaOperation& operation) {
-    std::set<std::pair<std::string, int>> sets;
-
-    for (auto quota_metric : operation.quota_metrics()) {
-      sets.insert(std::make_pair(quota_metric.metric_name(),
-                                 quota_metric.metric_values(0).int64_value()));
-    }
-
-    return sets;
   }
 
   AllocateQuotaRequest request1_;
@@ -297,7 +297,7 @@ TEST_F(QuotaAggregatorImplTest, TestFlushAggregatedRecord) {
   EXPECT_EQ(flushed_.size(), 1);
 }
 
-TEST_F(QuotaAggregatorImplTest, TestAggregatedRecordNoRefresh) {
+TEST_F(QuotaAggregatorImplTest, TestFushedBeforeRefreshTimeout) {
   AllocateQuotaResponse response;
 
   EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request1_, &response));
@@ -306,10 +306,12 @@ TEST_F(QuotaAggregatorImplTest, TestAggregatedRecordNoRefresh) {
   EXPECT_TRUE(MessageDifferencer::Equals(response, pass_response1_));
 
   EXPECT_OK(aggregator_->Flush());
+
+  // The request 1 remaining in the cache is not yet flushed.
   EXPECT_EQ(flushed_.size(), 0);
 }
 
-TEST_F(QuotaAggregatorImplTest, TestCacheRefreshAllAggregated) {
+TEST_F(QuotaAggregatorImplTest, TestCacheAggregateAfterRefreshAndCacheUpdate) {
   std::set<std::pair<std::string, int>> quota_metrics;
   std::set<std::pair<std::string, int>> expected_costs;
 
@@ -346,7 +348,7 @@ TEST_F(QuotaAggregatorImplTest, TestCacheRefreshAllAggregated) {
   EXPECT_EQ(flushed_.size(), 1);
 
   EXPECT_TRUE(flushed_[0].has_allocate_operation());
-  quota_metrics = covertMetricSets(flushed_[0].allocate_operation());
+  quota_metrics = ExtractMetricSets(flushed_[0].allocate_operation());
   expected_costs = {{"metric_first", 1}, {"metric_second", 1}};
   ASSERT_EQ(expected_costs, quota_metrics);
 
@@ -358,7 +360,7 @@ TEST_F(QuotaAggregatorImplTest, TestCacheRefreshAllAggregated) {
 
   EXPECT_TRUE(flushed_[1].has_allocate_operation());
   expected_costs = {{"metric_first", 2}, {"metric_second", 3}};
-  quota_metrics = covertMetricSets(flushed_[1].allocate_operation());
+  quota_metrics = ExtractMetricSets(flushed_[1].allocate_operation());
   ASSERT_EQ(quota_metrics, expected_costs);
 
   // expire temporary elements for refreshment from the cache
@@ -366,10 +368,56 @@ TEST_F(QuotaAggregatorImplTest, TestCacheRefreshAllAggregated) {
   EXPECT_OK(aggregator_->Flush());
   EXPECT_EQ(flushed_.size(), 2);
 
-  // lookup request 1 again
+  // lookup request1 failed
   AllocateQuotaResponse response3;
   EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request1_, &response3));
-  EXPECT_TRUE(MessageDifferencer::Equals(response3, empty_response_));
+}
+
+TEST_F(QuotaAggregatorImplTest,
+       TestCacheAggregateAfterRefreshBeforeCacheUpdate) {
+  std::set<std::pair<std::string, int>> quota_metrics;
+  std::set<std::pair<std::string, int>> expected_costs;
+
+  AllocateQuotaResponse response1;
+  AllocateQuotaResponse response2;
+
+  // insert request1
+  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request1_, &response1));
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+  // aggregated to request1
+  EXPECT_OK(aggregator_->Quota(request1_, &response1));
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(60));
+
+  // expire request1, temporary 1 inserted
+  EXPECT_OK(aggregator_->Flush());
+  EXPECT_EQ(flushed_.size(), 1);
+
+  // aggregated to temporary three times
+  EXPECT_OK(aggregator_->Quota(request1_, &response1));
+  EXPECT_OK(aggregator_->Quota(request1_, &response1));
+  EXPECT_OK(aggregator_->Quota(request1_, &response1));
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(110));
+
+  // temporary 1 will be flushed
+  EXPECT_OK(aggregator_->Flush());
+  EXPECT_EQ(flushed_.size(), 2);
+
+  // check first flushed
+  EXPECT_TRUE(flushed_[0].has_allocate_operation());
+  expected_costs = {{"metric_first", 1}, {"metric_second", 1}};
+  quota_metrics = ExtractMetricSets(flushed_[0].allocate_operation());
+  ASSERT_EQ(quota_metrics, expected_costs);
+
+  // check second flushed
+  EXPECT_TRUE(flushed_[1].has_allocate_operation());
+  expected_costs = {{"metric_first", 3}, {"metric_second", 3}};
+  quota_metrics = ExtractMetricSets(flushed_[1].allocate_operation());
+  ASSERT_EQ(quota_metrics, expected_costs);
 }
 
 TEST_F(QuotaAggregatorImplTest, TestCacheRefreshOneAggregated) {
@@ -409,19 +457,20 @@ TEST_F(QuotaAggregatorImplTest, TestCacheRefreshOneAggregated) {
 
   // verify flushed out 1
   expected_costs = {{"metric_first", 1}, {"metric_second", 1}};
-  quota_metrics = covertMetricSets(flushed_[0].allocate_operation());
+  quota_metrics = ExtractMetricSets(flushed_[0].allocate_operation());
 
   std::this_thread::sleep_for(std::chrono::milliseconds(60));
 
   // expire request2
   EXPECT_OK(aggregator_->Flush());
 
-  // request2 hasn't been aggregated. No need to flushed out
+  // the second cached item did not have aggregated quota, when it is flushed,
+  // it was dropped.
   EXPECT_EQ(flushed_.size(), 1);
 
   // verify flushed out 1 again
   expected_costs = {{"metric_first", 1}, {"metric_second", 1}};
-  quota_metrics = covertMetricSets(flushed_[0].allocate_operation());
+  quota_metrics = ExtractMetricSets(flushed_[0].allocate_operation());
 }
 
 }  // namespace service_control_client

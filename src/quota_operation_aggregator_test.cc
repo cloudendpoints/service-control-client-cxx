@@ -74,6 +74,18 @@ quota_metrics {
 quota_mode: NORMAL
 )";
 
+const std::set<std::pair<std::string, int>> ExtractMetricSets(
+    const ::google::api::servicecontrol::v1::QuotaOperation& operation) {
+  std::set<std::pair<std::string, int>> sets;
+
+  for (auto quota_metric : operation.quota_metrics()) {
+    sets.insert(std::make_pair(quota_metric.metric_name(),
+                               quota_metric.metric_values(0).int64_value()));
+  }
+
+  return sets;
+}
+
 }  // namespace
 
 class QuotaOperationAggregatorImplTest : public ::testing::Test {
@@ -81,18 +93,6 @@ class QuotaOperationAggregatorImplTest : public ::testing::Test {
   void SetUp() {
     ASSERT_TRUE(TextFormat::ParseFromString(kOperation1, &operation1_));
     ASSERT_TRUE(TextFormat::ParseFromString(kOperation2, &operation2_));
-  }
-
-  const std::set<std::pair<std::string, int>> covertMetricSets(
-      const ::google::api::servicecontrol::v1::QuotaOperation& operation) {
-    std::set<std::pair<std::string, int>> sets;
-
-    for (auto quota_metric : operation.quota_metrics()) {
-      sets.insert(std::make_pair(quota_metric.metric_name(),
-                                 quota_metric.metric_values(0).int64_value()));
-    }
-
-    return sets;
   }
 
   ::google::api::servicecontrol::v1::QuotaOperation operation1_;
@@ -105,7 +105,7 @@ TEST_F(QuotaOperationAggregatorImplTest, TestInitialization) {
   QuotaOperation operation = aggregator.ToOperationProto();
 
   std::set<std::pair<std::string, int>> quota_metrics =
-      covertMetricSets(operation);
+      ExtractMetricSets(operation);
   std::set<std::pair<std::string, int>> expected_costs = {{"metric_first", 1},
                                                           {"metric_second", 1}};
   ASSERT_EQ(quota_metrics, expected_costs);
@@ -114,37 +114,13 @@ TEST_F(QuotaOperationAggregatorImplTest, TestInitialization) {
 TEST_F(QuotaOperationAggregatorImplTest, TestMergeOperation) {
   QuotaOperationAggregator aggregator(operation1_);
 
-  QuotaOperation operation = aggregator.ToOperationProto();
-
-  std::set<std::pair<std::string, int>> quota_metrics =
-      covertMetricSets(operation);
-  std::set<std::pair<std::string, int>> expected_costs = {{"metric_first", 1},
-                                                          {"metric_second", 1}};
-  ASSERT_EQ(quota_metrics, expected_costs);
-
   aggregator.MergeOperation(operation2_);
 
-  operation = aggregator.ToOperationProto();
-  quota_metrics = covertMetricSets(operation);
-
-  expected_costs = {{"metric_first", 3}, {"metric_second", 4}};
-  ASSERT_EQ(quota_metrics, expected_costs);
-}
-
-TEST_F(QuotaOperationAggregatorImplTest, TestMergeOperationToNullOperation) {
-  QuotaOperationAggregator aggregator(operation2_);
-
   QuotaOperation operation = aggregator.ToOperationProto();
-
-  std::set<std::pair<std::string, int>> quota_metrics;
-  for (auto quota_metric : operation.quota_metrics()) {
-    quota_metrics.insert(
-        std::make_pair(quota_metric.metric_name(),
-                       quota_metric.metric_values(0).int64_value()));
-  }
-
-  std::set<std::pair<std::string, int>> expected_costs = {{"metric_first", 2},
-                                                          {"metric_second", 3}};
+  std::set<std::pair<std::string, int>> quota_metrics =
+      ExtractMetricSets(operation);
+  std::set<std::pair<std::string, int>> expected_costs = {{"metric_first", 3},
+                                                          {"metric_second", 4}};
   ASSERT_EQ(quota_metrics, expected_costs);
 }
 
