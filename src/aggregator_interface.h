@@ -20,6 +20,7 @@ limitations under the License.
 #include <memory>
 #include <string>
 
+#include "google/api/servicecontrol/v1/quota_controller.pb.h"
 #include "google/api/servicecontrol/v1/service_controller.pb.h"
 #include "google/protobuf/stubs/status.h"
 #include "include/aggregation_options.h"
@@ -65,6 +66,48 @@ class ReportAggregator {
 
  protected:
   ReportAggregator() {}
+};
+
+class QuotaAggregator {
+ public:
+  using FlushCallback = std::function<void(
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest&)>;
+  virtual ~QuotaAggregator(){};
+
+  // Sets the flush callback function.
+  // The callback function must be light and fast.  If it needs to make
+  // a remote call, it must be non-blocking call.
+  // It should NOT call into this object again from this callback.
+  // It will cause dead-lock.
+  virtual void SetFlushCallback(FlushCallback callback) = 0;
+
+  // If the quota could not be handled by the cache, returns NOT_FOUND,
+  // caller has to send the request to service control.
+  // Otherwise, returns OK and cached response.
+  virtual ::google::protobuf::util::Status Quota(
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request,
+      ::google::api::servicecontrol::v1::AllocateQuotaResponse* response) = 0;
+
+  // Caches a response from a remote Service Controller AllocateQuota call.
+  virtual ::google::protobuf::util::Status CacheResponse(
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request,
+      const ::google::api::servicecontrol::v1::AllocateQuotaResponse&
+          response) = 0;
+
+  // When the next Flush() should be called.
+  // Returns in ms from now, or -1 for never
+  virtual int GetNextFlushInterval() = 0;
+
+  // Invalidates expired allocate quota resposnes.
+  // Called at time specified by GetNextFlushInterval().
+  virtual ::google::protobuf::util::Status Flush() = 0;
+
+  // Flushes out all cached quota responses; clears all cache items.
+  // Usually called at destructor.
+  virtual ::google::protobuf::util::Status FlushAll() = 0;
+
+ protected:
+  QuotaAggregator() {}
 };
 
 // Aggregate Service_Control Check requests.
@@ -126,6 +169,11 @@ std::unique_ptr<CheckAggregator> CreateCheckAggregator(
     const std::string& service_name, const std::string& service_config_id,
     const CheckAggregationOptions& options,
     std::shared_ptr<MetricKindMap> metric_kind);
+
+// Creates a quota aggregator.
+std::unique_ptr<QuotaAggregator> CreateAllocateQuotaAggregator(
+    const std::string& service_name, const std::string& service_config_id,
+    const QuotaAggregationOptions& options);
 
 }  // namespace service_control_client
 }  // namespace google

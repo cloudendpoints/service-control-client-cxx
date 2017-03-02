@@ -20,6 +20,7 @@ limitations under the License.
 #include <memory>
 #include <string>
 
+#include "google/api/servicecontrol/v1/quota_controller.pb.h"
 #include "google/api/servicecontrol/v1/service_controller.pb.h"
 #include "google/protobuf/stubs/status.h"
 // To make it easier for other packages to include this module as their
@@ -41,6 +42,13 @@ using TransportDoneFunc =
 using TransportCheckFunc = std::function<void(
     const ::google::api::servicecontrol::v1::CheckRequest& request,
     ::google::api::servicecontrol::v1::CheckResponse* response,
+    TransportDoneFunc on_done)>;
+
+// Defines a function prototype to make an asynchronous Quota call to
+// the service control server.
+using TransportQuotaFunc = std::function<void(
+    const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request,
+    ::google::api::servicecontrol::v1::AllocateQuotaResponse* response,
     TransportDoneFunc on_done)>;
 
 // Defines a function prototype to make an asynchronous Report call to
@@ -74,12 +82,16 @@ struct ServiceControlClientOptions {
 
   // Constructor with specified option values.
   ServiceControlClientOptions(const CheckAggregationOptions& check_options,
+                              const QuotaAggregationOptions& quota_options,
                               const ReportAggregationOptions& report_options)
-      : check_options(check_options), report_options(report_options) {}
+      : check_options(check_options),
+        quota_options(quota_options),
+        report_options(report_options) {}
 
   // Check aggregation options.
   CheckAggregationOptions check_options;
-
+  // Quota aggregation options
+  QuotaAggregationOptions quota_options;
   // Report aggregation options.
   ReportAggregationOptions report_options;
 
@@ -92,6 +104,7 @@ struct ServiceControlClientOptions {
   // It can be implemented many ways based on the environments.
   // If not provided, the GRPC transport will be used.
   TransportCheckFunc check_transport;
+  TransportQuotaFunc quota_transport;
   TransportReportFunc report_transport;
 
   // This is only used when transport is NOT provided. The library will
@@ -106,6 +119,13 @@ struct ServiceControlClientOptions {
 
 // The statistics recorded by library.
 struct Statistics {
+  // Total number of Quota() calls received.
+  uint64_t total_called_quotas;
+  // Check sends to server from flushed cache items.
+  uint64_t send_quotas_by_flush;
+  // Check sends to remote sever during Check() calls.
+  uint64_t send_quotas_in_flight;
+
   // Total number of Check() calls received.
   uint64_t total_called_checks;
   // Check sends to server from flushed cache items.
@@ -284,6 +304,15 @@ class ServiceControlClient {
       const ::google::api::servicecontrol::v1::CheckRequest& check_request,
       ::google::api::servicecontrol::v1::CheckResponse* check_response,
       DoneCallback on_check_done, TransportCheckFunc check_transport) = 0;
+
+  // A allocateQuota call with provided per_request transport function.
+  // Only some special platforms may need to use this function.
+  // It allows caller to pass in a per_request transport function.
+  virtual void Quota(
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
+          quota_request,
+      ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response,
+      DoneCallback on_quota_done, TransportQuotaFunc quota_transport) = 0;
 
   // Reports operations to the Controller service for billing, logging,
   // monitoring, etc.

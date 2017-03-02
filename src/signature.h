@@ -1,4 +1,4 @@
-/* Copyright 2016 Google Inc. All Rights Reserved.
+/* Copyright 2017 Google Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ limitations under the License.
 #include <string>
 #include "google/api/servicecontrol/v1/metric_value.pb.h"
 #include "google/api/servicecontrol/v1/operation.pb.h"
+#include "google/api/servicecontrol/v1/quota_controller.pb.h"
 #include "google/api/servicecontrol/v1/service_controller.pb.h"
 
 namespace google {
@@ -52,6 +53,9 @@ std::string GenerateReportMetricValueSignature(
 // requests belong to the same service.
 std::string GenerateCheckRequestSignature(
     const ::google::api::servicecontrol::v1::CheckRequest& request);
+
+std::string GenerateAllocateQuotaRequestSignature(
+    const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request);
 
 }  // namespace service_control_client
 }  // namespace google

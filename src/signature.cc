@@ -1,4 +1,4 @@
-/* Copyright 2016 Google Inc. All Rights Reserved.
+/* Copyright 2017 Google Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ using std::string;
 using google::api::servicecontrol::v1::CheckRequest;
 using google::api::servicecontrol::v1::MetricValue;
 using google::api::servicecontrol::v1::Operation;
+using google::api::servicecontrol::v1::AllocateQuotaRequest;
+using google::api::servicecontrol::v1::QuotaOperation;
 
 namespace google {
 namespace service_control_client {
@@ -88,6 +90,23 @@ string GenerateCheckRequestSignature(const CheckRequest& request) {
   }
 
   hasher.Update(kDelimiter, kDelimiterLength);
+
+  return hasher.Digest();
+}
+
+string GenerateAllocateQuotaRequestSignature(
+    const AllocateQuotaRequest& request) {
+  MD5 hasher;
+  const QuotaOperation& operation = request.allocate_operation();
+  hasher.Update(operation.method_name());
+
+  hasher.Update(kDelimiter, kDelimiterLength);
+  hasher.Update(operation.consumer_id());
+
+  for (const auto& metric_value_set : operation.quota_metrics()) {
+    hasher.Update(kDelimiter, kDelimiterLength);
+    hasher.Update(metric_value_set.metric_name());
+  }
 
   return hasher.Digest();
 }

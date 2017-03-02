@@ -17,15 +17,38 @@ limitations under the License.
 #define GOOGLE_SERVICE_CONTROL_CLIENT_AGGREGATOR_OPTIONS_H_
 
 #include <memory>
+#include <unordered_map>
 #include "google/api/metric.pb.h"
 
 namespace google {
 namespace service_control_client {
 
+typedef std::unordered_map<std::string, int64_t> metric_value_t;
+
 // Defines a map of a metric name to its metric kind.
 typedef std::unordered_map<std::string,
                            ::google::api::MetricDescriptor::MetricKind>
     MetricKindMap;
+
+struct QuotaAggregationOptions {
+  QuotaAggregationOptions() : num_entries(10000), refresh_interval_ms(1000) {}
+
+  // Constructor.
+  // cache_entries is the maximum number of cache entries that can be kept in
+  // the aggregation cache. Cache is disabled when cache_entries <= 0.
+  // refresh_interval_ms is the maximum milliseconds before an aggregated quota
+  // request needs to send to remote server again.
+  QuotaAggregationOptions(int cache_entries, int refresh_interval_ms)
+      : num_entries(cache_entries), refresh_interval_ms(refresh_interval_ms) {}
+
+  // Maximum number of cache entries kept in the aggregation cache.
+  // Set to 0 will disable caching and aggregation.
+  int num_entries;
+
+  // The refresh interval in milliseconds when aggregated quota will be send to
+  // the server.
+  int refresh_interval_ms;
+};
 
 // Options controlling check aggregation behavior.
 struct CheckAggregationOptions {

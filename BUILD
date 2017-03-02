@@ -23,6 +23,10 @@ cc_library(
         "src/money_utils.h",
         "src/operation_aggregator.cc",
         "src/operation_aggregator.h",
+        "src/quota_aggregator_impl.cc",
+        "src/quota_aggregator_impl.h",
+        "src/quota_operation_aggregator.cc",
+        "src/quota_operation_aggregator.h",
         "src/report_aggregator_impl.cc",
         "src/report_aggregator_impl.h",
         "src/service_control_client_impl.cc",
@@ -65,9 +69,20 @@ cc_library(
 )
 
 cc_test(
-    name = "check_aggregator_impl_test",
+    name = "quota_aggregator_impl_test",
     size = "small",
-    srcs = ["src/check_aggregator_impl_test.cc"],
+    srcs = ["src/quota_aggregator_impl_test.cc"],
+    deps = [
+        ":service_control_client_lib",
+        "//external:googletest_main",
+    ],
+)
+
+cc_test(
+    name = "quota_operation_aggregator_test",
+    size = "small",
+    srcs = ["src/quota_operation_aggregator_test.cc"],
+    linkopts = ["-lm"],
     deps = [
         ":service_control_client_lib",
         "//external:googletest_main",
