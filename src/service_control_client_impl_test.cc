@@ -1798,7 +1798,7 @@ TEST_F(ServiceControlClientImplTest, TestFlushIntervalReportNeverFlush) {
   ServiceControlClientOptions options(
       CheckAggregationOptions(1 /*entries */, 500 /* refresh_interval_ms */,
                               1000 /* expiration_ms */),
-      QuotaAggregationOptions(1 /*entries */, 500 /* refresh_interval_ms */),
+      QuotaAggregationOptions(1 /*entries */, 1000 /* refresh_interval_ms */),
       ReportAggregationOptions(1 /* entries */, -1 /*flush_interval_ms*/));
 
   MockPeriodicTimer mock_timer;
@@ -1838,7 +1838,7 @@ TEST_F(ServiceControlClientImplTest, TestFlushInterval) {
   ServiceControlClientOptions options(
       CheckAggregationOptions(1 /*entries */, 500 /* refresh_interval_ms */,
                               1000 /* expiration_ms */),
-      QuotaAggregationOptions(1 /*entries */, 500 /* refresh_interval_ms */),
+      QuotaAggregationOptions(1 /*entries */, 1000 /* refresh_interval_ms */),
       ReportAggregationOptions(1 /* entries */, 800 /*flush_interval_ms*/));
 
   MockPeriodicTimer mock_timer;
