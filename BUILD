@@ -143,7 +143,38 @@ cc_test(
 cc_test(
     name = "service_control_client_impl_test",
     size = "small",
-    srcs = ["src/service_control_client_impl_test.cc"],
+    srcs = [
+        "src/service_control_client_impl_test.cc",
+        "src/service_control_client_impl_test.h",
+    ],
+    linkopts = ["-lm"],
+    deps = [
+        ":service_control_client_lib",
+        "//external:googletest_main",
+    ],
+)
+
+cc_test(
+    name = "service_control_client_impl_check_test",
+    size = "small",
+    srcs = [
+        "src/service_control_client_impl_check_test.cc",
+        "src/service_control_client_impl_test.h",
+    ],
+    linkopts = ["-lm"],
+    deps = [
+        ":service_control_client_lib",
+        "//external:googletest_main",
+    ],
+)
+
+cc_test(
+    name = "service_control_client_impl_report_test",
+    size = "small",
+    srcs = [
+        "src/service_control_client_impl_report_test.cc",
+        "src/service_control_client_impl_test.h",
+    ],
     linkopts = ["-lm"],
     deps = [
         ":service_control_client_lib",
