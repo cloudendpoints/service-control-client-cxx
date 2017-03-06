@@ -465,42 +465,7 @@ class ServiceControlClientImplTest : public ::testing::Test {
   // 5) Client::on_check_done() is called.
   void InternalTestNonCachedCheckWithStoredCallback(
       const CheckRequest& request, Status transport_status,
-      CheckResponse* transport_response) {
-    EXPECT_CALL(mock_check_transport_, Check(_, _, _))
-        .WillOnce(Invoke(&mock_check_transport_,
-                         &MockCheckTransport::CheckWithStoredCallback));
-
-    // Set the check response.
-    mock_check_transport_.check_response_ = transport_response;
-    size_t saved_done_vector_size =
-        mock_check_transport_.on_done_vector_.size();
-
-    CheckResponse check_response;
-    Status done_status = Status::UNKNOWN;
-    client_->Check(request, &check_response,
-                   [&done_status](Status status) { done_status = status; });
-    // on_check_done is not called yet. waiting for transport one_check_done.
-    EXPECT_EQ(done_status, Status::UNKNOWN);
-
-    // Since it is not cached, transport should be called.
-    EXPECT_EQ(mock_check_transport_.on_done_vector_.size(),
-              saved_done_vector_size + 1);
-    EXPECT_TRUE(MessageDifferencer::Equals(mock_check_transport_.check_request_,
-                                           request));
-
-    // Calls the on_check_done() to send status.
-    mock_check_transport_.on_done_vector_[saved_done_vector_size](
-        transport_status);
-    // on_check_done is called with right status.
-    EXPECT_EQ(done_status, transport_status);
-    if (done_status.ok()) {
-      EXPECT_TRUE(
-          MessageDifferencer::Equals(*transport_response, check_response));
-    }
-
-    // Verifies call expections and clear it before other test.
-    EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_check_transport_));
-  }
+      CheckResponse* transport_response);
 
   // Tests non cached check request. Mocked transport::Check() is called
   // right away (in place).
@@ -509,57 +474,11 @@ class ServiceControlClientImplTest : public ::testing::Test {
   //    Transport::Check().
   void InternalTestNonCachedCheckWithInplaceCallback(
       const CheckRequest& request, Status transport_status,
-      CheckResponse* transport_response) {
-    EXPECT_CALL(mock_check_transport_, Check(_, _, _))
-        .WillOnce(Invoke(&mock_check_transport_,
-                         &MockCheckTransport::CheckWithInplaceCallback));
-
-    // Set the check status and response to be used in the on_check_done
-    mock_check_transport_.done_status_ = transport_status;
-    mock_check_transport_.check_response_ = transport_response;
-
-    CheckResponse check_response;
-    Status done_status = Status::UNKNOWN;
-    client_->Check(request, &check_response,
-                   [&done_status](Status status) { done_status = status; });
-    // on_check_done should be called.
-    EXPECT_EQ(done_status, transport_status);
-    EXPECT_TRUE(MessageDifferencer::Equals(mock_check_transport_.check_request_,
-                                           request));
-    if (transport_status.ok()) {
-      EXPECT_TRUE(
-          MessageDifferencer::Equals(*transport_response, check_response));
-    }
-
-    // Verifies call expections and clear it before other test.
-    EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_check_transport_));
-  }
+      CheckResponse* transport_response);
 
   void InternalTestNonCachedBlockingCheckWithInplaceCallback(
       const CheckRequest& request, Status transport_status,
-      CheckResponse* transport_response) {
-    EXPECT_CALL(mock_check_transport_, Check(_, _, _))
-        .WillOnce(Invoke(&mock_check_transport_,
-                         &MockCheckTransport::CheckWithInplaceCallback));
-
-    // Set the check status and response to be used in the on_check_done
-    mock_check_transport_.done_status_ = transport_status;
-    mock_check_transport_.check_response_ = transport_response;
-
-    CheckResponse check_response;
-    Status done_status = client_->Check(request, &check_response);
-
-    EXPECT_EQ(done_status, transport_status);
-    EXPECT_TRUE(MessageDifferencer::Equals(mock_check_transport_.check_request_,
-                                           request));
-    if (transport_status.ok()) {
-      EXPECT_TRUE(
-          MessageDifferencer::Equals(*transport_response, check_response));
-    }
-
-    // Verifies call expectations and clear it before other test.
-    EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_check_transport_));
-  }
+      CheckResponse* transport_response);
 
   // Tests non cached check request. Mocked transport::Check() is using a
   // separate thread to call on_done callback.
@@ -568,70 +487,13 @@ class ServiceControlClientImplTest : public ::testing::Test {
   //    separate thread to call on_done callback.
   // 3) Client::Check() returns, but Client::on_check_done() will be called
   //    from the other thread.
-  void InternalTestNonCachedCheckUsingThread(
-      const CheckRequest& request, Status transport_status,
-      CheckResponse* transport_response) {
-    EXPECT_CALL(mock_check_transport_, Check(_, _, _))
-        .WillOnce(Invoke(&mock_check_transport_,
-                         &MockCheckTransport::CheckUsingThread));
-
-    // Set the check status and response to be used in the on_check_done
-    mock_check_transport_.done_status_ = transport_status;
-    mock_check_transport_.check_response_ = transport_response;
-
-    StatusPromise status_promise;
-    StatusFuture status_future = status_promise.get_future();
-
-    CheckResponse check_response;
-    client_->Check(request, &check_response, [&status_promise](Status status) {
-      StatusPromise moved_promise(std::move(status_promise));
-      moved_promise.set_value(status);
-    });
-
-    // Since it is not cached, transport should be called.
-    EXPECT_TRUE(MessageDifferencer::Equals(mock_check_transport_.check_request_,
-                                           request));
-
-    // on_check_done is called with right status.
-    status_future.wait();
-    EXPECT_EQ(transport_status, status_future.get());
-    if (transport_status.ok()) {
-      EXPECT_TRUE(
-          MessageDifferencer::Equals(*transport_response, check_response));
-    }
-
-    // Verifies call expections and clear it before other test.
-    EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_check_transport_));
-  }
+  void InternalTestNonCachedCheckUsingThread(const CheckRequest& request,
+                                             Status transport_status,
+                                             CheckResponse* transport_response);
 
   void InternalTestNonCachedBlockingCheckUsingThread(
       const CheckRequest& request, Status transport_status,
-      CheckResponse* transport_response) {
-    EXPECT_CALL(mock_check_transport_, Check(_, _, _))
-        .WillOnce(Invoke(&mock_check_transport_,
-                         &MockCheckTransport::CheckUsingThread));
-
-    // Set the check status and response to be used in the on_check_done
-    mock_check_transport_.done_status_ = transport_status;
-    mock_check_transport_.check_response_ = transport_response;
-
-    CheckResponse check_response;
-    // Test with blocking check.
-    Status done_status = client_->Check(request, &check_response);
-
-    // Since it is not cached, transport should be called.
-    EXPECT_TRUE(MessageDifferencer::Equals(mock_check_transport_.check_request_,
-                                           request));
-
-    EXPECT_EQ(transport_status, done_status);
-    if (transport_status.ok()) {
-      EXPECT_TRUE(
-          MessageDifferencer::Equals(*transport_response, check_response));
-    }
-
-    // Verifies call expectations and clear it before other test.
-    EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_check_transport_));
-  }
+      CheckResponse* transport_response);
 
   // Before this call, cache should have request1. This test will call Check
   // with request2, and it calls Transport::Check() and get a good
@@ -641,62 +503,7 @@ class ServiceControlClientImplTest : public ::testing::Test {
   void InternalTestReplacedGoodCheckWithStoredCallback(
       const CheckRequest& request2, Status transport_status2,
       CheckResponse* transport_response2, const CheckRequest& request1,
-      Status transport_status1, CheckResponse* transport_response1) {
-    EXPECT_CALL(mock_check_transport_, Check(_, _, _))
-        .WillOnce(Invoke(&mock_check_transport_,
-                         &MockCheckTransport::CheckWithStoredCallback));
-
-    // Set the check response.
-    mock_check_transport_.check_response_ = transport_response2;
-    size_t saved_done_vector_size =
-        mock_check_transport_.on_done_vector_.size();
-
-    CheckResponse check_response2;
-    Status done_status2 = Status::UNKNOWN;
-    client_->Check(request2, &check_response2,
-                   [&done_status2](Status status) { done_status2 = status; });
-    // on_check_done is not called yet. waiting for transport one_check_done.
-    EXPECT_EQ(done_status2, Status::UNKNOWN);
-
-    // Since it is not cached, transport should be called.
-    EXPECT_EQ(mock_check_transport_.on_done_vector_.size(),
-              saved_done_vector_size + 1);
-    EXPECT_TRUE(MessageDifferencer::Equals(mock_check_transport_.check_request_,
-                                           request2));
-
-    // Verifies call expections and clear it before other test.
-    EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_check_transport_));
-
-    // Once on_done_ is called, it will call CacheResponse
-    // which evicts out the old item. The evicted item will call
-    // Transport::Check.
-    EXPECT_CALL(mock_check_transport_, Check(_, _, _))
-        .WillOnce(Invoke(&mock_check_transport_,
-                         &MockCheckTransport::CheckWithStoredCallback));
-
-    // Set the check response for the next request
-    mock_check_transport_.check_response_ = transport_response1;
-
-    // Calls the on_check_done() to send status.
-    mock_check_transport_.on_done_vector_[saved_done_vector_size](
-        transport_status2);
-    // on_check_done is called with right status.
-    EXPECT_EQ(done_status2, transport_status2);
-    EXPECT_TRUE(
-        MessageDifferencer::Equals(*transport_response2, check_response2));
-
-    // request1 should be evited out, and called Transport.
-    EXPECT_EQ(mock_check_transport_.on_done_vector_.size(),
-              saved_done_vector_size + 2);
-    EXPECT_TRUE(MessageDifferencer::Equals(mock_check_transport_.check_request_,
-                                           request1));
-
-    // Calls the on_check_done() to send status.
-    mock_check_transport_.on_done_vector_[saved_done_vector_size + 1](
-        transport_status1);
-    // Verifies call expections and clear it before other test.
-    EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_check_transport_));
-  }
+      Status transport_status1, CheckResponse* transport_response1);
 
   // Before this call, cache should have request1. This test will call Check
   // with request2, and it calls Transport::Check() and get a good
@@ -705,58 +512,11 @@ class ServiceControlClientImplTest : public ::testing::Test {
   // is dropped. The cache will have request2.
   void InternalTestReplacedGoodCheckWithInplaceCallback(
       const CheckRequest& request2, Status transport_status2,
-      CheckResponse* transport_response2) {
-    // Transport::Check() will be called twice. First one is for request2
-    // The second one is for evicted request1.
-    ON_CALL(mock_check_transport_, Check(_, _, _))
-        .WillByDefault(Invoke(&mock_check_transport_,
-                              &MockCheckTransport::CheckWithInplaceCallback));
-    EXPECT_CALL(mock_check_transport_, Check(_, _, _)).Times(2);
-
-    // Both requests will use the same status and response.
-    mock_check_transport_.done_status_ = transport_status2;
-    mock_check_transport_.check_response_ = transport_response2;
-
-    CheckResponse check_response;
-    Status done_status = Status::UNKNOWN;
-    client_->Check(request2, &check_response,
-                   [&done_status](Status status) { done_status = status; });
-    EXPECT_EQ(transport_status2, done_status);
-    if (transport_status2.ok()) {
-      EXPECT_TRUE(
-          MessageDifferencer::Equals(*transport_response2, check_response));
-    }
-
-    // Verifies call expections and clear it before other test.
-    EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_check_transport_));
-  }
+      CheckResponse* transport_response2);
 
   void InternalTestReplacedBlockingCheckWithInplaceCallback(
       const CheckRequest& request2, Status transport_status2,
-      CheckResponse* transport_response2) {
-    // Transport::Check() will be called twice. First one is for request2
-    // The second one is for evicted request1.
-    ON_CALL(mock_check_transport_, Check(_, _, _))
-        .WillByDefault(Invoke(&mock_check_transport_,
-                              &MockCheckTransport::CheckWithInplaceCallback));
-    EXPECT_CALL(mock_check_transport_, Check(_, _, _)).Times(2);
-
-    // Both requests will use the same status and response.
-    mock_check_transport_.done_status_ = transport_status2;
-    mock_check_transport_.check_response_ = transport_response2;
-
-    CheckResponse check_response;
-    // Test with blocking check.
-    Status done_status = client_->Check(request2, &check_response);
-    EXPECT_EQ(transport_status2, done_status);
-    if (transport_status2.ok()) {
-      EXPECT_TRUE(
-          MessageDifferencer::Equals(*transport_response2, check_response));
-    }
-
-    // Verifies call expections and clear it before other test.
-    EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_check_transport_));
-  }
+      CheckResponse* transport_response2);
 
   // Before this call, cache should have request1. This test will call Check
   // with request2, and it calls Transport::Check() and get a good
@@ -765,105 +525,21 @@ class ServiceControlClientImplTest : public ::testing::Test {
   // is dropped. The cache will have request2.
   void InternalTestReplacedGoodCheckUsingThread(
       const CheckRequest& request2, Status transport_status2,
-      CheckResponse* transport_response2) {
-    // Transport::Check() will be called twice. First one is for request2
-    // The second one is for evicted request1.
-    ON_CALL(mock_check_transport_, Check(_, _, _))
-        .WillByDefault(Invoke(&mock_check_transport_,
-                              &MockCheckTransport::CheckUsingThread));
-    EXPECT_CALL(mock_check_transport_, Check(_, _, _)).Times(2);
-
-    // Both requests will use the same status and response.
-    mock_check_transport_.done_status_ = transport_status2;
-    mock_check_transport_.check_response_ = transport_response2;
-
-    StatusPromise status_promise;
-    StatusFuture status_future = status_promise.get_future();
-
-    CheckResponse check_response;
-    client_->Check(request2, &check_response, [&status_promise](Status status) {
-      StatusPromise moved_promise(std::move(status_promise));
-      moved_promise.set_value(status);
-    });
-
-    // on_check_done is called with right status.
-    status_future.wait();
-    EXPECT_EQ(transport_status2, status_future.get());
-    if (transport_status2.ok()) {
-      EXPECT_TRUE(
-          MessageDifferencer::Equals(*transport_response2, check_response));
-    }
-
-    // Verifies call expections and clear it before other test.
-    EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_check_transport_));
-  }
+      CheckResponse* transport_response2);
 
   void InternalTestReplacedBlockingCheckUsingThread(
       const CheckRequest& request2, Status transport_status2,
-      CheckResponse* transport_response2) {
-    // Test with blocking check.
-    // Transport::Check() will be called twice. First one is for request2
-    // The second one is for evicted request1.
-    ON_CALL(mock_check_transport_, Check(_, _, _))
-        .WillByDefault(Invoke(&mock_check_transport_,
-                              &MockCheckTransport::CheckUsingThread));
-    EXPECT_CALL(mock_check_transport_, Check(_, _, _)).Times(2);
-
-    // Both requests will use the same status and response.
-    mock_check_transport_.done_status_ = transport_status2;
-    mock_check_transport_.check_response_ = transport_response2;
-
-    CheckResponse check_response;
-    // Test with blocking check.
-    Status done_status = client_->Check(request2, &check_response);
-
-    EXPECT_EQ(transport_status2, done_status);
-    if (transport_status2.ok()) {
-      EXPECT_TRUE(
-          MessageDifferencer::Equals(*transport_response2, check_response));
-    }
-
-    // Verifies call expections and clear it before other test.
-    EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_check_transport_));
-  }
+      CheckResponse* transport_response2);
 
   // Tests a cached check request.
   // 1) Calls a Client::Check(), its request is in the cache.
   // 2) Client::on_check_done() is called right away.
   // 3) Transport::Check() is not called.
   void InternalTestCachedCheck(const CheckRequest& request,
-                               const CheckResponse& expected_response) {
-    // Check should not be called with cached entry
-    EXPECT_CALL(mock_check_transport_, Check(_, _, _)).Times(0);
-
-    CheckResponse cached_response;
-    Status cached_done_status = Status::UNKNOWN;
-    client_->Check(
-        request, &cached_response,
-        [&cached_done_status](Status status) { cached_done_status = status; });
-    // on_check_done is called inplace with a cached entry.
-    EXPECT_OK(cached_done_status);
-    EXPECT_TRUE(MessageDifferencer::Equals(expected_response, cached_response));
-
-    // Verifies call expections and clear it before other test.
-    EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_check_transport_));
-  }
+                               const CheckResponse& expected_response);
 
   void InternalTestCachedBlockingCheck(const CheckRequest& request,
-                                       const CheckResponse& expected_response) {
-    // Check should not be called with cached entry
-    EXPECT_CALL(mock_check_transport_, Check(_, _, _)).Times(0);
-
-    CheckResponse cached_response;
-    // Test with blocking check.
-    Status cached_done_status = client_->Check(request, &cached_response);
-    // on_check_done is called inplace with a cached entry.
-    EXPECT_OK(cached_done_status);
-    EXPECT_TRUE(MessageDifferencer::Equals(expected_response, cached_response));
-
-    // Verifies call expections and clear it before other test.
-    EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_check_transport_));
-  }
+                                       const CheckResponse& expected_response);
 
   // Adds a label to the given operation.
   void AddLabel(const string& key, const string& value, Operation* operation) {
