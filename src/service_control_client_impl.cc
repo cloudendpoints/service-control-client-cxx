@@ -396,7 +396,7 @@ int ServiceControlClientImpl::GetNextFlushInterval() {
   report_interval =
       (report_interval < 0) ? std::numeric_limits<int>::max() : report_interval;
 
-  return std::min(check_interval, std::min(report_interval, report_interval));
+  return std::min(check_interval, std::min(quota_interval, report_interval));
 }
 
 Status ServiceControlClientImpl::Flush() {
