@@ -305,6 +305,20 @@ class ServiceControlClient {
       ::google::api::servicecontrol::v1::CheckResponse* check_response,
       DoneCallback on_check_done, TransportCheckFunc check_transport) = 0;
 
+  // An async quota call.
+  virtual void Quota(
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
+          quota_request,
+      ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response,
+      DoneCallback on_quota_done) = 0;
+
+  // A sync quota call.
+  virtual ::google::protobuf::util::Status Quota(
+      const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
+          quota_request,
+      ::google::api::servicecontrol::v1::AllocateQuotaResponse*
+          quota_response) = 0;
+
   // A allocateQuota call with provided per_request transport function.
   // Only some special platforms may need to use this function.
   // It allows caller to pass in a per_request transport function.
