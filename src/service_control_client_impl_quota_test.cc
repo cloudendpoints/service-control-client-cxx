@@ -182,7 +182,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.send_quotas_in_flight, 0);
 }
 
-// Cache: false, Callback: stored
+// Cached: false, Callback: stored
 TEST_F(ServiceControlClientImplQuotaTest,
        TestNonCachedQuotaWithStoredCallback) {
   EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
@@ -213,7 +213,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
 }
 
-// Cache: false, Callback: stored
+// Cached: false, Callback: stored
 TEST_F(ServiceControlClientImplQuotaTest,
        TestNonCachedQuotaWithStoredCallbackMultipleReqeusts) {
   // Initialize client instance with cache disabled
@@ -262,7 +262,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.send_quotas_in_flight, 10);
 }
 
-// Cache: true, Callback: stored
+// Cached: true, Callback: stored
 TEST_F(ServiceControlClientImplQuotaTest,
        TestCachedQuotaWithStoredCallbackMultipleRequests) {
   EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
@@ -299,7 +299,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
 }
 
-// Cache: false, Callback: in place
+// Cached: false, Callback: in place
 TEST_F(ServiceControlClientImplQuotaTest,
        TestNonCachedQuotaWithInPlaceCallbackMultipleReqeusts) {
   // Initialize client instance with cache disabled
@@ -341,7 +341,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.send_quotas_in_flight, 10);
 }
 
-// Cache: false, Callback: in place
+// Cached: false, Callback: in place
 TEST_F(ServiceControlClientImplQuotaTest,
        TestNonCachedQuotaWithInPlaceCallback) {
   EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
@@ -368,7 +368,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
 }
 
-// Cache: false, Callback: in place
+// Cached: false, Callback: in place
 TEST_F(ServiceControlClientImplQuotaTest,
        TestCachedQuotaWithInPlaceCallbackMultipleRequests) {
   EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
@@ -402,7 +402,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
 }
 
-// Cache: false, Callback: local in place
+// Cached: false, Callback: local in place
 TEST_F(ServiceControlClientImplQuotaTest,
        TestNonCachedQuotaWithLocalInPlaceCallback) {
   Status done_status = Status::UNKNOWN;
@@ -436,7 +436,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
 }
 
-// Cache: false, Callback: in place
+// Cached: false, Callback: in place
 TEST_F(ServiceControlClientImplQuotaTest,
        TestNonCachedQuotaWithInPlaceCallbackInSync) {
   EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
@@ -461,7 +461,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
 }
 
-// Cache: true, Callback: in place
+// Cached: true, Callback: in place
 TEST_F(ServiceControlClientImplQuotaTest,
        TestCachedQuotaWithInPlaceCallbackInSyncMultipleRequests) {
   EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
@@ -487,7 +487,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
 }
 
-// Cache: true, Callback: thread
+// Cached: true, Callback: thread
 TEST_F(ServiceControlClientImplQuotaTest,
        TestCachedQuotaInSyncThreadMultipleRequests) {
   EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
@@ -522,7 +522,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
 }
 
-// Cache: false, Callback: thread
+// Cached: false, Callback: thread
 TEST_F(ServiceControlClientImplQuotaTest, TestNonCachedQuotaThread) {
   EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
       .WillRepeatedly(Invoke(&mock_quota_transport_,
@@ -560,7 +560,7 @@ TEST_F(ServiceControlClientImplQuotaTest, TestNonCachedQuotaThread) {
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
 }
 
-// Cache: true, Callback: thread
+// Cached: true, Callback: thread
 TEST_F(ServiceControlClientImplQuotaTest,
        TestCachedQuotaThreadMultipleRequests) {
   EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
