@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_SERVICE_CONTROL_CLIENT_IMPL_TEST_H_
-#define GOOGLE_SERVICE_CONTROL_CLIENT_SERVICE_CONTROL_CLIENT_IMPL_TEST_H_
+#ifndef GOOGLE_SERVICE_CONTROL_CLIENT_MOCK_TRANSPORT_H_
+#define GOOGLE_SERVICE_CONTROL_CLIENT_MOCK_TRANSPORT_H_
 
 #include "include/service_control_client.h"
 
@@ -131,8 +131,6 @@ class MockQuotaTransport {
   TransportQuotaFunc GetFunc() {
     return [this](const AllocateQuotaRequest& request, AllocateQuotaResponse* response,
                   TransportDoneFunc on_done) {
-      std::cout << __FILE__ << ":" << __LINE__ << " " << std::endl;
-
       this->Quota(request, response, on_done);
     };
   }
@@ -309,4 +307,4 @@ class MockPeriodicTimer {
 }  // namespace service_control_client
 }  // namespace google
 
-#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_SERVICE_CONTROL_CLIENT_IMPL_TEST_H_
+#endif  // GOOGLE_SERVICE_CONTROL_CLIENT_MOCK_TRANSPORT_H_

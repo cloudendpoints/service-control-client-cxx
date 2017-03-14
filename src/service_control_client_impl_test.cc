@@ -15,7 +15,7 @@ limitations under the License.
 
 #include "include/service_control_client.h"
 
-#include "src/service_control_client_impl_test.h"
+#include "src/mock_transport.h"
 
 #include "gmock/gmock.h"
 #include "google/protobuf/text_format.h"
