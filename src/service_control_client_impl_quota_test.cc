@@ -147,15 +147,14 @@ TEST_F(ServiceControlClientImplQuotaTest, TestQuotaWithInvalidServiceName) {
   EXPECT_EQ(stat.total_called_quotas, 1);
   EXPECT_EQ(stat.send_quotas_by_flush, 0);
   EXPECT_EQ(stat.send_quotas_in_flight, 0);
-  EXPECT_EQ(stat.send_report_operations, 0);
 }
 
 // Error on default callback is not assigned
 TEST_F(ServiceControlClientImplQuotaTest,
        TestQuotaWithNoDefaultQuotaTransport) {
-  ServiceControlClientOptions options(CheckAggregationOptions(1, 500, 1000),
-                                      QuotaAggregationOptions(1, 500),
-                                      ReportAggregationOptions(1, 500));
+  ServiceControlClientOptions options(CheckAggregationOptions(10, 500, 1000),
+                                      QuotaAggregationOptions(10, 500),
+                                      ReportAggregationOptions(10, 500));
 
   options.check_transport = mock_check_transport_.GetFunc();
   options.quota_transport = nullptr;
@@ -181,10 +180,9 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.total_called_quotas, 1);
   EXPECT_EQ(stat.send_quotas_by_flush, 0);
   EXPECT_EQ(stat.send_quotas_in_flight, 0);
-  EXPECT_EQ(stat.send_report_operations, 0);
 }
 
-// Cached: false, Callback: stored
+// Cache: false, Callback: stored
 TEST_F(ServiceControlClientImplQuotaTest,
        TestNonCachedQuotaWithStoredCallback) {
   EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
@@ -213,11 +211,9 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.total_called_quotas, 1);
   EXPECT_EQ(stat.send_quotas_by_flush, 0);
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
-
-  EXPECT_EQ(stat.send_report_operations, 0);
 }
 
-// Cached: false, Callback: stored
+// Cache: false, Callback: stored
 TEST_F(ServiceControlClientImplQuotaTest,
        TestNonCachedQuotaWithStoredCallbackMultipleReqeusts) {
   // Initialize client instance with cache disabled
@@ -251,8 +247,11 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(mock_quota_transport_.on_done_vector_.size(), 10);
 
   // execute stored callback
-  mock_quota_transport_.on_done_vector_[0](done_status.OK);
-  EXPECT_EQ(done_status, Status::OK);
+  for (auto callback : mock_quota_transport_.on_done_vector_) {
+    done_status = Status::UNKNOWN;
+    callback(done_status.OK);
+    EXPECT_EQ(done_status, Status::OK);
+  }
 
   Statistics stat;
   Status stat_status = client->GetStatistics(&stat);
@@ -261,10 +260,9 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.total_called_quotas, 10);
   EXPECT_EQ(stat.send_quotas_by_flush, 0);
   EXPECT_EQ(stat.send_quotas_in_flight, 10);
-  EXPECT_EQ(stat.send_report_operations, 0);
 }
 
-// Cached: true, Callback: stored
+// Cache: true, Callback: stored
 TEST_F(ServiceControlClientImplQuotaTest,
        TestCachedQuotaWithStoredCallbackMultipleRequests) {
   EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
@@ -299,13 +297,11 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.total_called_quotas, 11);
   EXPECT_EQ(stat.send_quotas_by_flush, 0);
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
-
-  EXPECT_EQ(stat.send_report_operations, 0);
 }
 
-// Cached: false, Callback: in place
+// Cache: false, Callback: in place
 TEST_F(ServiceControlClientImplQuotaTest,
-       TestNonCachedQuotaWithInStoredCallbackMultipleReqeusts) {
+       TestNonCachedQuotaWithInPlaceCallbackMultipleReqeusts) {
   // Initialize client instance with cache disabled
   ServiceControlClientOptions options(CheckAggregationOptions(0, 500, 1000),
                                       QuotaAggregationOptions(0, 500),
@@ -343,10 +339,9 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.total_called_quotas, 10);
   EXPECT_EQ(stat.send_quotas_by_flush, 0);
   EXPECT_EQ(stat.send_quotas_in_flight, 10);
-  EXPECT_EQ(stat.send_report_operations, 0);
 }
 
-// Cached: false, Callback: in place
+// Cache: false, Callback: in place
 TEST_F(ServiceControlClientImplQuotaTest,
        TestNonCachedQuotaWithInPlaceCallback) {
   EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
@@ -371,8 +366,6 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.total_called_quotas, 1);
   EXPECT_EQ(stat.send_quotas_by_flush, 0);
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
-
-  EXPECT_EQ(stat.send_report_operations, 0);
 }
 
 // Cache: false, Callback: in place
@@ -407,8 +400,6 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.total_called_quotas, 11);
   EXPECT_EQ(stat.send_quotas_by_flush, 0);
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
-
-  EXPECT_EQ(stat.send_report_operations, 0);
 }
 
 // Cache: false, Callback: local in place
@@ -443,8 +434,6 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.total_called_quotas, 1);
   EXPECT_EQ(stat.send_quotas_by_flush, 0);
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
-
-  EXPECT_EQ(stat.send_report_operations, 0);
 }
 
 // Cache: false, Callback: in place
@@ -470,8 +459,6 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.total_called_quotas, 1);
   EXPECT_EQ(stat.send_quotas_by_flush, 0);
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
-
-  EXPECT_EQ(stat.send_report_operations, 0);
 }
 
 // Cache: true, Callback: in place
@@ -498,8 +485,41 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.total_called_quotas, 10);
   EXPECT_EQ(stat.send_quotas_by_flush, 0);
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
+}
 
-  EXPECT_EQ(stat.send_report_operations, 0);
+// Cache: true, Callback: thread
+TEST_F(ServiceControlClientImplQuotaTest,
+       TestCachedQuotaInSyncThreadMultipleRequests) {
+  EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
+      .WillRepeatedly(Invoke(&mock_quota_transport_,
+                             &MockQuotaTransport::AllocateQuotaUsingThread));
+
+  Status done_status;
+  AllocateQuotaResponse quota_response;
+
+  // Set the check status and response to be used in the on_quota_done
+  mock_quota_transport_.done_status_ = done_status;
+  mock_quota_transport_.quota_response_ = &quota_response;
+
+  done_status = client_->Quota(quota_request1_, &quota_response);
+  EXPECT_TRUE(MessageDifferencer::Equals(mock_quota_transport_.quota_request_,
+                                         quota_request1_));
+  EXPECT_EQ(done_status, Status::OK);
+
+  for (int i = 0; i < 10; i++) {
+    done_status = client_->Quota(quota_request1_, &quota_response);
+    EXPECT_TRUE(MessageDifferencer::Equals(mock_quota_transport_.quota_request_,
+                                           quota_request1_));
+    EXPECT_EQ(done_status, Status::OK);
+  }
+
+  Statistics stat;
+  Status stat_status = client_->GetStatistics(&stat);
+
+  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat.total_called_quotas, 11);
+  EXPECT_EQ(stat.send_quotas_by_flush, 0);
+  EXPECT_EQ(stat.send_quotas_in_flight, 1);
 }
 
 // Cache: false, Callback: thread
@@ -511,7 +531,7 @@ TEST_F(ServiceControlClientImplQuotaTest, TestNonCachedQuotaThread) {
   Status done_status;
   AllocateQuotaResponse quota_response;
 
-  // Set the check status and response to be used in the on_check_done
+  // Set the check status and response to be used in the on_quota_done
   mock_quota_transport_.done_status_ = done_status;
   mock_quota_transport_.quota_response_ = &quota_response;
 
@@ -538,13 +558,11 @@ TEST_F(ServiceControlClientImplQuotaTest, TestNonCachedQuotaThread) {
   EXPECT_EQ(stat.total_called_quotas, 1);
   EXPECT_EQ(stat.send_quotas_by_flush, 0);
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
-
-  EXPECT_EQ(stat.send_report_operations, 0);
 }
 
 // Cache: true, Callback: thread
 TEST_F(ServiceControlClientImplQuotaTest,
-       TestCachedQuotaInSyncThreadMultipleRequests) {
+       TestCachedQuotaThreadMultipleRequests) {
   EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
       .WillRepeatedly(Invoke(&mock_quota_transport_,
                              &MockQuotaTransport::AllocateQuotaUsingThread));
@@ -552,9 +570,21 @@ TEST_F(ServiceControlClientImplQuotaTest,
   Status done_status;
   AllocateQuotaResponse quota_response;
 
-  // Set the check status and response to be used in the on_check_done
+  // Set the check status and response to be used in the on_quota_done
   mock_quota_transport_.done_status_ = done_status;
   mock_quota_transport_.quota_response_ = &quota_response;
+
+  StatusPromise status_promise;
+  StatusFuture status_future = status_promise.get_future();
+  client_->Quota(quota_request1_, &quota_response,
+                 [&status_promise, &done_status](Status status) {
+                   StatusPromise moved_promise(std::move(status_promise));
+                   moved_promise.set_value(status);
+                 });
+  EXPECT_TRUE(MessageDifferencer::Equals(mock_quota_transport_.quota_request_,
+                                         quota_request1_));
+  status_future.wait();
+  EXPECT_EQ(status_future.get(), Status::OK);
 
   for (int i = 0; i < 10; i++) {
     StatusPromise status_promise;
@@ -564,7 +594,6 @@ TEST_F(ServiceControlClientImplQuotaTest,
                      StatusPromise moved_promise(std::move(status_promise));
                      moved_promise.set_value(status);
                    });
-    // Since it is not cached, transport should be called.
     EXPECT_TRUE(MessageDifferencer::Equals(mock_quota_transport_.quota_request_,
                                            quota_request1_));
     status_future.wait();
@@ -575,11 +604,9 @@ TEST_F(ServiceControlClientImplQuotaTest,
   Status stat_status = client_->GetStatistics(&stat);
 
   EXPECT_EQ(stat_status, Status::OK);
-  EXPECT_EQ(stat.total_called_quotas, 10);
+  EXPECT_EQ(stat.total_called_quotas, 11);
   EXPECT_EQ(stat.send_quotas_by_flush, 0);
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
-
-  EXPECT_EQ(stat.send_report_operations, 0);
 }
 
 }  // namespace service_control_client
