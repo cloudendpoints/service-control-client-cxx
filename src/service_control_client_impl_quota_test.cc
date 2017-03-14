@@ -544,7 +544,7 @@ TEST_F(ServiceControlClientImplQuotaTest, TestNonCachedQuotaThread) {
                    moved_promise.set_value(status);
                  });
 
-  // Since it is not cached, transport should be called.
+  // since it is a cache miss, transport should be called.
   EXPECT_TRUE(MessageDifferencer::Equals(mock_quota_transport_.quota_request_,
                                          quota_request1_));
 
