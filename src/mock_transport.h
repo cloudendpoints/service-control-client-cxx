@@ -121,16 +121,15 @@ class MockCheckTransport {
   std::vector<std::unique_ptr<std::thread>> callback_threads_;
 };
 
-
 // A mocking class to mock QuotaTransport interface.
 class MockQuotaTransport {
  public:
-  MOCK_METHOD3(Quota,
-               void(const AllocateQuotaRequest&, AllocateQuotaResponse*, TransportDoneFunc));
+  MOCK_METHOD3(Quota, void(const AllocateQuotaRequest&, AllocateQuotaResponse*,
+                           TransportDoneFunc));
 
   TransportQuotaFunc GetFunc() {
-    return [this](const AllocateQuotaRequest& request, AllocateQuotaResponse* response,
-                  TransportDoneFunc on_done) {
+    return [this](const AllocateQuotaRequest& request,
+                  AllocateQuotaResponse* response, TransportDoneFunc on_done) {
       this->Quota(request, response, on_done);
     };
   }
@@ -148,8 +147,8 @@ class MockQuotaTransport {
 
   // The done callback is stored in on_done_. It MUST be called later.
   void AllocateQuotaWithStoredCallback(const AllocateQuotaRequest& request,
-                               AllocateQuotaResponse* response,
-                               TransportDoneFunc on_done) {
+                                       AllocateQuotaResponse* response,
+                                       TransportDoneFunc on_done) {
     quota_request_ = request;
     if (quota_response_) {
       *response = *quota_response_;
@@ -159,8 +158,8 @@ class MockQuotaTransport {
 
   // The done callback is called right away (in place).
   void AllocateQuotaWithInplaceCallback(const AllocateQuotaRequest& request,
-                                AllocateQuotaResponse* response,
-                                TransportDoneFunc on_done) {
+                                        AllocateQuotaResponse* response,
+                                        TransportDoneFunc on_done) {
     quota_request_ = request;
     if (quota_response_) {
       *response = *quota_response_;
@@ -169,8 +168,9 @@ class MockQuotaTransport {
   }
 
   // The done callback is called from a separate thread with quota_status_
-  void AllocateQuotaUsingThread(const AllocateQuotaRequest& request, AllocateQuotaResponse* response,
-                        TransportDoneFunc on_done) {
+  void AllocateQuotaUsingThread(const AllocateQuotaRequest& request,
+                                AllocateQuotaResponse* response,
+                                TransportDoneFunc on_done) {
     quota_request_ = request;
     Status done_status = done_status_;
     AllocateQuotaResponse* quota_response = quota_response_;
@@ -196,8 +196,6 @@ class MockQuotaTransport {
   // A vector to store thread objects used to call on_done callback.
   std::vector<std::unique_ptr<std::thread>> callback_threads_;
 };
-
-
 
 // A mocking class to mock ReportTransport interface.
 class MockReportTransport {
@@ -300,7 +298,6 @@ class MockPeriodicTimer {
   int interval_ms_;
   std::function<void()> callback_;
 };
-
 
 }  // namespace
 
