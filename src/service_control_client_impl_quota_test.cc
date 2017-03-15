@@ -98,8 +98,8 @@ class ServiceControlClientImplQuotaTest : public ::testing::Test {
     cached_options.quota_transport = mock_quota_transport_.GetFunc();
     cached_options.report_transport = mock_report_transport_.GetFunc();
 
-    client_ = CreateServiceControlClient(kServiceName, kServiceConfigId,
-                                         cached_options);
+    cached_client_ = CreateServiceControlClient(kServiceName, kServiceConfigId,
+                                                cached_options);
 
     // Initialize the client instance with cache disabled
     ServiceControlClientOptions noncached_options(
@@ -122,7 +122,7 @@ class ServiceControlClientImplQuotaTest : public ::testing::Test {
   MockQuotaTransport mock_quota_transport_;
   MockReportTransport mock_report_transport_;
 
-  std::unique_ptr<ServiceControlClient> client_;
+  std::unique_ptr<ServiceControlClient> cached_client_;
   std::unique_ptr<ServiceControlClient> noncached_client_;
 };
 
@@ -244,14 +244,16 @@ TEST_F(ServiceControlClientImplQuotaTest,
   Status done_status = Status::UNKNOWN;
   AllocateQuotaResponse quota_response;
 
-  client_->Quota(quota_request1_, &quota_response,
-                 [&done_status](Status status) { done_status = status; });
+  cached_client_->Quota(
+      quota_request1_, &quota_response,
+      [&done_status](Status status) { done_status = status; });
   EXPECT_EQ(done_status, Status::UNKNOWN);
 
   // call Quota 10 times
   for (int i = 0; i < 10; i++) {
-    client_->Quota(quota_request1_, &quota_response,
-                   [&done_status](Status status) { done_status = status; });
+    cached_client_->Quota(
+        quota_request1_, &quota_response,
+        [&done_status](Status status) { done_status = status; });
     EXPECT_EQ(done_status, Status::OK);
   }
 
@@ -263,7 +265,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(done_status, Status::OK);
 
   Statistics stat;
-  Status stat_status = client_->GetStatistics(&stat);
+  Status stat_status = cached_client_->GetStatistics(&stat);
 
   EXPECT_EQ(stat_status, Status::OK);
   EXPECT_EQ(stat.total_called_quotas, 11);
@@ -437,7 +439,8 @@ TEST_F(ServiceControlClientImplQuotaTest,
   AllocateQuotaResponse quota_response;
 
   for (int i = 0; i < 10; i++) {
-    Status done_status = client_->Quota(quota_request1_, &quota_response);
+    Status done_status =
+        cached_client_->Quota(quota_request1_, &quota_response);
     EXPECT_EQ(done_status, Status::OK);
   }
 
@@ -445,7 +448,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(mock_quota_transport_.on_done_vector_.size(), 0);
 
   Statistics stat;
-  Status stat_status = client_->GetStatistics(&stat);
+  Status stat_status = cached_client_->GetStatistics(&stat);
 
   EXPECT_EQ(stat_status, Status::OK);
   EXPECT_EQ(stat.total_called_quotas, 10);
@@ -467,20 +470,20 @@ TEST_F(ServiceControlClientImplQuotaTest,
   mock_quota_transport_.done_status_ = done_status;
   mock_quota_transport_.quota_response_ = &quota_response;
 
-  done_status = client_->Quota(quota_request1_, &quota_response);
+  done_status = cached_client_->Quota(quota_request1_, &quota_response);
   EXPECT_TRUE(MessageDifferencer::Equals(mock_quota_transport_.quota_request_,
                                          quota_request1_));
   EXPECT_EQ(done_status, Status::OK);
 
   for (int i = 0; i < 10; i++) {
-    done_status = client_->Quota(quota_request1_, &quota_response);
+    done_status = cached_client_->Quota(quota_request1_, &quota_response);
     EXPECT_TRUE(MessageDifferencer::Equals(mock_quota_transport_.quota_request_,
                                            quota_request1_));
     EXPECT_EQ(done_status, Status::OK);
   }
 
   Statistics stat;
-  Status stat_status = client_->GetStatistics(&stat);
+  Status stat_status = cached_client_->GetStatistics(&stat);
 
   EXPECT_EQ(stat_status, Status::OK);
   EXPECT_EQ(stat.total_called_quotas, 11);
@@ -543,26 +546,27 @@ TEST_F(ServiceControlClientImplQuotaTest,
 
   StatusPromise status_promise;
   StatusFuture status_future = status_promise.get_future();
-  client_->Quota(quota_request1_, &quota_response,
-                 [&status_promise, &done_status](Status status) {
-                   StatusPromise moved_promise(std::move(status_promise));
-                   moved_promise.set_value(status);
-                 });
+  cached_client_->Quota(
+      quota_request1_, &quota_response,
+      [&status_promise, &done_status](Status status) {
+        StatusPromise moved_promise(std::move(status_promise));
+        moved_promise.set_value(status);
+      });
   EXPECT_TRUE(MessageDifferencer::Equals(mock_quota_transport_.quota_request_,
                                          quota_request1_));
 
   for (int i = 0; i < 10; i++) {
-    client_->Quota(quota_request1_, &quota_response,
-                   [&status_promise, &done_status](Status status) {
-                     EXPECT_EQ(status, Status::OK);
-                   });
+    cached_client_->Quota(quota_request1_, &quota_response,
+                          [&status_promise, &done_status](Status status) {
+                            EXPECT_EQ(status, Status::OK);
+                          });
   }
 
   status_future.wait();
   EXPECT_EQ(status_future.get(), Status::OK);
 
   Statistics stat;
-  Status stat_status = client_->GetStatistics(&stat);
+  Status stat_status = cached_client_->GetStatistics(&stat);
 
   EXPECT_EQ(stat_status, Status::OK);
   EXPECT_EQ(stat.total_called_quotas, 11);
