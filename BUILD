@@ -143,7 +143,24 @@ cc_test(
 cc_test(
     name = "service_control_client_impl_test",
     size = "small",
-    srcs = ["src/service_control_client_impl_test.cc"],
+    srcs = [
+        "src/mock_transport.h",
+        "src/service_control_client_impl_test.cc",
+    ],
+    linkopts = ["-lm"],
+    deps = [
+        ":service_control_client_lib",
+        "//external:googletest_main",
+    ],
+)
+
+cc_test(
+    name = "service_control_client_impl_quota_test",
+    size = "small",
+    srcs = [
+        "src/mock_transport.h",
+        "src/service_control_client_impl_quota_test.cc",
+    ],
     linkopts = ["-lm"],
     deps = [
         ":service_control_client_lib",
