@@ -215,7 +215,8 @@ int QuotaAggregatorImpl::GetNextFlushInterval() {
 // response, tokens should be aggregated
 void QuotaAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
   if (elem->in_flight() && in_flush_all_ == false) {
-    // keep the cached element remaining in the cache
+    // keep the cached entry remain in the cache if the entry is waiting for
+    // the response
     cache_->Insert(elem->signature(), elem, 1);
     return;
   }

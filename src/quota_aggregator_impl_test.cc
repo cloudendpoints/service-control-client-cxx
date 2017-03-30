@@ -398,7 +398,7 @@ TEST_F(QuotaAggregatorImplTest, TestCacheAggregateAfterRefreshAndCacheUpdate) {
   quota_metrics = ExtractMetricSets(flushed_[1].allocate_operation());
   ASSERT_EQ(quota_metrics, expected_costs);
 
-  // reset in flight flag for request1
+  // reset in_flight flag for request1
   EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response2_));
 
   // expire temporary elements for refreshment from the cache
