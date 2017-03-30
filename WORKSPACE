@@ -68,20 +68,11 @@ bind(
     actual = "@protobuf_git//:cc_wkt_protos_genproto",
 )
 
-# TODO(jaebong): Changed the protobuf repository from git to local copy
-# This move be rolled back when updated public protobuf is published
-
-#new_git_repository(
-#    name = "googleapis_git",
-#    commit = "6c1d6d4067364a21f8ffefa3401b213d652bf121", # common-protos-1_3_1
-#    remote = "https://github.com/googleapis/googleapis.git",
-#    build_file = "third_party/BUILD.googleapis",
-#)
-
-new_local_repository(
+new_git_repository(
     name = "googleapis_git",
-    path = "proto",
-    build_file = "proto/BUILD",
+    commit = "2fe0050bd2a6d4c6ba798c0311f0b149b8997314",
+    remote = "https://github.com/googleapis/googleapis.git",
+    build_file = "third_party/BUILD.googleapis",
 )
 
 bind(
@@ -90,6 +81,29 @@ bind(
 )
 
 bind(
+    name = "servicecontrol_genproto",
+    actual = "@googleapis_git//:servicecontrol_genproto",
+)
+
+bind(
     name = "service_config",
     actual = "@googleapis_git//:service_config",
+)
+
+bind(
+    name = "cloud_trace",
+    actual = "@googleapis_git//:cloud_trace",
+)
+
+# TODO(jaebong): Changed the protobuf repository from git to local copy
+# This move be rolled back when updated public protobuf is published
+new_local_repository(
+    name = "quotacontrol_git",
+    path = "proto",
+    build_file = "proto/BUILD",
+)
+
+bind(
+    name = "quotacontrol",
+    actual = "@quotacontrol_git//:quotacontrol",
 )

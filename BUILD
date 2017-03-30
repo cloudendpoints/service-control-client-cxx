@@ -2,6 +2,8 @@ licenses(["notice"])
 
 exports_files(["LICENSE"])
 
+load("@protobuf_git//:protobuf.bzl", "cc_proto_library")
+
 cc_library(
     name = "distribution_helper_lib",
     srcs = ["utils/distribution_helper.cc"],
@@ -54,6 +56,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//external:boringssl_crypto",
+        "//external:quotacontrol",
         "//external:servicecontrol",
     ],
 )
