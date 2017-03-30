@@ -90,11 +90,6 @@ bind(
     actual = "@googleapis_git//:service_config",
 )
 
-bind(
-    name = "cloud_trace",
-    actual = "@googleapis_git//:cloud_trace",
-)
-
 # TODO(jaebong): Changed the protobuf repository from git to local copy
 # This move be rolled back when updated public protobuf is published
 new_local_repository(
