@@ -265,22 +265,29 @@ void ServiceControlClientImpl::Quota(
                 quota_request);
 
     std::shared_ptr<QuotaAggregator> quota_aggregator_copy = quota_aggregator_;
-    quota_transport(*quota_request_copy, quota_response,
-                    [this, quota_aggregator_copy, quota_request_copy,
-                     quota_response, on_quota_done](Status status) {
+    quota_transport(*quota_request_copy, quota_response, [this,
+                                                          quota_aggregator_copy,
+                                                          quota_request_copy,
+                                                          quota_response,
+                                                          on_quota_done](
+                                                             Status status) {
 
-                      if (status.ok()) {
-                        quota_aggregator_copy->CacheResponse(
-                            *quota_request_copy, *quota_response);
-                      } else {
-                        GOOGLE_LOG(ERROR) << "Failed in Check call: "
-                                          << status.error_message();
-                      }
+      if (status.ok()) {
+        quota_aggregator_copy->CacheResponse(*quota_request_copy,
+                                             *quota_response);
+      } else {
+        // on network error, failed open, reset in_flight flag to false
+        ::google::api::servicecontrol::v1::AllocateQuotaResponse dummy_response;
+        quota_aggregator_copy->CacheResponse(*quota_request_copy,
+                                             dummy_response);
 
-                      delete quota_request_copy;
+        GOOGLE_LOG(ERROR) << "Failed in Quota call: " << status.error_message();
+      }
 
-                      on_quota_done(status);
-                    });
+      delete quota_request_copy;
+
+      on_quota_done(status);
+    });
 
     ++send_quotas_in_flight_;
     return;

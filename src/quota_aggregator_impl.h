@@ -74,7 +74,9 @@ class QuotaAggregatorImpl : public QuotaAggregator,
    public:
     CacheElem(const ::google::api::servicecontrol::v1::AllocateQuotaResponse&
                   response)
-        : operation_aggregator_(nullptr), quota_response_(response) {}
+        : operation_aggregator_(nullptr),
+          quota_response_(response),
+          in_flight_(false) {}
 
     // Aggregates the given request to this cache entry.
     void Aggregate(
@@ -110,6 +112,10 @@ class QuotaAggregatorImpl : public QuotaAggregator,
     inline std::string signature() const { return signature_; }
     inline void set_signature(std::string v) { signature_ = v; }
 
+    // Getter and Setter of in_flight_
+    inline bool in_flight() const { return in_flight_; }
+    inline void set_in_flight(bool v) { in_flight_ = v; }
+
     inline bool is_positive_response() {
       return quota_response().allocate_errors_size() == 0;
     }
@@ -123,6 +129,8 @@ class QuotaAggregatorImpl : public QuotaAggregator,
 
     // maintain the sinature to move unnecessary signaure generation
     std::string signature_;
+
+    bool in_flight_;
   };
 
   using CacheDeleter = std::function<void(CacheElem*)>;

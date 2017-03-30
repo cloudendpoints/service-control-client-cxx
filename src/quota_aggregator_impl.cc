@@ -127,6 +127,7 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
     ::google::api::servicecontrol::v1::AllocateQuotaResponse temp_response;
     CacheElem* cache_elem = new CacheElem(temp_response);
     cache_elem->set_signature(request_signature);
+    cache_elem->set_in_flight(true);
     cache_->Insert(request_signature, cache_elem, 1);
 
     // By returning NOT_FOUND, caller will send AllocateQuotaRequest
@@ -160,6 +161,7 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
 
   QuotaCache::ScopedLookup lookup(cache_.get(), request_signature);
   if (lookup.Found()) {
+    lookup.value()->set_in_flight(false);
     lookup.value()->set_quota_response(response);
   }
 
@@ -212,22 +214,20 @@ int QuotaAggregatorImpl::GetNextFlushInterval() {
 // if the element is refreshing and aggregated while waiting for the
 // response, tokens should be aggregated
 void QuotaAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
+  if (elem->in_flight() && in_flush_all_ == false) {
+    // keep the cached element remaining in the cache
+    cache_->Insert(elem->signature(), elem, 1);
+    return;
+  }
+
   if (elem->is_aggregated() == true && in_flush_all_ == false) {
-    // create a new request instance
-    AllocateQuotaRequest request = elem->ReturnAllocateQuotaRequestAndClear(
-        service_name_, service_config_id_);
-
-    // Change the negative response to positive
-    if (!elem->is_positive_response()) {
-      elem->ClearAllocationErrors();
-    }
-
     // Insert the element back to the cache while aggregator is waiting for the
     // response.
+    elem->set_in_flight(true);
     cache_->Insert(elem->signature(), elem, 1);
 
-    // remove the instance
-    AddRemovedItem(request);
+    AddRemovedItem(elem->ReturnAllocateQuotaRequestAndClear(
+        service_name_, service_config_id_));
   } else {
     delete elem;
   }
