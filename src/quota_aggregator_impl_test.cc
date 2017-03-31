@@ -297,7 +297,7 @@ TEST_F(QuotaAggregatorImplTest, TestFlushAggregatedRecord) {
   EXPECT_EQ(flushed_.size(), 1);
 }
 
-TEST_F(QuotaAggregatorImplTest, TestFushedBeforeRefreshTimeout) {
+TEST_F(QuotaAggregatorImplTest, TestFlushedBeforeRefreshTimeout) {
   AllocateQuotaResponse response;
 
   EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request1_, &response));
@@ -309,6 +309,41 @@ TEST_F(QuotaAggregatorImplTest, TestFushedBeforeRefreshTimeout) {
 
   // The request 1 remaining in the cache is not yet flushed.
   EXPECT_EQ(flushed_.size(), 0);
+}
+
+TEST_F(QuotaAggregatorImplTest, TestInflightCache) {
+  AllocateQuotaResponse response;
+
+  // temporary cached with in_flight flag on
+  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request1_, &response));
+
+  // hit cached response and aggregate
+  EXPECT_ERROR_CODE(Code::OK, aggregator_->Quota(request1_, &response));
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(110));
+  EXPECT_OK(aggregator_->Flush());
+
+  // hit cached response and aggregate
+  EXPECT_ERROR_CODE(Code::OK, aggregator_->Quota(request1_, &response));
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(110));
+  EXPECT_OK(aggregator_->Flush());
+
+  // nothing refreshed
+  EXPECT_EQ(flushed_.size(), 0);
+
+  // update the response in the cache and set in_flight flag off
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+
+  // hit cached response and aggregate
+  EXPECT_ERROR_CODE(Code::OK, aggregator_->Quota(request1_, &response));
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(110));
+
+  EXPECT_OK(aggregator_->Flush());
+
+  // one element added to the refresh list
+  EXPECT_EQ(flushed_.size(), 1);
 }
 
 TEST_F(QuotaAggregatorImplTest, TestCacheAggregateAfterRefreshAndCacheUpdate) {
@@ -363,6 +398,9 @@ TEST_F(QuotaAggregatorImplTest, TestCacheAggregateAfterRefreshAndCacheUpdate) {
   quota_metrics = ExtractMetricSets(flushed_[1].allocate_operation());
   ASSERT_EQ(quota_metrics, expected_costs);
 
+  // reset in_flight flag for request1
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response2_));
+
   // expire temporary elements for refreshment from the cache
   std::this_thread::sleep_for(std::chrono::milliseconds(110));
   EXPECT_OK(aggregator_->Flush());
@@ -400,6 +438,9 @@ TEST_F(QuotaAggregatorImplTest,
   EXPECT_OK(aggregator_->Quota(request1_, &response1));
   EXPECT_OK(aggregator_->Quota(request1_, &response1));
   EXPECT_OK(aggregator_->Quota(request1_, &response1));
+
+  // response has arrived, set in_flight flag off
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
 
   std::this_thread::sleep_for(std::chrono::milliseconds(110));
 

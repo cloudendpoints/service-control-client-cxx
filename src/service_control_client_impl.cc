@@ -244,11 +244,10 @@ Status ServiceControlClientImpl::Check(const CheckRequest& check_request,
   return status_future.get();
 }
 
-void ServiceControlClientImpl::Quota(
-    const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
-        quota_request,
-    ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response,
-    DoneCallback on_quota_done, TransportQuotaFunc quota_transport) {
+void ServiceControlClientImpl::Quota(const AllocateQuotaRequest& quota_request,
+                                     AllocateQuotaResponse* quota_response,
+                                     DoneCallback on_quota_done,
+                                     TransportQuotaFunc quota_transport) {
   ++total_called_quotas_;
   if (quota_transport == NULL) {
     on_quota_done(Status(Code::INVALID_ARGUMENT, "transport is NULL."));
@@ -259,10 +258,8 @@ void ServiceControlClientImpl::Quota(
   if (status.error_code() == Code::NOT_FOUND) {
     // Makes a copy of check_request so that on_done() callback can use
     // it to call CacheResponse.
-    ::google::api::servicecontrol::v1::AllocateQuotaRequest*
-        quota_request_copy =
-            new ::google::api::servicecontrol::v1::AllocateQuotaRequest(
-                quota_request);
+    AllocateQuotaRequest* quota_request_copy =
+        new AllocateQuotaRequest(quota_request);
 
     std::shared_ptr<QuotaAggregator> quota_aggregator_copy = quota_aggregator_;
     quota_transport(*quota_request_copy, quota_response,
@@ -273,7 +270,13 @@ void ServiceControlClientImpl::Quota(
                         quota_aggregator_copy->CacheResponse(
                             *quota_request_copy, *quota_response);
                       } else {
-                        GOOGLE_LOG(ERROR) << "Failed in Check call: "
+                        // on network error, failed open, reset in_flight flag
+                        // to false
+                        AllocateQuotaResponse dummy_response;
+                        quota_aggregator_copy->CacheResponse(
+                            *quota_request_copy, dummy_response);
+
+                        GOOGLE_LOG(ERROR) << "Failed in Quota call: "
                                           << status.error_message();
                       }
 
@@ -291,19 +294,16 @@ void ServiceControlClientImpl::Quota(
 }
 
 // An async quota call.
-void ServiceControlClientImpl::Quota(
-    const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
-        quota_request,
-    ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response,
-    DoneCallback on_quota_done) {
+void ServiceControlClientImpl::Quota(const AllocateQuotaRequest& quota_request,
+                                     AllocateQuotaResponse* quota_response,
+                                     DoneCallback on_quota_done) {
   Quota(quota_request, quota_response, on_quota_done, quota_transport_);
 }
 
 // A sync quota call.
 ::google::protobuf::util::Status ServiceControlClientImpl::Quota(
-    const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
-        quota_request,
-    ::google::api::servicecontrol::v1::AllocateQuotaResponse* quota_response) {
+    const AllocateQuotaRequest& quota_request,
+    AllocateQuotaResponse* quota_response) {
   StatusPromise status_promise;
   StatusFuture status_future = status_promise.get_future();
 
