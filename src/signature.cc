@@ -16,6 +16,9 @@ limitations under the License.
 #include "src/signature.h"
 #include "utils/md5.h"
 
+#include <vector>
+#include <algorithm>
+
 using std::string;
 using google::api::servicecontrol::v1::CheckRequest;
 using google::api::servicecontrol::v1::MetricValue;
@@ -103,11 +106,17 @@ string GenerateAllocateQuotaRequestSignature(
   hasher.Update(kDelimiter, kDelimiterLength);
   hasher.Update(operation.consumer_id());
 
+  // order of metric_name can be changed. need to be sorted.
+  std::vector<std::string> metric_names;
   for (const auto& metric_value_set : operation.quota_metrics()) {
-    hasher.Update(kDelimiter, kDelimiterLength);
-    hasher.Update(metric_value_set.metric_name());
+    metric_names.push_back(metric_value_set.metric_name());
   }
+  sort(metric_names.begin(),metric_names.end());
 
+  for (const auto& metric_name : metric_names) {
+    hasher.Update(kDelimiter, kDelimiterLength);
+    hasher.Update(metric_name);
+  }
   return hasher.Digest();
 }
 
