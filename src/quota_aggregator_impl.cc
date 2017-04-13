@@ -55,6 +55,10 @@ QuotaAggregatorImpl::CacheElem::ReturnAllocateQuotaRequestAndClear(
     *(request.mutable_allocate_operation()) =
         operation_aggregator_->ToOperationProto();
     operation_aggregator_ = NULL;
+  } else {
+    // If requests ere not aggregated, use the stored initial request
+    // to allocate minimal quota
+    request = quota_request_;
   }
 
   return request;
@@ -125,7 +129,7 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
     // requests will be aggregated to this temporary element until the
     // response for the actual request arrives.
     ::google::api::servicecontrol::v1::AllocateQuotaResponse temp_response;
-    CacheElem* cache_elem = new CacheElem(temp_response);
+    CacheElem* cache_elem = new CacheElem(request, temp_response);
     cache_elem->set_signature(request_signature);
     cache_elem->set_in_flight(true);
     cache_->Insert(request_signature, cache_elem, 1);
@@ -214,21 +218,20 @@ int QuotaAggregatorImpl::GetNextFlushInterval() {
 // if the element is refreshing and aggregated while waiting for the
 // response, tokens should be aggregated
 void QuotaAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
-  if (elem->in_flight() && in_flush_all_ == false) {
-    // keep the cached entry remain in the cache if the entry is waiting for
-    // the response
-    cache_->Insert(elem->signature(), elem, 1);
-    return;
-  }
+  if (in_flush_all_ == false) {
+    if (elem->in_flight()) {
+      // keep the cached entry remain in the cache if the entry is waiting for
+      // the response
+      cache_->Insert(elem->signature(), elem, 1);
+    } else {
+      // Insert the element back to the cache while aggregator is waiting for the
+      // response.
+      elem->set_in_flight(true);
+      cache_->Insert(elem->signature(), elem, 1);
 
-  if (elem->is_aggregated() == true && in_flush_all_ == false) {
-    // Insert the element back to the cache while aggregator is waiting for the
-    // response.
-    elem->set_in_flight(true);
-    cache_->Insert(elem->signature(), elem, 1);
-
-    AddRemovedItem(elem->ReturnAllocateQuotaRequestAndClear(
-        service_name_, service_config_id_));
+      AddRemovedItem(elem->ReturnAllocateQuotaRequestAndClear(
+          service_name_, service_config_id_));
+    }
   } else {
     delete elem;
   }

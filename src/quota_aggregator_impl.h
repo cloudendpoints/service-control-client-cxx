@@ -25,6 +25,7 @@ limitations under the License.
 #include "google/api/metric.pb.h"
 #include "google/api/servicecontrol/v1/operation.pb.h"
 #include "google/api/servicecontrol/v1/service_controller.pb.h"
+#include "google/api/servicecontrol/v1/quota_controller.pb.h"
 #include "src/aggregator_interface.h"
 #include "src/cache_removed_items_handler.h"
 #include "src/quota_operation_aggregator.h"
@@ -72,9 +73,12 @@ class QuotaAggregatorImpl : public QuotaAggregator,
  private:
   class CacheElem {
    public:
-    CacheElem(const ::google::api::servicecontrol::v1::AllocateQuotaResponse&
+    CacheElem(const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
+                  request,
+              const ::google::api::servicecontrol::v1::AllocateQuotaResponse&
                   response)
         : operation_aggregator_(nullptr),
+          quota_request_(request),
           quota_response_(response),
           in_flight_(false) {}
 
@@ -90,14 +94,18 @@ class QuotaAggregatorImpl : public QuotaAggregator,
     // Change the negative response to the positive response for refreshing
     void ClearAllocationErrors() { quota_response_.clear_allocate_errors(); }
 
-    // Setter for AllocateQuota response.
+    // Setter for quota_response_.
     inline void set_quota_response(
         const ::google::api::servicecontrol::v1::AllocateQuotaResponse&
             quota_response) {
       quota_response_ = quota_response;
+
+      if(quota_response.allocate_errors_size() > 0) {
+        operation_aggregator_ = NULL;
+      }
     }
 
-    // Getter for check response.
+    // Getter for quota_response_.
     inline const ::google::api::servicecontrol::v1::AllocateQuotaResponse&
     quota_response() const {
       return quota_response_;
@@ -124,7 +132,10 @@ class QuotaAggregatorImpl : public QuotaAggregator,
     // Internal operation.
     std::unique_ptr<QuotaOperationAggregator> operation_aggregator_;
 
-    // The check response for the last check request.
+    // The AllocateQuotaRequest for the initial allocate quota request.
+    ::google::api::servicecontrol::v1::AllocateQuotaRequest quota_request_;
+
+    // The AllocateQuotaResponse for the last request.
     ::google::api::servicecontrol::v1::AllocateQuotaResponse quota_response_;
 
     // maintain the sinature to move unnecessary signaure generation
