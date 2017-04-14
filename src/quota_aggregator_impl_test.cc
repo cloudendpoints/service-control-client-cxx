@@ -406,9 +406,9 @@ TEST_F(QuotaAggregatorImplTest, TestCacheAggregateAfterRefreshAndCacheUpdate) {
   EXPECT_OK(aggregator_->Flush());
   EXPECT_EQ(flushed_.size(), 2);
 
-  // lookup request1 failed
+  // lookup request should be Code::OK. Element will not be expired.
   AllocateQuotaResponse response3;
-  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Quota(request1_, &response3));
+  EXPECT_ERROR_CODE(Code::OK, aggregator_->Quota(request1_, &response3));
 }
 
 TEST_F(QuotaAggregatorImplTest,
