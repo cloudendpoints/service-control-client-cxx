@@ -214,23 +214,18 @@ int QuotaAggregatorImpl::GetNextFlushInterval() {
 
 // OnCacheEntryDelete will be called behind the cache_mutex_
 // no need to consider locking at this point
-//
-// if the element is refreshing and aggregated while waiting for the
-// response, tokens should be aggregated
 void QuotaAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
   if (in_flush_all_ == false) {
-    if (elem->in_flight()) {
-      // keep the cached entry remain in the cache if the entry is waiting for
-      // the response
-      cache_->Insert(elem->signature(), elem, 1);
-    } else {
-      // Insert the element back to the cache while aggregator is waiting for the
-      // response.
-      elem->set_in_flight(true);
-      cache_->Insert(elem->signature(), elem, 1);
+    // insert the element back to the cache
+    cache_->Insert(elem->signature(), elem, 1);
 
-      AddRemovedItem(elem->ReturnAllocateQuotaRequestAndClear(
+    if (elem->in_flight() == false) {
+      // refresh quota when the response is negative or aggregated.
+      if(elem->is_positive_response() == false || elem->is_aggregated()) {
+        elem->set_in_flight(true);
+        AddRemovedItem(elem->ReturnAllocateQuotaRequestAndClear(
           service_name_, service_config_id_));
+      }
     }
   } else {
     delete elem;
