@@ -57,7 +57,7 @@ QuotaAggregatorImpl::CacheElem::ReturnAllocateQuotaRequestAndClear(
     operation_aggregator_ = NULL;
   } else {
     // If requests ere not aggregated, use the stored initial request
-    // to allocate minimal quota
+    // to allocate minimum token
     request = quota_request_;
   }
 
