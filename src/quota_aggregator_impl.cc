@@ -56,7 +56,7 @@ QuotaAggregatorImpl::CacheElem::ReturnAllocateQuotaRequestAndClear(
         operation_aggregator_->ToOperationProto();
     operation_aggregator_ = NULL;
   } else {
-    // If requests ere not aggregated, use the stored initial request
+    // If requests are not aggregated, use the stored initial request
     // to allocate minimum token
     request = quota_request_;
   }
@@ -129,7 +129,8 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
     // requests will be aggregated to this temporary element until the
     // response for the actual request arrives.
     ::google::api::servicecontrol::v1::AllocateQuotaResponse temp_response;
-    CacheElem* cache_elem = new CacheElem(request, temp_response);
+    CacheElem* cache_elem = new CacheElem(request, temp_response,
+                                          SimpleCycleTimer::Now());
     cache_elem->set_signature(request_signature);
     cache_elem->set_in_flight(true);
     cache_->Insert(request_signature, cache_elem, 1);
@@ -141,6 +142,18 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
   // Aggregate tokens if the cached response is positive
   if (lookup.value()->is_positive_response()) {
     lookup.value()->Aggregate(request);
+  } else {
+    if (lookup.value()->in_flight() == false) {
+      int64_t elapsed = (SimpleCycleTimer::Now() - lookup.value()->last_refresh_time())
+          / 1000;
+      if (elapsed > options_.refresh_interval_ms) {
+        // update in_flight to avoid duplicated request
+        lookup.value()->set_in_flight(true);
+
+        // trigger a new quota refresh request
+        return Status(Code::NOT_FOUND, "");
+      }
+    }
   }
 
   *response = lookup.value()->quota_response();
@@ -167,6 +180,7 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
   if (lookup.Found()) {
     lookup.value()->set_in_flight(false);
     lookup.value()->set_quota_response(response);
+    lookup.value()->set_last_refresh_time(SimpleCycleTimer::Now());
   }
 
   return ::google::protobuf::util::Status::OK;
@@ -219,13 +233,10 @@ void QuotaAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
     // insert the element back to the cache
     cache_->Insert(elem->signature(), elem, 1);
 
-    if (elem->in_flight() == false) {
-      // refresh quota when the response is negative or aggregated.
-      if(elem->is_positive_response() == false || elem->is_aggregated()) {
-        elem->set_in_flight(true);
-        AddRemovedItem(elem->ReturnAllocateQuotaRequestAndClear(
-          service_name_, service_config_id_));
-      }
+    if (elem->in_flight() == false && elem->is_aggregated()) {
+      elem->set_in_flight(true);
+      AddRemovedItem(elem->ReturnAllocateQuotaRequestAndClear(
+        service_name_, service_config_id_));
     }
   } else {
     delete elem;

@@ -76,10 +76,11 @@ class QuotaAggregatorImpl : public QuotaAggregator,
     CacheElem(const ::google::api::servicecontrol::v1::AllocateQuotaRequest&
                   request,
               const ::google::api::servicecontrol::v1::AllocateQuotaResponse&
-                  response)
+                  response, const int64_t time)
         : operation_aggregator_(nullptr),
           quota_request_(request),
           quota_response_(response),
+          last_refresh_time_(time),
           in_flight_(false) {}
 
     // Aggregates the given request to this cache entry.
@@ -128,6 +129,13 @@ class QuotaAggregatorImpl : public QuotaAggregator,
       return quota_response().allocate_errors_size() == 0;
     }
 
+    // Setter for last check time.
+    inline void set_last_refresh_time(const int64_t last_refresh_time) {
+      last_refresh_time_ = last_refresh_time;
+    }
+    // Getter for last check time.
+    inline const int64_t last_refresh_time() const { return last_refresh_time_; }
+
    private:
     // Internal operation.
     std::unique_ptr<QuotaOperationAggregator> operation_aggregator_;
@@ -138,9 +146,13 @@ class QuotaAggregatorImpl : public QuotaAggregator,
     // The AllocateQuotaResponse for the last request.
     ::google::api::servicecontrol::v1::AllocateQuotaResponse quota_response_;
 
-    // maintain the sinature to move unnecessary signaure generation
+    // maintain the signature to move unnecessary signature generation
     std::string signature_;
 
+    // the last refresh time of the cached element
+    int64_t last_refresh_time_;
+
+    // the element is waiting for the response
     bool in_flight_;
   };
 
