@@ -77,6 +77,9 @@ QuotaAggregatorImpl::QuotaAggregatorImpl(const std::string& service_name,
                                        this, std::placeholders::_1)));
     cache_->SetAgeBasedEviction(options.refresh_interval_ms / 1000.0);
   }
+
+  refresh_interval_in_cycle_ =
+      options_.refresh_interval_ms * SimpleCycleTimer::Frequency() / 1000;
 }
 
 QuotaAggregatorImpl::~QuotaAggregatorImpl() {
@@ -124,7 +127,7 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
 
   QuotaCache::ScopedLookup lookup(cache_.get(), request_signature);
   if (!lookup.Found()) {
-    // To avoid sending con-current allocateQuota from con-current requests.
+    // To avoid sending concurrent allocateQuota from concurrent requests.
     // insert a temporary positive response to the cache. Requests from other
     // requests will be aggregated to this temporary element until the
     // response for the actual request arrives.
@@ -135,29 +138,31 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
     cache_elem->set_in_flight(true);
     cache_->Insert(request_signature, cache_elem, 1);
 
-    // By returning NOT_FOUND, caller will send AllocateQuotaRequest
-    return Status(Code::NOT_FOUND, "");
+    // Triggers refresh
+    AddRemovedItem(request);
+
+    // return positive response
+    *response = cache_elem->quota_response();
+    return ::google::protobuf::util::Status::OK;
+  }
+
+  if (lookup.value()->in_flight() == false &&
+      ShouldRefresh(*lookup.value()) == true) {
+    // Update in_flight to avoid duplicated request
+    lookup.value()->set_in_flight(true);
+    lookup.value()->set_last_refresh_time(SimpleCycleTimer::Now());
+
+    // Triggers refresh
+    AddRemovedItem(lookup.value()->ReturnAllocateQuotaRequestAndClear(
+        service_name_, service_config_id_));
   }
 
   // Aggregate tokens if the cached response is positive
   if (lookup.value()->is_positive_response()) {
     lookup.value()->Aggregate(request);
-  } else {
-    if (lookup.value()->in_flight() == false) {
-      int64_t elapsed = (SimpleCycleTimer::Now() - lookup.value()->last_refresh_time())
-          / 1000;
-      if (elapsed > options_.refresh_interval_ms) {
-        // update in_flight to avoid duplicated request
-        lookup.value()->set_in_flight(true);
-
-        // trigger a new quota refresh request
-        return Status(Code::NOT_FOUND, "");
-      }
-    }
   }
 
   *response = lookup.value()->quota_response();
-
   return ::google::protobuf::util::Status::OK;
 }
 
@@ -180,7 +185,6 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
   if (lookup.Found()) {
     lookup.value()->set_in_flight(false);
     lookup.value()->set_quota_response(response);
-    lookup.value()->set_last_refresh_time(SimpleCycleTimer::Now());
   }
 
   return ::google::protobuf::util::Status::OK;
@@ -191,6 +195,11 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
 int QuotaAggregatorImpl::GetNextFlushInterval() {
   if (!cache_) return -1;
   return options_.refresh_interval_ms;
+}
+
+bool QuotaAggregatorImpl::ShouldRefresh(const CacheElem& elem) {
+  int64_t age = SimpleCycleTimer::Now() - elem.last_refresh_time();
+  return age >= refresh_interval_in_cycle_;
 }
 
 // Invalidates expired allocate quota responses.
@@ -235,6 +244,7 @@ void QuotaAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
 
     if (elem->in_flight() == false && elem->is_aggregated()) {
       elem->set_in_flight(true);
+      elem->set_last_refresh_time(SimpleCycleTimer::Now());
       AddRemovedItem(elem->ReturnAllocateQuotaRequestAndClear(
         service_name_, service_config_id_));
     }

@@ -246,7 +246,7 @@ TEST_F(ServiceControlClientImplQuotaTest, TestCachedQuotaWithStoredCallback) {
   cached_client_->Quota(
       quota_request1_, &quota_response,
       [&done_status](Status status) { done_status = status; });
-  EXPECT_EQ(done_status, Status::UNKNOWN);
+  EXPECT_EQ(done_status, Status::OK);
 
   // call Quota 10 times
   for (int i = 0; i < 10; i++) {
@@ -270,8 +270,8 @@ TEST_F(ServiceControlClientImplQuotaTest, TestCachedQuotaWithStoredCallback) {
 
   EXPECT_EQ(stat_status, Status::OK);
   EXPECT_EQ(stat.total_called_quotas, 11);
-  EXPECT_EQ(stat.send_quotas_by_flush, 0);
-  EXPECT_EQ(stat.send_quotas_in_flight, 1);
+  EXPECT_EQ(stat.send_quotas_by_flush, 1);
+  EXPECT_EQ(stat.send_quotas_in_flight, 0);
 }
 
 // Cached: false, Callback: in place
@@ -336,8 +336,8 @@ TEST_F(ServiceControlClientImplQuotaTest, TestCachedQuotaWithInPlaceCallback) {
 
   EXPECT_EQ(stat_status, Status::OK);
   EXPECT_EQ(stat.total_called_quotas, 11);
-  EXPECT_EQ(stat.send_quotas_by_flush, 0);
-  EXPECT_EQ(stat.send_quotas_in_flight, 1);
+  EXPECT_EQ(stat.send_quotas_by_flush, 1);
+  EXPECT_EQ(stat.send_quotas_in_flight, 0);
 }
 
 // Cached: false, Callback: local in place
@@ -423,8 +423,8 @@ TEST_F(ServiceControlClientImplQuotaTest,
 
   EXPECT_EQ(stat_status, Status::OK);
   EXPECT_EQ(stat.total_called_quotas, 10);
-  EXPECT_EQ(stat.send_quotas_by_flush, 0);
-  EXPECT_EQ(stat.send_quotas_in_flight, 1);
+  EXPECT_EQ(stat.send_quotas_by_flush, 1);
+  EXPECT_EQ(stat.send_quotas_in_flight, 0);
 }
 
 // Cached: true, Callback: thread
@@ -457,8 +457,8 @@ TEST_F(ServiceControlClientImplQuotaTest, TestCachedQuotaInSyncThread) {
 
   EXPECT_EQ(stat_status, Status::OK);
   EXPECT_EQ(stat.total_called_quotas, 11);
-  EXPECT_EQ(stat.send_quotas_by_flush, 0);
-  EXPECT_EQ(stat.send_quotas_in_flight, 1);
+  EXPECT_EQ(stat.send_quotas_by_flush, 1);
+  EXPECT_EQ(stat.send_quotas_in_flight, 0);
 }
 
 // Cached: false, Callback: thread
@@ -539,8 +539,8 @@ TEST_F(ServiceControlClientImplQuotaTest, TestCachedQuotaThread) {
 
   EXPECT_EQ(stat_status, Status::OK);
   EXPECT_EQ(stat.total_called_quotas, 11);
-  EXPECT_EQ(stat.send_quotas_by_flush, 0);
-  EXPECT_EQ(stat.send_quotas_in_flight, 1);
+  EXPECT_EQ(stat.send_quotas_by_flush, 1);
+  EXPECT_EQ(stat.send_quotas_in_flight, 0);
 }
 
 }  // namespace service_control_client

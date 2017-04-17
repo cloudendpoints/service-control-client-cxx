@@ -179,6 +179,8 @@ class QuotaAggregatorImpl : public QuotaAggregator,
   // Usually called at destructor.
   virtual ::google::protobuf::util::Status FlushAll();
 
+  bool ShouldRefresh(const CacheElem& elem);
+
  private:
   // The service name for this cache.
   const std::string service_name_;
@@ -192,8 +194,9 @@ class QuotaAggregatorImpl : public QuotaAggregator,
   Mutex cache_mutex_;
 
   std::unique_ptr<QuotaCache> cache_;
+
   // flush interval in cycles.
-  int64_t flush_interval_in_cycle_;
+  int64_t refresh_interval_in_cycle_;
 
   bool in_flush_all_;
 
