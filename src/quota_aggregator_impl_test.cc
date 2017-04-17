@@ -29,7 +29,7 @@ const char kServiceName[] = "library.googleapis.com";
 const char kServiceConfigId[] = "2016-09-19r0";
 
 const int kFlushIntervalMs = 100;
-const int kExpirationMs = 200;
+const int kExpirationMs = 400;
 
 const char kRequest1[] = R"(
 service_name: "library.googleapis.com"
@@ -196,7 +196,7 @@ class QuotaAggregatorImplTest : public ::testing::Test {
 
     ASSERT_TRUE(TextFormat::ParseFromString(kEmptyResponse, &empty_response_));
 
-    QuotaAggregationOptions options(10, kFlushIntervalMs);
+    QuotaAggregationOptions options(10, kFlushIntervalMs, kExpirationMs);
 
     aggregator_ =
         CreateAllocateQuotaAggregator(kServiceName, kServiceConfigId, options);
@@ -232,37 +232,48 @@ class QuotaAggregatorImplTest : public ::testing::Test {
   std::vector<AllocateQuotaRequest> flushed_;
 };
 
-TEST_F(QuotaAggregatorImplTest, TestFirstReqeustNotFound) {
+TEST_F(QuotaAggregatorImplTest, TestRequestAndCache) {
   AllocateQuotaResponse response;
 
-  EXPECT_ERROR_CODE(Code::OK, aggregator_->Quota(request1_, &response));
-}
-
-TEST_F(QuotaAggregatorImplTest, TestSecondRequestFound) {
-  AllocateQuotaResponse response;
-
-  EXPECT_ERROR_CODE(Code::OK, aggregator_->Quota(request1_, &response));
   EXPECT_OK(aggregator_->Quota(request1_, &response));
   EXPECT_TRUE(MessageDifferencer::Equals(response, empty_response_));
-}
 
-TEST_F(QuotaAggregatorImplTest, TestFirstReqeustSucceeded) {
-  AllocateQuotaResponse response;
-
-  EXPECT_ERROR_CODE(Code::OK, aggregator_->Quota(request1_, &response));
   EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+
   EXPECT_OK(aggregator_->Quota(request1_, &response));
   EXPECT_TRUE(MessageDifferencer::Equals(response, pass_response1_));
 }
 
-TEST_F(QuotaAggregatorImplTest, TestFirstReqeustQuotaExceed) {
+TEST_F(QuotaAggregatorImplTest, TestCacheElementStay) {
   AllocateQuotaResponse response;
 
-  EXPECT_ERROR_CODE(Code::OK, aggregator_->Quota(request1_, &response));
-  EXPECT_OK(aggregator_->CacheResponse(request1_, error_response1_));
   EXPECT_OK(aggregator_->Quota(request1_, &response));
-  EXPECT_TRUE(MessageDifferencer::Equals(response, error_response1_));
+  EXPECT_TRUE(MessageDifferencer::Equals(response, empty_response_));
+
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(kExpirationMs - 10));
+  EXPECT_OK(aggregator_->Flush());
+
+  EXPECT_OK(aggregator_->Quota(request1_, &response));
+  EXPECT_TRUE(MessageDifferencer::Equals(response, pass_response1_));
 }
+
+TEST_F(QuotaAggregatorImplTest, TestCacheElementDrop) {
+  AllocateQuotaResponse response;
+
+  EXPECT_OK(aggregator_->Quota(request1_, &response));
+  EXPECT_TRUE(MessageDifferencer::Equals(response, empty_response_));
+
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(kExpirationMs + 10));
+  EXPECT_OK(aggregator_->Flush());
+
+  EXPECT_OK(aggregator_->Quota(request1_, &response));
+  EXPECT_TRUE(MessageDifferencer::Equals(response, empty_response_));
+}
+
 
 TEST_F(QuotaAggregatorImplTest, TestNotMatchingServiceName) {
   *(request1_.mutable_service_name()) = "some-other-service-name";

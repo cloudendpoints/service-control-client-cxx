@@ -80,6 +80,9 @@ QuotaAggregatorImpl::QuotaAggregatorImpl(const std::string& service_name,
 
   refresh_interval_in_cycle_ =
       options_.refresh_interval_ms * SimpleCycleTimer::Frequency() / 1000;
+
+  expiration_interval_in_cycle_ =
+      options_.expiration_interval_ms * SimpleCycleTimer::Frequency() / 1000;
 }
 
 QuotaAggregatorImpl::~QuotaAggregatorImpl() {
@@ -197,9 +200,16 @@ int QuotaAggregatorImpl::GetNextFlushInterval() {
   return options_.refresh_interval_ms;
 }
 
-bool QuotaAggregatorImpl::ShouldRefresh(const CacheElem& elem) {
+// Check the cached element should be refreshed
+bool QuotaAggregatorImpl::ShouldRefresh(const CacheElem& elem) const {
   int64_t age = SimpleCycleTimer::Now() - elem.last_refresh_time();
   return age >= refresh_interval_in_cycle_;
+}
+
+// Check the cached element should be dropped from the cache
+bool QuotaAggregatorImpl::ShouldDrop(const CacheElem& elem) const {
+  int64_t age = SimpleCycleTimer::Now() - elem.last_refresh_time();
+  return age >= expiration_interval_in_cycle_;
 }
 
 // Invalidates expired allocate quota responses.
@@ -238,7 +248,7 @@ bool QuotaAggregatorImpl::ShouldRefresh(const CacheElem& elem) {
 // OnCacheEntryDelete will be called behind the cache_mutex_
 // no need to consider locking at this point
 void QuotaAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
-  if (in_flush_all_ == false) {
+  if (in_flush_all_ == false && ShouldDrop(*elem) == false) {
     // insert the element back to the cache
     cache_->Insert(elem->signature(), elem, 1);
 

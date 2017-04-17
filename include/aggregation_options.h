@@ -31,15 +31,18 @@ typedef std::unordered_map<std::string,
     MetricKindMap;
 
 struct QuotaAggregationOptions {
-  QuotaAggregationOptions() : num_entries(10000), refresh_interval_ms(1000) {}
+  QuotaAggregationOptions() : num_entries(10000), refresh_interval_ms(1000),
+      expiration_interval_ms(600000){}
 
   // Constructor.
   // cache_entries is the maximum number of cache entries that can be kept in
   // the aggregation cache. Cache is disabled when cache_entries <= 0.
   // refresh_interval_ms is the maximum milliseconds before an aggregated quota
   // request needs to send to remote server again.
-  QuotaAggregationOptions(int cache_entries, int refresh_interval_ms)
-      : num_entries(cache_entries), refresh_interval_ms(refresh_interval_ms) {}
+  QuotaAggregationOptions(int cache_entries, int refresh_interval_ms,
+                          int expiration_interval_ms = 600000)
+      : num_entries(cache_entries), refresh_interval_ms(refresh_interval_ms),
+        expiration_interval_ms(expiration_interval_ms) {}
 
   // Maximum number of cache entries kept in the aggregation cache.
   // Set to 0 will disable caching and aggregation.
@@ -48,6 +51,10 @@ struct QuotaAggregationOptions {
   // The refresh interval in milliseconds when aggregated quota will be send to
   // the server.
   int refresh_interval_ms;
+
+  // The expiration interval in milliseconds. Cached element will be dropped
+  // when the element was idle for longer than this time.
+  int expiration_interval_ms;
 };
 
 // Options controlling check aggregation behavior.
