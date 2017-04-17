@@ -39,6 +39,8 @@ struct QuotaAggregationOptions {
   // the aggregation cache. Cache is disabled when cache_entries <= 0.
   // refresh_interval_ms is the maximum milliseconds before an aggregated quota
   // request needs to send to remote server again.
+  // expiration_interval_ms should be at lease 10 times bigger
+  // than the rate limit service's refill time window.
   QuotaAggregationOptions(int cache_entries, int refresh_interval_ms,
                           int expiration_interval_ms = 600000)
       : num_entries(cache_entries), refresh_interval_ms(refresh_interval_ms),
@@ -53,7 +55,7 @@ struct QuotaAggregationOptions {
   int refresh_interval_ms;
 
   // The expiration interval in milliseconds. Cached element will be dropped
-  // when the element was idle for longer than this time.
+  // when the last refresh time is older than expiration_interval_ms
   int expiration_interval_ms;
 };
 
