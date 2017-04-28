@@ -52,7 +52,7 @@ quota_metrics {
     int64_value: 1
   }
 }
-quota_mode: NORMAL
+quota_mode: BEST_EFFORT
 )";
 
 const char kOperation2[] = R"(
@@ -71,7 +71,7 @@ quota_metrics {
     int64_value: 3
   }
 }
-quota_mode: NORMAL
+quota_mode: BEST_EFFORT
 )";
 
 const std::set<std::pair<std::string, int>> ExtractMetricSets(

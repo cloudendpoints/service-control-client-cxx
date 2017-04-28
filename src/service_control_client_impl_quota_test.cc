@@ -41,7 +41,7 @@ allocate_operation {
       int64_value: 1
     }
   }
-  quota_mode: NORMAL
+  quota_mode: BEST_EFFORT
 }
 service_config_id: "2016-09-19r0"
 )";

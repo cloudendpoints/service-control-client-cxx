@@ -16,6 +16,7 @@ using std::string;
 using ::google::api::servicecontrol::v1::QuotaOperation;
 using ::google::api::servicecontrol::v1::AllocateQuotaRequest;
 using ::google::api::servicecontrol::v1::AllocateQuotaResponse;
+using ::google::api::servicecontrol::v1::QuotaOperation_QuotaMode;
 using ::google::protobuf::TextFormat;
 using ::google::protobuf::util::MessageDifferencer;
 using ::google::protobuf::util::Status;
@@ -49,7 +50,7 @@ allocate_operation {
       int64_value: 1
     }
   }
-  quota_mode: NORMAL
+  quota_mode: BEST_EFFORT
 }
 service_config_id: "2016-09-19r0"
 )";
@@ -72,7 +73,7 @@ allocate_operation {
       int64_value: 3
     }
   }
-  quota_mode: NORMAL
+  quota_mode: BEST_EFFORT
 }
 service_config_id: "2016-09-19r0"
 )";
@@ -95,7 +96,7 @@ allocate_operation {
       int64_value: 1
     }
   }
-  quota_mode: NORMAL
+  quota_mode: BEST_EFFORT
 }
 service_config_id: "2016-09-19r0"
 )";
@@ -554,6 +555,71 @@ TEST_F(QuotaAggregatorImplTest, TestCacheRefreshOneAggregated) {
   quota_metrics = ExtractMetricSets(flushed_[3].allocate_operation());
   ASSERT_EQ(quota_metrics, expected_costs);
 }
+
+TEST_F(QuotaAggregatorImplTest, TestCacheRefreshQuotaModeBestEffort) {
+  std::set<std::pair<std::string, int>> quota_metrics;
+  std::set<std::pair<std::string, int>> expected_costs;
+
+  AllocateQuotaResponse response;
+
+  // trigger initial allocation
+  EXPECT_ERROR_CODE(Code::OK, aggregator_->Quota(request1_, &response));
+  // check refresh
+  EXPECT_EQ(flushed_.size(), 1);
+  // cache positive response
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+  // aggregate
+  EXPECT_OK(aggregator_->Quota(request1_, &response));
+
+  // trigger refresh request by timeout
+  std::this_thread::sleep_for(std::chrono::milliseconds(60));
+  EXPECT_OK(aggregator_->Flush());
+
+  // check refresh request
+  EXPECT_EQ(flushed_.size(), 2);
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+
+  EXPECT_EQ(flushed_[0].allocate_operation().quota_mode(),
+            QuotaOperation_QuotaMode::QuotaOperation_QuotaMode_BEST_EFFORT);
+  EXPECT_EQ(flushed_[1].allocate_operation().quota_mode(),
+            QuotaOperation_QuotaMode::QuotaOperation_QuotaMode_BEST_EFFORT);
+}
+
+TEST_F(QuotaAggregatorImplTest, TestCacheRefreshQuotaModeNormal) {
+  std::set<std::pair<std::string, int>> quota_metrics;
+  std::set<std::pair<std::string, int>> expected_costs;
+
+  AllocateQuotaResponse response;
+
+  // trigger initial allocation
+  EXPECT_ERROR_CODE(Code::OK, aggregator_->Quota(request1_, &response));
+  // check refresh
+  EXPECT_EQ(flushed_.size(), 1);
+  // cache negative response
+  EXPECT_OK(aggregator_->CacheResponse(request1_, error_response1_));
+
+  // keep request 1 without refresh
+  std::this_thread::sleep_for(std::chrono::milliseconds(110));
+  EXPECT_OK(aggregator_->Flush());
+  // check no refresh
+  EXPECT_EQ(flushed_.size(), 1);
+
+  // trigger refresh request 1
+  EXPECT_OK(aggregator_->Quota(request1_, &response));
+
+  // check refresh
+  EXPECT_EQ(flushed_.size(), 2);
+  EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
+
+  EXPECT_EQ(flushed_[0].allocate_operation().quota_mode(),
+            QuotaOperation_QuotaMode::QuotaOperation_QuotaMode_BEST_EFFORT);
+  EXPECT_EQ(flushed_[1].allocate_operation().quota_mode(),
+            QuotaOperation_QuotaMode::QuotaOperation_QuotaMode_NORMAL);
+}
+
 
 }  // namespace service_control_client
 }  // namespace google

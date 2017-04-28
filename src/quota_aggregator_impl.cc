@@ -26,6 +26,7 @@ using ::google::api::MetricDescriptor;
 using ::google::api::servicecontrol::v1::QuotaOperation;
 using ::google::api::servicecontrol::v1::AllocateQuotaRequest;
 using ::google::api::servicecontrol::v1::AllocateQuotaResponse;
+using ::google::api::servicecontrol::v1::QuotaOperation_QuotaMode;
 using ::google::protobuf::util::Status;
 using ::google::protobuf::util::error::Code;
 using ::google::service_control_client::SimpleCycleTimer;
@@ -155,9 +156,19 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
     lookup.value()->set_in_flight(true);
     lookup.value()->set_last_refresh_time(SimpleCycleTimer::Now());
 
+    AllocateQuotaRequest refresh_request =
+        lookup.value()->ReturnAllocateQuotaRequestAndClear(service_name_,
+                                                           service_config_id_);
+    if(!lookup.value()->is_positive_response()) {
+      // If the cached response is negative, then use NORMAL QuotaMode
+      // instead of BEST_EFFORT
+      refresh_request.mutable_allocate_operation()->
+          set_quota_mode(
+              QuotaOperation_QuotaMode::QuotaOperation_QuotaMode_NORMAL);
+    }
+
     // Triggers refresh
-    AddRemovedItem(lookup.value()->ReturnAllocateQuotaRequestAndClear(
-        service_name_, service_config_id_));
+    AddRemovedItem(refresh_request);
   }
 
   // Aggregate tokens if the cached response is positive
