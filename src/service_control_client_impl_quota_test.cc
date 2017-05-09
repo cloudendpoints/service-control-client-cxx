@@ -15,6 +15,9 @@ limitations under the License.
 
 #include "src/mock_transport.h"
 
+#include <thread>
+#include <chrono>
+
 namespace google {
 namespace service_control_client {
 
@@ -232,6 +235,55 @@ TEST_F(ServiceControlClientImplQuotaTest,
   EXPECT_EQ(stat.total_called_quotas, 10);
   EXPECT_EQ(stat.send_quotas_by_flush, 0);
   EXPECT_EQ(stat.send_quotas_in_flight, 10);
+}
+
+TEST_F(ServiceControlClientImplQuotaTest, TestCachedQuotaRefreshGotHTTPError) {
+  // callback  returns the negative response
+  mock_quota_transport_.quota_response_ = &error_quota_response1_;
+  mock_quota_transport_.done_status_ = Status::OK;
+
+  EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
+      .WillRepeatedly(
+          Invoke(&mock_quota_transport_,
+                 &MockQuotaTransport::AllocateQuotaWithInplaceCallback));
+
+  Status done_status = Status::UNKNOWN;
+  AllocateQuotaResponse quota_response;
+
+	// Initial Quota
+  cached_client_->Quota(
+      quota_request1_, &quota_response,
+      [&done_status](Status status) { done_status = status; });
+  EXPECT_EQ(done_status, Status::OK);
+
+  // callback returns HTTP error
+  mock_quota_transport_.done_status_ = Status::CANCELLED;
+
+  // wait for the next quota refresh
+  std::this_thread::sleep_for(std::chrono::milliseconds(600));
+
+  // triggers quota cache refresh and returns previously cached response.
+  // callback function updates the cache with dummy positive response
+  // for failed open
+  cached_client_->Quota(quota_request1_, &quota_response,
+      [&done_status](Status status) { done_status = status; });
+  EXPECT_EQ(quota_response.allocate_errors_size(), 1);
+
+  // read response from the cache
+  cached_client_->Quota(
+      quota_request1_, &quota_response,
+      [&done_status](Status status) { done_status = status; });
+
+  // cached response is positive
+  EXPECT_EQ(quota_response.allocate_errors_size(), 0);
+
+  Statistics stat;
+  Status stat_status = cached_client_->GetStatistics(&stat);
+
+  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat.total_called_quotas, 3);
+  EXPECT_EQ(stat.send_quotas_by_flush, 2);
+  EXPECT_EQ(stat.send_quotas_in_flight, 0);
 }
 
 // Cached: true, Callback: stored
