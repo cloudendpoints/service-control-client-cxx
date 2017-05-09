@@ -142,6 +142,10 @@ void ServiceControlClientImpl::AllocateQuotaFlushCallback(
                      if (!status.ok()) {
                        GOOGLE_LOG(ERROR) << "Failed in AllocateQuota call: "
                                          << status.error_message();
+                       // cache dummy response for fail open
+                       AllocateQuotaResponse dummy_response;
+                       this->quota_aggregator_->CacheResponse(
+                           *quota_request_copy, dummy_response);
                      } else {
                        this->quota_aggregator_->CacheResponse(
                            *quota_request_copy, *quota_response);
