@@ -266,8 +266,8 @@ TEST_F(ServiceControlClientImplQuotaTest, TestCachedQuotaRefreshGotHTTPError) {
   // to simulate HTTP error
   mock_quota_transport_.done_status_ = Status::CANCELLED;
 
-  // Wait 600ms to trigger the next quota refresh
-  std::this_thread::sleep_for(std::chrono::milliseconds(600));
+  // Wait 500ms to trigger the next quota refresh
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
   // Next Quota call reads the cached negative response, and triggers
   // the quota cache refresh.
