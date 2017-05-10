@@ -238,7 +238,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
 }
 
 TEST_F(ServiceControlClientImplQuotaTest, TestCachedQuotaRefreshGotHTTPError) {
-  // callback  returns the negative response
+  // Set callback function to return the negative response
   mock_quota_transport_.quota_response_ = &error_quota_response1_;
   mock_quota_transport_.done_status_ = Status::OK;
 
@@ -250,31 +250,41 @@ TEST_F(ServiceControlClientImplQuotaTest, TestCachedQuotaRefreshGotHTTPError) {
   Status done_status = Status::UNKNOWN;
   AllocateQuotaResponse quota_response;
 
-	// Initial Quota
+  // Triggers the initial AllocateQuotaRequset and insert a temporary positive
+  // response to quota cache.
   cached_client_->Quota(
       quota_request1_, &quota_response,
       [&done_status](Status status) { done_status = status; });
   EXPECT_EQ(done_status, Status::OK);
+  // Check quota_response is positive
+  EXPECT_EQ(quota_response.allocate_errors_size(), 0);
 
-  // callback returns HTTP error
+  // AllocateQuotaFlushCallback replaces the cached response with the
+  // negative response, QUOTA_EXHAUSED
+
+  // Set callback function to return the negative status
+  // to simulate HTTP error
   mock_quota_transport_.done_status_ = Status::CANCELLED;
 
-  // wait for the next quota refresh
+  // Wait 600ms to trigger the next quota refresh
   std::this_thread::sleep_for(std::chrono::milliseconds(600));
 
-  // triggers quota cache refresh and returns previously cached response.
-  // callback function updates the cache with dummy positive response
-  // for failed open
+  // Next Quota call reads the cached negative response, and triggers
+  // the quota cache refresh.
   cached_client_->Quota(quota_request1_, &quota_response,
       [&done_status](Status status) { done_status = status; });
+  // Check the cached response is negative
   EXPECT_EQ(quota_response.allocate_errors_size(), 1);
 
-  // read response from the cache
+  // AllocateQuotaFlushCallback replaces the cached negative response with
+  // the temporary positive one for failed open on transport callback error
+
+  // Read the positive response from the cache
   cached_client_->Quota(
       quota_request1_, &quota_response,
       [&done_status](Status status) { done_status = status; });
 
-  // cached response is positive
+  // Check the cached response is positive
   EXPECT_EQ(quota_response.allocate_errors_size(), 0);
 
   Statistics stat;
