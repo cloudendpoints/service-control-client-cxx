@@ -562,7 +562,6 @@ TEST_F(ServiceControlClientImplQuotaTest, TestNonCachedQuotaThread) {
   EXPECT_EQ(stat.send_quotas_in_flight, 1);
 }
 
-/*
 // Cached: true, Callback: thread
 TEST_F(ServiceControlClientImplQuotaTest, TestCachedQuotaThread) {
   EXPECT_CALL(mock_quota_transport_, Quota(_, _, _))
@@ -605,7 +604,6 @@ TEST_F(ServiceControlClientImplQuotaTest, TestCachedQuotaThread) {
   EXPECT_EQ(stat.send_quotas_by_flush, 1);
   EXPECT_EQ(stat.send_quotas_in_flight, 0);
 }
-*/
 
 }  // namespace service_control_client
 }  // namespace google
