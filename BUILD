@@ -54,7 +54,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//external:boringssl_crypto",
-        "//external:quotacontrol",
         "//external:servicecontrol",
     ],
 )
