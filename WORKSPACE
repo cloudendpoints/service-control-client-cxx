@@ -44,7 +44,7 @@ bind(
 
 git_repository(
     name = "protobuf_git",
-    commit = "56855f6f002eeee8cf03021eaf2ece2adff2a297", # 3.0.0-beta-4
+    commit = "320d56c833f835f40c56bdaf2a375768cdd1b334", # 3.0.0-beta-4
     remote = "https://github.com/google/protobuf.git",
 )
 

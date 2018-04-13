@@ -17,6 +17,7 @@ limitations under the License.
 #define GOOGLE_SERVICE_CONTROL_CLIENT_AGGREGATOR_INTERFACE_H_
 
 #include <string.h>
+#include <functional>
 #include <memory>
 #include <string>
 
