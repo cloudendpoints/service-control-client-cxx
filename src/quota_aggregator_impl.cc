@@ -248,7 +248,6 @@ bool QuotaAggregatorImpl::ShouldDrop(const CacheElem& elem) const {
 
   in_flush_all_ = true;
 
-  GOOGLE_LOG(INFO) << "Remove all entries of check aggregator.";
   if (cache_) {
     cache_->RemoveAll();
   }

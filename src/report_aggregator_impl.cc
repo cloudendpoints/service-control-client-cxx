@@ -172,7 +172,6 @@ Status ReportAggregatorImpl::FlushAll() {
   MutexLock lock(cache_mutex_);
   ReportCacheRemovedItemsHandler::StackBuffer::Swapper swapper(this,
                                                                &stack_buffer);
-  GOOGLE_LOG(INFO) << "Remove all entries of report aggregator.";
   if (cache_) {
     cache_->RemoveAll();
   }

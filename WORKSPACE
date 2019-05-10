@@ -17,7 +17,7 @@
 new_git_repository(
     name = "googletest_git",
     build_file = "third_party/BUILD.googletest",
-    commit = "13206d6f53aaff844f2d3595a01ac83a29e383db",
+    commit = "d225acc90bc3a8c420a9bcd1f033033c1ccd7fe0",
     remote = "https://github.com/google/googletest.git",
 )
 
@@ -33,7 +33,7 @@ bind(
 
 git_repository(
     name = "boringssl",
-    commit = "2f29d38cc5e6c1bfae4ce22b4b032fb899cdb705",  # 2016-07-12
+    commit = "5b8bd1ba221804c81c8a92c6d1d353ef43a851ab",  # 2018-12-14
     remote = "https://boringssl.googlesource.com/boringssl",
 )
 
@@ -44,8 +44,8 @@ bind(
 
 git_repository(
     name = "protobuf_git",
-    commit = "320d56c833f835f40c56bdaf2a375768cdd1b334", # 3.0.0-beta-4
-    remote = "https://github.com/google/protobuf.git",
+    commit = "48cb18e5c419ddd23d9badcfe4e9df7bde1979b2",  # same as grpc
+    remote = "https://github.com/protocolbuffers/protobuf.git",
 )
 
 bind(
@@ -90,15 +90,3 @@ bind(
     actual = "@googleapis_git//:service_config",
 )
 
-# TODO(jaebong): Changed the protobuf repository from git to local copy
-# This move be rolled back when updated public protobuf is published
-new_local_repository(
-    name = "quotacontrol_git",
-    path = "proto",
-    build_file = "proto/BUILD",
-)
-
-bind(
-    name = "quotacontrol",
-    actual = "@quotacontrol_git//:quotacontrol",
-)

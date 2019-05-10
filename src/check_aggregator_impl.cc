@@ -241,7 +241,6 @@ Status CheckAggregatorImpl::FlushAll() {
   MutexLock lock(cache_mutex_);
   CheckCacheRemovedItemsHandler::StackBuffer::Swapper swapper(this,
                                                               &stack_buffer);
-  GOOGLE_LOG(INFO) << "Remove all entries of check aggregator.";
   if (cache_) {
     cache_->RemoveAll();
   }
