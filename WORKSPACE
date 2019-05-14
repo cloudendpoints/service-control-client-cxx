@@ -48,8 +48,9 @@ http_archive(
 http_archive(
     name = "googleapis_git",
     build_file = "@//:third_party/BUILD.googleapis",
-    strip_prefix = "googleapis-620947d5dc99cab4f255474a85e504433a52d8a5",
-    url = "https://github.com/googleapis/googleapis/archive/620947d5dc99cab4f255474a85e504433a52d8a5.tar.gz",
-    sha256 = "4f126f0abc4f9a7879debfe797ccf598f3350471d2925f51f26b1d55e0932ac4",
+    patch_cmds = ["find . -type f -name '*BUILD*' | xargs rm"],
+    strip_prefix = "googleapis-275cdfcdc3188a60456f43acd139b8cc037379f4",  # May 14, 2019
+    url = "https://github.com/googleapis/googleapis/archive/275cdfcdc3188a60456f43acd139b8cc037379f4.tar.gz",
+    sha256 = "d07a9bf06bb02b51ff6e913211cedc7511430af550b6a775908c33c8ee218985",
 )
 
