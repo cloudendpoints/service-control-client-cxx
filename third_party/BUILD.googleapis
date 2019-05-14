@@ -39,8 +39,8 @@ cc_proto_library(
     deps = [
         ":service_config",
     ],
-    protoc = "//external:protoc",
-    default_runtime = "//external:protobuf",
+    protoc = "@protobuf_git//:protoc",
+    default_runtime = "@protobuf_git//:protobuf",
 )
 
 cc_proto_library(
@@ -73,8 +73,8 @@ cc_proto_library(
     include = ".",
     visibility = ["//visibility:public"],
     deps = [
-        "//external:cc_wkt_protos",
+        "@protobuf_git//:cc_wkt_protos",
     ],
-    protoc = "//external:protoc",
-    default_runtime = "//external:protobuf",
+    protoc = "@protobuf_git//:protoc",
+    default_runtime = "@protobuf_git//:protobuf",
 )
