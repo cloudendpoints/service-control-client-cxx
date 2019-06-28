@@ -179,6 +179,16 @@ cc_test(
 )
 
 cc_test(
+    name = "check_aggregator_impl_test",
+    size = "small",
+    srcs = ["src/check_aggregator_impl_test.cc"],
+    deps = [
+        ":service_control_client_lib",
+        "@googletest_git//:googletest_main",
+    ],
+)
+
+cc_test(
     name = "simple_lru_cache_test",
     size = "small",
     srcs = ["utils/simple_lru_cache_test.cc"],
