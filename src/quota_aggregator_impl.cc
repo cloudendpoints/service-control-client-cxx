@@ -88,7 +88,7 @@ QuotaAggregatorImpl::QuotaAggregatorImpl(const std::string& service_name,
 
 QuotaAggregatorImpl::~QuotaAggregatorImpl() {
   SetFlushCallback(NULL);
-  FlushAll();
+  (void)FlushAll();
 }
 
 // Sets the flush callback function.

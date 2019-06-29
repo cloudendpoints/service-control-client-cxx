@@ -114,7 +114,7 @@ ServiceControlClientImpl::ServiceControlClientImpl(
 
 ServiceControlClientImpl::~ServiceControlClientImpl() {
   // Flush out all cached data
-  FlushAll();
+  (void)FlushAll();
   if (flush_timer_) {
     flush_timer_->Stop();
   }
@@ -144,10 +144,10 @@ void ServiceControlClientImpl::AllocateQuotaFlushCallback(
                                          << status.error_message();
                        // cache dummy response for fail open
                        AllocateQuotaResponse dummy_response;
-                       this->quota_aggregator_->CacheResponse(
+                       (void)this->quota_aggregator_->CacheResponse(
                            *quota_request_copy, dummy_response);
                      } else {
-                       this->quota_aggregator_->CacheResponse(
+                       (void)this->quota_aggregator_->CacheResponse(
                            *quota_request_copy, *quota_response);
                      }
 
@@ -207,7 +207,7 @@ void ServiceControlClientImpl::Check(const CheckRequest& check_request,
                     [check_aggregator_copy, check_request_copy, check_response,
                      on_check_done](Status status) {
                       if (status.ok()) {
-                        check_aggregator_copy->CacheResponse(
+                        (void)check_aggregator_copy->CacheResponse(
                             *check_request_copy, *check_response);
                       } else {
                         GOOGLE_LOG(ERROR) << "Failed in Check call: "
@@ -271,13 +271,13 @@ void ServiceControlClientImpl::Quota(const AllocateQuotaRequest& quota_request,
                      quota_response, on_quota_done](Status status) {
 
                       if (status.ok()) {
-                        quota_aggregator_copy->CacheResponse(
+                        (void)quota_aggregator_copy->CacheResponse(
                             *quota_request_copy, *quota_response);
                       } else {
                         // on network error, failed open, reset in_flight flag
                         // to false
                         AllocateQuotaResponse dummy_response;
-                        quota_aggregator_copy->CacheResponse(
+                        (void)quota_aggregator_copy->CacheResponse(
                             *quota_request_copy, dummy_response);
 
                         GOOGLE_LOG(ERROR) << "Failed in Quota call: "

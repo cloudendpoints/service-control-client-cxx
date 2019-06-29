@@ -92,7 +92,7 @@ void MergeDeltaMetricValue(const MetricValue& from, MetricValue* to) {
       to->set_double_value(to->double_value() + from.double_value());
       break;
     case MetricValue::kDistributionValue:
-      DistributionHelper::Merge(from.distribution_value(),
+      (void)DistributionHelper::Merge(from.distribution_value(),
                                 to->mutable_distribution_value());
       break;
     default:

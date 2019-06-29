@@ -69,7 +69,7 @@ ReportAggregatorImpl::~ReportAggregatorImpl() {
   // For each removed item, it will call flush_callback().
   // At the destructor, it is better not to call the callback.
   SetFlushCallback(NULL);
-  FlushAll();
+  (void)FlushAll();
 }
 
 // Set the flush callback function.

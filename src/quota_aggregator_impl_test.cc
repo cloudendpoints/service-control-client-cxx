@@ -214,7 +214,7 @@ class QuotaAggregatorImplTest : public ::testing::Test {
   void FlushCallbackCallingBackToAggregator(
       const AllocateQuotaRequest& request) {
     flushed_.push_back(request);
-    aggregator_->CacheResponse(request, pass_response1_);
+    (void)aggregator_->CacheResponse(request, pass_response1_);
   }
 
   AllocateQuotaRequest request1_;

@@ -409,13 +409,13 @@ bucket_counts: 2
 class DistributionHelperTest : public ::testing::Test {
  protected:
   DistributionHelperTest() {
-    helper_.InitExponential(2 /* num_finite_buckets */, 2 /* growth_factor */,
+    (void)helper_.InitExponential(2 /* num_finite_buckets */, 2 /* growth_factor */,
                             0.001 /* scale */, &exponential_distribution_);
     other_exponential_distribution_ = exponential_distribution_;
 
-    helper_.InitLinear(2 /* num_finite_buckets */, 2 /* width */,
+    (void)helper_.InitLinear(2 /* num_finite_buckets */, 2 /* width */,
                        1 /* offset */, &linear_distribution_);
-    helper_.InitExplicit({1.0, 3.0, 5.0}, &explicit_distribution_);
+    (void)helper_.InitExplicit({1.0, 3.0, 5.0}, &explicit_distribution_);
   }
 
   DistributionHelper helper_;
@@ -454,7 +454,7 @@ TEST_F(DistributionHelperTest, AddSample_OneValue_Exponential) {
   Distribution expected;
   ASSERT_TRUE(
       TextFormat::ParseFromString(kOneValueExponentialDistribution, &expected));
-  helper_.AddSample(kOneValueExponential, &exponential_distribution_);
+  (void)helper_.AddSample(kOneValueExponential, &exponential_distribution_);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(exponential_distribution_,
                                                       expected));
 }
@@ -463,7 +463,7 @@ TEST_F(DistributionHelperTest, AddSample_OneValue_Linear) {
   Distribution expected;
   ASSERT_TRUE(
       TextFormat::ParseFromString(kOneValueLinearDistribution, &expected));
-  helper_.AddSample(kOneValueLinear, &linear_distribution_);
+  (void)helper_.AddSample(kOneValueLinear, &linear_distribution_);
   EXPECT_TRUE(
       MessageDifferencer::ApproximatelyEquals(linear_distribution_, expected));
 }
@@ -472,7 +472,7 @@ TEST_F(DistributionHelperTest, AddSample_OneValue_Explicit) {
   Distribution expected;
   ASSERT_TRUE(
       TextFormat::ParseFromString(kOneValueExplicitDistribution, &expected));
-  helper_.AddSample(kOneValueExplicit, &explicit_distribution_);
+  (void)helper_.AddSample(kOneValueExplicit, &explicit_distribution_);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(explicit_distribution_,
                                                       expected));
 }
@@ -482,7 +482,7 @@ TEST_F(DistributionHelperTest, AddSample_TwoValues_Exponential) {
   ASSERT_TRUE(TextFormat::ParseFromString(kTwoValuesExponentialDistribution,
                                           &expected));
   for (double value : kTwoValuesExponential) {
-    helper_.AddSample(value, &exponential_distribution_);
+    (void)helper_.AddSample(value, &exponential_distribution_);
   }
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(exponential_distribution_,
                                                       expected));
@@ -493,7 +493,7 @@ TEST_F(DistributionHelperTest, AddSample_TwoValues_Linear) {
   ASSERT_TRUE(
       TextFormat::ParseFromString(kTwoValuesLinearDistribution, &expected));
   for (double value : kTwoValuesLinear) {
-    helper_.AddSample(value, &linear_distribution_);
+    (void)helper_.AddSample(value, &linear_distribution_);
   }
   EXPECT_TRUE(
       MessageDifferencer::ApproximatelyEquals(linear_distribution_, expected));
@@ -504,7 +504,7 @@ TEST_F(DistributionHelperTest, AddSample_TwoValues_Explicit) {
   ASSERT_TRUE(
       TextFormat::ParseFromString(kTwoValuesExplicitDistribution, &expected));
   for (double value : kTwoValuesExplicit) {
-    helper_.AddSample(value, &explicit_distribution_);
+    (void)helper_.AddSample(value, &explicit_distribution_);
   }
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(explicit_distribution_,
                                                       expected));
@@ -515,7 +515,7 @@ TEST_F(DistributionHelperTest, AddSample_MultipleValues_Exponential) {
   ASSERT_TRUE(TextFormat::ParseFromString(
       kMultipleValuesExponentialDistribution, &expected));
   for (double value : kMultipleValuesExponential) {
-    helper_.AddSample(value, &exponential_distribution_);
+    (void)helper_.AddSample(value, &exponential_distribution_);
   }
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(exponential_distribution_,
                                                       expected));
@@ -526,7 +526,7 @@ TEST_F(DistributionHelperTest, AddSample_MultipleValues_Linear) {
   ASSERT_TRUE(TextFormat::ParseFromString(kMultipleValuesLinearDistribution,
                                           &expected));
   for (double value : kMultipleValuesLinear) {
-    helper_.AddSample(value, &linear_distribution_);
+    (void)helper_.AddSample(value, &linear_distribution_);
   }
   EXPECT_TRUE(
       MessageDifferencer::ApproximatelyEquals(linear_distribution_, expected));
@@ -537,7 +537,7 @@ TEST_F(DistributionHelperTest, AddSample_MultipleValues_Explicit) {
   ASSERT_TRUE(TextFormat::ParseFromString(kMultipleValuesExplicitDistribution,
                                           &expected));
   for (double value : kMultipleValuesExplicit) {
-    helper_.AddSample(value, &explicit_distribution_);
+    (void)helper_.AddSample(value, &explicit_distribution_);
   }
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(explicit_distribution_,
                                                       expected));
@@ -549,7 +549,7 @@ TEST_F(DistributionHelperTest, AddSample_SpecialValues_Exponential) {
   ASSERT_TRUE(TextFormat::ParseFromString(kSpecialValuesExponentialDistribution,
                                           &expected));
   for (double value : kSpecialValues) {
-    helper_.AddSample(value, &exponential_distribution_);
+    (void)helper_.AddSample(value, &exponential_distribution_);
   }
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(exponential_distribution_,
                                                       expected));
@@ -560,7 +560,7 @@ TEST_F(DistributionHelperTest, AddSample_SpecialValues_Linear) {
   ASSERT_TRUE(
       TextFormat::ParseFromString(kSpecialValuesLinearDistribution, &expected));
   for (double value : kSpecialValues) {
-    helper_.AddSample(value, &linear_distribution_);
+    (void)helper_.AddSample(value, &linear_distribution_);
   }
   EXPECT_TRUE(
       MessageDifferencer::ApproximatelyEquals(linear_distribution_, expected));
@@ -571,7 +571,7 @@ TEST_F(DistributionHelperTest, AddSample_SpecialValues_Explicit) {
   ASSERT_TRUE(TextFormat::ParseFromString(kSpecialValuesExplicitDistribution,
                                           &expected));
   for (double value : kSpecialValues) {
-    helper_.AddSample(value, &explicit_distribution_);
+    (void)helper_.AddSample(value, &explicit_distribution_);
   }
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(explicit_distribution_,
                                                       expected));
@@ -584,14 +584,14 @@ TEST_F(DistributionHelperTest, Merge_TwoDistributions_SpecialValues) {
 
   int total_values = sizeof(kSpecialValues) / sizeof(double);
   for (int i = 0; i < total_values / 2; ++i) {
-    helper_.AddSample(kSpecialValues[i], &exponential_distribution_);
+    (void)helper_.AddSample(kSpecialValues[i], &exponential_distribution_);
   }
 
   for (int i = total_values / 2; i < total_values; ++i) {
-    helper_.AddSample(kSpecialValues[i], &other_exponential_distribution_);
+    (void)helper_.AddSample(kSpecialValues[i], &other_exponential_distribution_);
   }
 
-  helper_.Merge(other_exponential_distribution_, &exponential_distribution_);
+  (void)helper_.Merge(other_exponential_distribution_, &exponential_distribution_);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(exponential_distribution_,
                                                       expected));
 }
@@ -600,7 +600,7 @@ TEST_F(DistributionHelperTest, Merge_TwoDistributions_SpecialValues) {
 TEST_F(DistributionHelperTest, AddSample_UnknownDistribution) {
   Distribution distribution;
   Distribution expected;
-  helper_.AddSample(1, &distribution);
+  (void)helper_.AddSample(1, &distribution);
   EXPECT_TRUE(MessageDifferencer::Equals(distribution, expected));
 }
 
@@ -608,10 +608,10 @@ TEST_F(DistributionHelperTest, AddSample_UnknownDistribution) {
 // in tests.
 TEST_F(DistributionHelperTest, Merge_EmptyDistributions) {
   Distribution empty;
-  helper_.InitExponential(2, 2, 0.001, &empty);
+  (void)helper_.InitExponential(2, 2, 0.001, &empty);
   Distribution other_empty = empty;
 
-  helper_.Merge(other_empty, &empty);
+  (void)helper_.Merge(other_empty, &empty);
   EXPECT_EQ(0, empty.count());
 }
 
@@ -620,8 +620,8 @@ TEST_F(DistributionHelperTest, Merge_FromEmptyDistribution) {
   ASSERT_TRUE(
       TextFormat::ParseFromString(kOneValueExponentialDistribution, &expected));
 
-  helper_.AddSample(kOneValueExponential, &exponential_distribution_);
-  helper_.Merge(other_exponential_distribution_, &exponential_distribution_);
+  (void)helper_.AddSample(kOneValueExponential, &exponential_distribution_);
+  (void)helper_.Merge(other_exponential_distribution_, &exponential_distribution_);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(exponential_distribution_,
                                                       expected));
 }
@@ -631,8 +631,8 @@ TEST_F(DistributionHelperTest, Merge_ToEmptyDistribution) {
   ASSERT_TRUE(
       TextFormat::ParseFromString(kOneValueExponentialDistribution, &expected));
 
-  helper_.AddSample(kOneValueExponential, &exponential_distribution_);
-  helper_.Merge(other_exponential_distribution_, &exponential_distribution_);
+  (void)helper_.AddSample(kOneValueExponential, &exponential_distribution_);
+  (void)helper_.Merge(other_exponential_distribution_, &exponential_distribution_);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(exponential_distribution_,
                                                       expected));
 }
@@ -644,16 +644,16 @@ TEST_F(DistributionHelperTest, Merge_TwoDistributions) {
 
   int total_values = sizeof(kMultipleValuesExponential) / sizeof(double);
   for (int i = 0; i < total_values / 2; ++i) {
-    helper_.AddSample(kMultipleValuesExponential[i],
+    (void)helper_.AddSample(kMultipleValuesExponential[i],
                       &exponential_distribution_);
   }
 
   for (int i = total_values / 2; i < total_values; ++i) {
-    helper_.AddSample(kMultipleValuesExponential[i],
+    (void)helper_.AddSample(kMultipleValuesExponential[i],
                       &other_exponential_distribution_);
   }
 
-  helper_.Merge(other_exponential_distribution_, &exponential_distribution_);
+  (void)helper_.Merge(other_exponential_distribution_, &exponential_distribution_);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(exponential_distribution_,
                                                       expected));
 }
@@ -667,7 +667,7 @@ TEST_F(DistributionHelperTest, Merge_BucketMatch_Linear) {
   ASSERT_TRUE(TextFormat::ParseFromString(kLinearDistribution, &distribution));
   Distribution other_distribution = distribution;
 
-  helper_.Merge(other_distribution, &distribution);
+  (void)helper_.Merge(other_distribution, &distribution);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(distribution, expected));
 }
 
@@ -679,7 +679,7 @@ TEST_F(DistributionHelperTest,
   other_distribution.mutable_linear_buckets()->set_num_finite_buckets(10);
 
   Distribution expected = distribution;
-  helper_.Merge(other_distribution, &distribution);
+  (void)helper_.Merge(other_distribution, &distribution);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(distribution, expected));
 }
 
@@ -690,7 +690,7 @@ TEST_F(DistributionHelperTest, Merge_BucketNotMatch_Linear_DifferentWidth) {
   other_distribution.mutable_linear_buckets()->set_width(10);
 
   Distribution expected = distribution;
-  helper_.Merge(other_distribution, &distribution);
+  (void)helper_.Merge(other_distribution, &distribution);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(distribution, expected));
 }
 
@@ -701,7 +701,7 @@ TEST_F(DistributionHelperTest, Merge_BucketNotMatch_Linear_DifferentOffset) {
   other_distribution.mutable_linear_buckets()->set_offset(10);
 
   Distribution expected = distribution;
-  helper_.Merge(other_distribution, &distribution);
+  (void)helper_.Merge(other_distribution, &distribution);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(distribution, expected));
 }
 
@@ -715,7 +715,7 @@ TEST_F(DistributionHelperTest, Merge_BucketNotMatch_Explicit) {
       TextFormat::ParseFromString(kExplicitDistribution, &distribution));
   Distribution other_distribution = distribution;
 
-  helper_.Merge(other_distribution, &distribution);
+  (void)helper_.Merge(other_distribution, &distribution);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(distribution, expected));
 }
 
@@ -728,7 +728,7 @@ TEST_F(DistributionHelperTest,
   other_distribution.mutable_explicit_buckets()->clear_bounds();
 
   Distribution expected = distribution;
-  helper_.Merge(other_distribution, &distribution);
+  (void)helper_.Merge(other_distribution, &distribution);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(distribution, expected));
 }
 
@@ -740,7 +740,7 @@ TEST_F(DistributionHelperTest, Merge_BucketNotMatch_Explicit_DifferentBounds) {
   other_distribution.mutable_explicit_buckets()->set_bounds(0, 1.5);
 
   Distribution expected = distribution;
-  helper_.Merge(other_distribution, &distribution);
+  (void)helper_.Merge(other_distribution, &distribution);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(distribution, expected));
 }
 
@@ -754,7 +754,7 @@ TEST_F(DistributionHelperTest, Merge_BucketMatch_Exponential) {
       TextFormat::ParseFromString(kExponentialDistribution, &distribution));
   Distribution other_distribution = distribution;
 
-  helper_.Merge(other_distribution, &distribution);
+  (void)helper_.Merge(other_distribution, &distribution);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(distribution, expected));
 }
 
@@ -767,7 +767,7 @@ TEST_F(DistributionHelperTest,
   other_distribution.mutable_exponential_buckets()->set_num_finite_buckets(10);
 
   Distribution expected = distribution;
-  helper_.Merge(other_distribution, &distribution);
+  (void)helper_.Merge(other_distribution, &distribution);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(distribution, expected));
 }
 
@@ -780,7 +780,7 @@ TEST_F(DistributionHelperTest,
   other_distribution.mutable_exponential_buckets()->set_growth_factor(10);
 
   Distribution expected = distribution;
-  helper_.Merge(other_distribution, &distribution);
+  (void)helper_.Merge(other_distribution, &distribution);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(distribution, expected));
 }
 
@@ -793,7 +793,7 @@ TEST_F(DistributionHelperTest,
   other_distribution.mutable_exponential_buckets()->set_scale(10);
 
   Distribution expected = distribution;
-  helper_.Merge(other_distribution, &distribution);
+  (void)helper_.Merge(other_distribution, &distribution);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(distribution, expected));
 }
 
@@ -806,7 +806,7 @@ TEST_F(DistributionHelperTest, Merge_BucketNotMatch_Linear_Exponential) {
                                           &exponential));
 
   Distribution expected = exponential;
-  helper_.Merge(linear, &exponential);
+  (void)helper_.Merge(linear, &exponential);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(exponential, expected));
 }
 
@@ -819,7 +819,7 @@ TEST_F(DistributionHelperTest, Merge_BucketNotMatch_Explicit_Linear) {
                                           &explicit_distribution));
 
   Distribution expected = linear;
-  helper_.Merge(explicit_distribution, &linear);
+  (void)helper_.Merge(explicit_distribution, &linear);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(linear, expected));
 }
 
@@ -832,7 +832,7 @@ TEST_F(DistributionHelperTest, Merge_BucketNotMatch_Exponential_Explicit) {
                                           &explicit_distribution));
 
   Distribution expected = explicit_distribution;
-  helper_.Merge(exponential, &explicit_distribution);
+  (void)helper_.Merge(exponential, &explicit_distribution);
   EXPECT_TRUE(
       MessageDifferencer::ApproximatelyEquals(explicit_distribution, expected));
 }
@@ -853,7 +853,7 @@ TEST_F(DistributionHelperTest, Merge_BucketNotMatch_UnknownBucketOptions) {
 
   // The Merge function should not break in this situation.
   Distribution expected = distribution;
-  helper_.Merge(other_distribution, &distribution);
+  (void)helper_.Merge(other_distribution, &distribution);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(distribution, expected));
 }
 
@@ -864,7 +864,7 @@ TEST_F(DistributionHelperTest, Merge_DifferentBucketCountsSize) {
   Distribution to = exponential_distribution_;
 
   // The merge won't happen because the bucket size are different.
-  helper_.Merge(from, &to);
+  (void)helper_.Merge(from, &to);
   EXPECT_TRUE(
       MessageDifferencer::ApproximatelyEquals(to, exponential_distribution_));
 }
@@ -877,7 +877,7 @@ TEST_F(DistributionHelperTest, Merge_ZeroCount) {
   Distribution to = distribution;
   to.set_count(0);
 
-  helper_.Merge(distribution, &to);
+  (void)helper_.Merge(distribution, &to);
   EXPECT_TRUE(MessageDifferencer::ApproximatelyEquals(to, distribution));
 }
 

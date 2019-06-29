@@ -194,7 +194,7 @@ class ReportAggregatorImplTest : public ::testing::Test {
 
   void FlushCallbackCallingBackToAggregator(const ReportRequest& request) {
     flushed_.push_back(request);
-    aggregator_->Flush();
+    (void)aggregator_->Flush();
   }
 
   ReportRequest request1_;

@@ -77,7 +77,7 @@ CheckAggregatorImpl::~CheckAggregatorImpl() {
   // FlushAll() will remove all cache items. For each removed item, it will call
   // flush_callback.  At destructor, it is better not to call the callback.
   SetFlushCallback(NULL);
-  FlushAll();
+  (void)FlushAll();
 }
 
 // Set the flush callback function.
