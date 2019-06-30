@@ -18,6 +18,7 @@ limitations under the License.
 
 #include "google/api/metric.pb.h"
 #include "google/api/servicecontrol/v1/quota_controller.pb.h"
+#include "google/protobuf/text_format.h"
 #include "utils/google_macros.h"
 
 namespace google {

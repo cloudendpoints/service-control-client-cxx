@@ -17,8 +17,6 @@ limitations under the License.
 
 #include <iostream>
 
-#include <google/protobuf/text_format.h>
-
 #include "src/money_utils.h"
 #include "src/signature.h"
 #include "utils/distribution_helper.h"
