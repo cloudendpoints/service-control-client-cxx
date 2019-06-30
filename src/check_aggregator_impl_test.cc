@@ -148,7 +148,7 @@ class CheckAggregatorImplTest : public ::testing::Test {
 
   void FlushCallbackCallingBackToAggregator(const CheckRequest& request) {
     flushed_.push_back(request);
-    aggregator_->CacheResponse(request, pass_response1_);
+    (void)aggregator_->CacheResponse(request, pass_response1_);
   }
 
   CheckRequest request1_;
