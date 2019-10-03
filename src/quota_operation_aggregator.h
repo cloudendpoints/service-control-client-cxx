@@ -16,6 +16,8 @@ limitations under the License.
 #ifndef GOOGLE_SERVICE_CONTROL_CLIENT_QUOTA_OPERATION_AGGREGATOR_H_
 #define GOOGLE_SERVICE_CONTROL_CLIENT_QUOTA_OPERATION_AGGREGATOR_H_
 
+#include <unordered_map>
+
 #include "google/api/metric.pb.h"
 #include "google/api/servicecontrol/v1/quota_controller.pb.h"
 #include "google/protobuf/text_format.h"
