@@ -16,10 +16,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "googletest_git",
-    build_file = "@//:third_party/BUILD.googletest",
-    sha256 = "01508c8f47c99509130f128924f07f3a60be05d039cff571bb11d60bb11a3581",
-    strip_prefix = "googletest-d225acc90bc3a8c420a9bcd1f033033c1ccd7fe0",
-    urls = ["https://github.com/google/googletest/archive/d225acc90bc3a8c420a9bcd1f033033c1ccd7fe0.tar.gz"],
+    sha256 = "f9830bcfb68c8a2a689337c4ad6998d6849df9574451f338a3dde14ff1f3e381",
+    strip_prefix = "googletest-23b2a3b1cf803999fb38175f6e9e038a4495c8a5",  #2/13/2020
+    urls = ["https://github.com/google/googletest/archive/23b2a3b1cf803999fb38175f6e9e038a4495c8a5.tar.gz"],
 )
 
 http_archive(
@@ -29,15 +28,15 @@ http_archive(
     urls = ["https://github.com/google/boringssl/archive/8cb07520451f0dc454654f2da5cdecf0b806f823.tar.gz"],
 )
 
-
+# Required by com_google_protobuf
 http_archive(
-    name = "protobuf_git",
-    strip_prefix = "protobuf-d5f0dac497f833d06f92d246431f4f2f42509e04",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/d5f0dac497f833d06f92d246431f4f2f42509e04.tar.gz"],
-    sha256 = "6514bc2994b29c2571ad2ceb90da25b7fb0dd575f5830fe109ddb214d59e3e2b",
+    name = "rules_python",
+    sha256 = "e5470e92a18aa51830db99a4d9c492cc613761d5bdb7131c04bd92b9834380f6",
+    strip_prefix = "rules_python-4b84ad270387a7c439ebdccfd530e2339601ef27",  #8/2/2019
+    urls = ["https://github.com/bazelbuild/rules_python/archive/4b84ad270387a7c439ebdccfd530e2339601ef27.tar.gz"],
 )
 
-# Required by protobuf_git
+# Required by com_google_protobuf
 http_archive(
     name = "bazel_skylib",
     sha256 = "bbccf674aa441c266df9894182d80de104cabd19be98be002f6d478aaa31574d",
@@ -45,12 +44,31 @@ http_archive(
     urls = ["https://github.com/bazelbuild/bazel-skylib/archive/2169ae1c374aab4a09aa90e65efe1a3aad4e279b.tar.gz"],
 )
 
+# Required by com_google_protobuf
 http_archive(
-    name = "googleapis_git",
-    build_file = "@//:third_party/BUILD.googleapis",
-    patch_cmds = ["find . -type f -name '*BUILD*' | xargs rm"],
-    strip_prefix = "googleapis-275cdfcdc3188a60456f43acd139b8cc037379f4",  # May 14, 2019
-    url = "https://github.com/googleapis/googleapis/archive/275cdfcdc3188a60456f43acd139b8cc037379f4.tar.gz",
-    sha256 = "d07a9bf06bb02b51ff6e913211cedc7511430af550b6a775908c33c8ee218985",
+    name = "zlib",
+    build_file = "@com_google_protobuf//:third_party/zlib.BUILD",
+    sha256 = "629380c90a77b964d896ed37163f5c3a34f6e6d897311f1df2a7016355c45eff",
+    strip_prefix = "zlib-1.2.11",
+    urls = ["https://github.com/madler/zlib/archive/v1.2.11.tar.gz"],
 )
 
+http_archive(
+    name = "com_google_protobuf",
+    sha256 = "ad868d4d1ea45a045f7c0f833ecc83eeb9f28a2ccdd21ea012c354bd90c9e0fd",
+    strip_prefix = "protobuf-83b47e4c65def035a958a4ecdb8f757185f34d79",  #2/13/2020
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/83b47e4c65def035a958a4ecdb8f757185f34d79.tar.gz"],
+)
+
+http_archive(
+    name = "googleapis_git",
+    sha256 = "9a1c52df6c3c166fa83c0ba37b60d25b265ae1f760f90e85e436d563b41fcb54",
+    strip_prefix = "googleapis-8a1020bf6828f6e3c84c3014f2c51cb62b739140",  # Feb 18, 2020
+    url = "https://github.com/googleapis/googleapis/archive/8a1020bf6828f6e3c84c3014f2c51cb62b739140.tar.gz",
+)
+
+load("@googleapis_git//:repository_rules.bzl", "switched_rules_by_language")
+switched_rules_by_language(
+    name = "com_google_googleapis_imports",
+    cc = True,
+)

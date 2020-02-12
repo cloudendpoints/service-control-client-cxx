@@ -24,8 +24,8 @@ limitations under the License.
 // ::google::protobuf::util::Status.
 
 // EXPECT_OK is defined in google/protobuf/stubs/status.h
-//#define EXPECT_OK(statement) EXPECT_EQ(::google::protobuf::util::Status::OK,
-//(statement))
+#define EXPECT_OK(statement) \
+  EXPECT_EQ(::google::protobuf::util::Status::OK, (statement))
 #define ASSERT_OK(statement) \
   ASSERT_EQ(::google::protobuf::util::Status::OK, (statement))
 

@@ -8,7 +8,7 @@ cc_library(
     hdrs = ["utils/distribution_helper.h"],
     visibility = ["//visibility:public"],
     deps = [
-        "@googleapis_git//:servicecontrol",
+        "@googleapis_git//google/api/servicecontrol/v1:servicecontrol_cc_proto",
     ],
 )
 
@@ -54,7 +54,8 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "@boringssl//:crypto",
-        "@googleapis_git//:servicecontrol",
+        "@googleapis_git//google/api:metric_cc_proto",
+        "@googleapis_git//google/api/servicecontrol/v1:servicecontrol_cc_proto",
     ],
 )
 
@@ -74,7 +75,7 @@ cc_test(
     srcs = ["src/quota_aggregator_impl_test.cc"],
     deps = [
         ":service_control_client_lib",
-        "@googletest_git//:googletest_main",
+        "@googletest_git//:gtest_main",
     ],
 )
 
@@ -85,7 +86,7 @@ cc_test(
     linkopts = ["-lm"],
     deps = [
         ":service_control_client_lib",
-        "@googletest_git//:googletest_main",
+        "@googletest_git//:gtest_main",
     ],
 )
 
@@ -95,7 +96,7 @@ cc_test(
     srcs = ["utils/distribution_helper_test.cc"],
     deps = [
         ":distribution_helper_lib",
-        "@googletest_git//:googletest_main",
+        "@googletest_git//:gtest_main",
     ],
 )
 
@@ -105,17 +106,19 @@ cc_test(
     srcs = ["utils/md5_test.cc"],
     deps = [
         ":service_control_client_lib",
-        "@googletest_git//:googletest_main",
+        "@googletest_git//:gtest_main",
     ],
 )
 
 cc_test(
     name = "money_utils_test",
     size = "small",
-    srcs = ["src/money_utils_test.cc"],
+    srcs = [
+        "src/money_utils_test.cc",
+    ],
     deps = [
         ":service_control_client_lib",
-        "@googletest_git//:googletest_main",
+        "@googletest_git//:gtest_main",
     ],
 )
 
@@ -126,7 +129,7 @@ cc_test(
     linkopts = ["-lm"],
     deps = [
         ":service_control_client_lib",
-        "@googletest_git//:googletest_main",
+        "@googletest_git//:gtest_main",
     ],
 )
 
@@ -136,7 +139,7 @@ cc_test(
     srcs = ["src/report_aggregator_impl_test.cc"],
     deps = [
         ":service_control_client_lib",
-        "@googletest_git//:googletest_main",
+        "@googletest_git//:gtest_main",
     ],
 )
 
@@ -150,7 +153,7 @@ cc_test(
     linkopts = ["-lm"],
     deps = [
         ":service_control_client_lib",
-        "@googletest_git//:googletest_main",
+        "@googletest_git//:gtest_main",
     ],
 )
 
@@ -164,7 +167,7 @@ cc_test(
     linkopts = ["-lm"],
     deps = [
         ":service_control_client_lib",
-        "@googletest_git//:googletest_main",
+        "@googletest_git//:gtest_main",
     ],
 )
 
@@ -174,7 +177,7 @@ cc_test(
     srcs = ["src/signature_test.cc"],
     deps = [
         ":service_control_client_lib",
-        "@googletest_git//:googletest_main",
+        "@googletest_git//:gtest_main",
     ],
 )
 
@@ -184,7 +187,7 @@ cc_test(
     srcs = ["src/check_aggregator_impl_test.cc"],
     deps = [
         ":service_control_client_lib",
-        "@googletest_git//:googletest_main",
+        "@googletest_git//:gtest_main",
     ],
 )
 
@@ -198,6 +201,6 @@ cc_test(
     ],
     deps = [
         ":simple_lru_cache",
-        "@googletest_git//:googletest_main",
+        "@googletest_git//:gtest_main",
     ],
 )
