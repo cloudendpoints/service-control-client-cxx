@@ -17,7 +17,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
     name = "googletest_git",
     sha256 = "f9830bcfb68c8a2a689337c4ad6998d6849df9574451f338a3dde14ff1f3e381",
-    strip_prefix = "googletest-23b2a3b1cf803999fb38175f6e9e038a4495c8a5",  #2/13/2020
+    strip_prefix = "googletest-23b2a3b1cf803999fb38175f6e9e038a4495c8a5",  # 2/13/2020
     urls = ["https://github.com/google/googletest/archive/23b2a3b1cf803999fb38175f6e9e038a4495c8a5.tar.gz"],
 )
 
@@ -32,7 +32,7 @@ http_archive(
 http_archive(
     name = "rules_python",
     sha256 = "e5470e92a18aa51830db99a4d9c492cc613761d5bdb7131c04bd92b9834380f6",
-    strip_prefix = "rules_python-4b84ad270387a7c439ebdccfd530e2339601ef27",  #8/2/2019
+    strip_prefix = "rules_python-4b84ad270387a7c439ebdccfd530e2339601ef27",  # 8/2/2019
     urls = ["https://github.com/bazelbuild/rules_python/archive/4b84ad270387a7c439ebdccfd530e2339601ef27.tar.gz"],
 )
 
@@ -56,14 +56,14 @@ http_archive(
 http_archive(
     name = "com_google_protobuf",
     sha256 = "ad868d4d1ea45a045f7c0f833ecc83eeb9f28a2ccdd21ea012c354bd90c9e0fd",
-    strip_prefix = "protobuf-83b47e4c65def035a958a4ecdb8f757185f34d79",  #2/13/2020
+    strip_prefix = "protobuf-83b47e4c65def035a958a4ecdb8f757185f34d79",  # 2/13/2020
     urls = ["https://github.com/protocolbuffers/protobuf/archive/83b47e4c65def035a958a4ecdb8f757185f34d79.tar.gz"],
 )
 
 http_archive(
     name = "googleapis_git",
     sha256 = "9a1c52df6c3c166fa83c0ba37b60d25b265ae1f760f90e85e436d563b41fcb54",
-    strip_prefix = "googleapis-8a1020bf6828f6e3c84c3014f2c51cb62b739140",  # Feb 18, 2020
+    strip_prefix = "googleapis-8a1020bf6828f6e3c84c3014f2c51cb62b739140",  # 2/18/2020
     url = "https://github.com/googleapis/googleapis/archive/8a1020bf6828f6e3c84c3014f2c51cb62b739140.tar.gz",
 )
 
