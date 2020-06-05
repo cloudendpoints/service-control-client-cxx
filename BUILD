@@ -56,6 +56,7 @@ cc_library(
         "@boringssl//:crypto",
         "@googleapis_git//google/api:metric_cc_proto",
         "@googleapis_git//google/api/servicecontrol/v1:servicecontrol_cc_proto",
+         "@googleapis_git//google/type:money_cc_proto",
     ],
 )
 

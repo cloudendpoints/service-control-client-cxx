@@ -62,9 +62,9 @@ http_archive(
 
 http_archive(
     name = "googleapis_git",
-    sha256 = "9a1c52df6c3c166fa83c0ba37b60d25b265ae1f760f90e85e436d563b41fcb54",
-    strip_prefix = "googleapis-8a1020bf6828f6e3c84c3014f2c51cb62b739140",  # 2/18/2020
-    url = "https://github.com/googleapis/googleapis/archive/8a1020bf6828f6e3c84c3014f2c51cb62b739140.tar.gz",
+    sha256 = "0eaf8c4d0ea4aa3ebf94bc8f5ec57403c633920ada57a498fea4a8eb8c17b948",
+    strip_prefix = "googleapis-68c72c1d1ffff49b7d0019a21e65705b5d9c23c2",  # 06/04/2020
+    url = "https://github.com/googleapis/googleapis/archive/68c72c1d1ffff49b7d0019a21e65705b5d9c23c2.tar.gz",
 )
 
 load("@googleapis_git//:repository_rules.bzl", "switched_rules_by_language")
