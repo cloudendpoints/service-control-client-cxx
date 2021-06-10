@@ -24,7 +24,8 @@ using ::google::api::servicecontrol::v1::CheckResponse;
 using ::google::api::servicecontrol::v1::ReportRequest;
 using ::google::api::servicecontrol::v1::ReportResponse;
 
-using ::google::protobuf::util::error::Code;
+using ::google::protobuf::util::OkStatus;
+using ::google::protobuf::util::StatusCode;
 using ::google::protobuf::util::Status;
 
 namespace google {
@@ -38,41 +39,41 @@ Status ConvertHttpCodeToStatus(const long &http_code) {
   std::cout << "http_code is: " << http_code << std::endl;
   switch (http_code) {
     case 400:
-      status = Status(Code::INVALID_ARGUMENT, std::string("Bad Request."));
+      status = Status(StatusCode::kInvalidArgument, std::string("Bad Request."));
     case 403:
       status =
-          Status(Code::PERMISSION_DENIED, std::string("Permission Denied."));
+          Status(StatusCode::kPermissionDenied, std::string("Permission Denied."));
     case 404:
-      status = Status(Code::NOT_FOUND, std::string("Not Found."));
+      status = Status(StatusCode::kNotFound, std::string("Not Found."));
     case 409:
-      status = Status(Code::ABORTED, std::string("Conflict."));
+      status = Status(StatusCode::kAborted, std::string("Conflict."));
     case 416:
-      status = Status(Code::OUT_OF_RANGE,
+      status = Status(StatusCode::kOutOfRange,
                       std::string("Requested Range Not Satisfiable."));
     case 429:
       status =
-          Status(Code::RESOURCE_EXHAUSTED, std::string("Too Many Requests."));
+          Status(StatusCode::kResourceExhausted, std::string("Too Many Requests."));
     case 499:
-      status = Status(Code::CANCELLED, std::string("Client Closed Request."));
+      status = Status(StatusCode::kCancelled, std::string("Client Closed Request."));
     case 504:
-      status = Status(Code::DEADLINE_EXCEEDED, std::string("Gateway Timeout."));
+      status = Status(StatusCode::kDeadlineExceeded, std::string("Gateway Timeout."));
     case 501:
-      status = Status(Code::UNIMPLEMENTED, std::string("Not Implemented."));
+      status = Status(StatusCode::kUnimplemented, std::string("Not Implemented."));
     case 503:
-      status = Status(Code::UNAVAILABLE, std::string("Service Unavailable."));
+      status = Status(StatusCode::kUnavailable, std::string("Service Unavailable."));
     case 401:
-      status = Status(Code::UNAUTHENTICATED, std::string("Unauthorized."));
+      status = Status(StatusCode::kUnauthenticated, std::string("Unauthorized."));
     default: {
       if (http_code >= 200 && http_code < 300) {
-        status = Status(Code::OK, std::string("OK."));
+        status = Status(StatusCode::kOk, std::string("OK."));
 
       } else if (http_code >= 400 && http_code < 500) {
         status =
-            Status(Code::FAILED_PRECONDITION, std::string("Client Error."));
+            Status(StatusCode::kFailedPrecondition, std::string("Client Error."));
       } else if (http_code >= 500 && http_code < 600) {
-        status = Status(Code::INTERNAL, std::string("Server Error."));
+        status = Status(StatusCode::kInternal, std::string("Server Error."));
       } else
-        status = Status(Code::UNKNOWN, std::string("Unknown Error."));
+        status = Status(StatusCode::kUnknown, std::string("Unknown Error."));
     }
   }
   return status;
@@ -117,7 +118,7 @@ Status SendHttp(const std::string &url, const std::string &auth_header,
   curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
 
   CURLcode res = curl_easy_perform(curl);
-  Status status = Status::OK;
+  Status status = OkStatus();
   if (res != CURLE_OK) {
     std::cout << "curl easy_perform() failed." << std::endl;
     long http_code = 0;
@@ -145,7 +146,7 @@ void LibCurlTransport::Check(
     delete request_body;
     if (status.ok()) {
       if (!response->ParseFromString(response_body)) {
-        status = Status(Code::INVALID_ARGUMENT,
+        status = Status(StatusCode::kInvalidArgument,
                         std::string("Cannot parse response to proto."));
       } else {
         std::cout << "response parsed from string: " << response->DebugString()
@@ -172,7 +173,7 @@ void LibCurlTransport::Report(
     delete request_body;
     if (status.ok()) {
       if (!response->ParseFromString(response_body)) {
-        status = Status(Code::INVALID_ARGUMENT,
+        status = Status(StatusCode::kInvalidArgument,
                         std::string("Cannot parse response to proto."));
       } else {
         std::cout << "response parsed from string: " << response->DebugString()

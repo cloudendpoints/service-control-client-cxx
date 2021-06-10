@@ -27,8 +27,9 @@ using ::google::api::servicecontrol::v1::QuotaOperation;
 using ::google::api::servicecontrol::v1::AllocateQuotaRequest;
 using ::google::api::servicecontrol::v1::AllocateQuotaResponse;
 using ::google::api::servicecontrol::v1::QuotaOperation_QuotaMode;
+using ::google::protobuf::util::OkStatus;
 using ::google::protobuf::util::Status;
-using ::google::protobuf::util::error::Code;
+using ::google::protobuf::util::StatusCode;
 using ::google::service_control_client::SimpleCycleTimer;
 
 namespace google {
@@ -107,19 +108,19 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
     const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request,
     ::google::api::servicecontrol::v1::AllocateQuotaResponse* response) {
   if (request.service_name() != service_name_) {
-    return Status(Code::INVALID_ARGUMENT,
+    return Status(StatusCode::kInvalidArgument,
                   (string("Invalid service name: ") + request.service_name() +
                    string(" Expecting: ") + service_name_));
   }
 
   if (!request.has_allocate_operation()) {
-    return Status(Code::INVALID_ARGUMENT,
+    return Status(StatusCode::kInvalidArgument,
                   "allocate operation field is required.");
   }
 
   if (!cache_) {
     // By returning NO_FOUND, caller will send request to server.
-    return Status(Code::NOT_FOUND, "");
+    return Status(StatusCode::kNotFound, "");
   }
 
   AllocateQuotaCacheRemovedItemsHandler::StackBuffer stack_buffer(this);
@@ -147,7 +148,7 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
 
     // return positive response
     *response = cache_elem->quota_response();
-    return ::google::protobuf::util::Status::OK;
+    return ::google::protobuf::util::OkStatus();
   }
 
   if (lookup.value()->in_flight() == false &&
@@ -177,7 +178,7 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
   }
 
   *response = lookup.value()->quota_response();
-  return ::google::protobuf::util::Status::OK;
+  return ::google::protobuf::util::OkStatus();
 }
 
 // Caches a response from a remote Service Controller AllocateQuota call.
@@ -185,7 +186,7 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
     const ::google::api::servicecontrol::v1::AllocateQuotaRequest& request,
     const ::google::api::servicecontrol::v1::AllocateQuotaResponse& response) {
   if (!cache_) {
-    return ::google::protobuf::util::Status::OK;
+    return ::google::protobuf::util::OkStatus();
   }
 
   string request_signature = GenerateAllocateQuotaRequestSignature(request);
@@ -201,7 +202,7 @@ void QuotaAggregatorImpl::SetFlushCallback(FlushCallback callback) {
     lookup.value()->set_quota_response(response);
   }
 
-  return ::google::protobuf::util::Status::OK;
+  return ::google::protobuf::util::OkStatus();
 }
 
 // When the next Flush() should be called.
@@ -235,7 +236,7 @@ bool QuotaAggregatorImpl::ShouldDrop(const CacheElem& elem) const {
     cache_->RemoveExpiredEntries();
   }
 
-  return Status::OK;
+  return OkStatus();
 }
 
 // Flushes out all cached check responses; clears all cache items.
@@ -252,7 +253,7 @@ bool QuotaAggregatorImpl::ShouldDrop(const CacheElem& elem) const {
     cache_->RemoveAll();
   }
 
-  return Status::OK;
+  return OkStatus();
 }
 
 // OnCacheEntryDelete will be called behind the cache_mutex_

@@ -16,29 +16,30 @@ limitations under the License.
 #include "src/money_utils.h"
 
 using google::type::Money;
+using ::google::protobuf::util::OkStatus;
 using ::google::protobuf::util::Status;
-using ::google::protobuf::util::error::Code;
+using ::google::protobuf::util::StatusCode;
 
 namespace google {
 namespace service_control_client {
 
 Status ValidateMoney(const Money& money) {
   if (money.currency_code().empty() || money.currency_code().length() != 3) {
-    return Status(Code::INVALID_ARGUMENT,
+    return Status(StatusCode::kInvalidArgument,
                   "The currency_code field in Money must be 3 letters long.");
   }
   if ((money.units() > 0 && money.nanos() < 0) ||
       (money.units() < 0 && money.nanos() > 0)) {
-    return Status(Code::INVALID_ARGUMENT,
+    return Status(StatusCode::kInvalidArgument,
                   "The signs of units and nanos field in Money must agree.");
   }
   const int kMaxNanos = 999999999;
   if (money.nanos() < -kMaxNanos || money.nanos() > kMaxNanos) {
-    return Status(Code::INVALID_ARGUMENT,
+    return Status(StatusCode::kInvalidArgument,
                   "The nanos field in Money must be between -999999999 and "
                   "999999999 inclusive.");
   }
-  return Status::OK;
+  return OkStatus();
 }
 
 int GetAmountSign(const Money& money) {
@@ -60,7 +61,7 @@ Status TryAddMoney(const Money& a, const Money& b, Money* sum) {
     sum->clear_currency_code();
     sum->clear_units();
     sum->clear_nanos();
-    return Status(Code::INVALID_ARGUMENT,
+    return Status(StatusCode::kInvalidArgument,
                   "Money values must have the same currency_code to add");
   }
   sum->set_currency_code(a.currency_code());
@@ -100,7 +101,7 @@ Status TryAddMoney(const Money& a, const Money& b, Money* sum) {
   if (sign_a > 0 && sign_b > 0 && sum_units <= 0) {
     sum->set_units(INT64_MAX);
     sum->set_nanos(kBillion - 1);
-    return Status(Code::OUT_OF_RANGE, "Money addition positive overflow");
+    return Status(StatusCode::kOutOfRange, "Money addition positive overflow");
   }
   // Detect negative overflow. Note there is a tricky case that can only happen
   // to negative overflow: sum_units_no_carry overflows to 0 but adding the
@@ -111,20 +112,20 @@ Status TryAddMoney(const Money& a, const Money& b, Money* sum) {
   if (sign_a < 0 && sign_b < 0 && (sum_units_no_carry >= 0 || sum_units >= 0)) {
     sum->set_units(INT64_MIN);
     sum->set_nanos(-kBillion + 1);
-    return Status(Code::OUT_OF_RANGE, "Money addition negative overflow");
+    return Status(StatusCode::kOutOfRange, "Money addition negative overflow");
   }
 
   // The success case.
   sum->set_units(sum_units);
   sum->set_nanos(sum_nanos);
-  return Status::OK;
+  return OkStatus();
 }
 
 Money SaturatedAddMoney(const Money& a, const Money& b) {
   Money sum;
   Status status = TryAddMoney(a, b, &sum);
   // Ignore overflow and crash on other errors.
-  assert(status.ok() || status.error_code() == Code::OUT_OF_RANGE);
+  assert(status.ok() || status.code() == StatusCode::kOutOfRange);
   return sum;
 }
 

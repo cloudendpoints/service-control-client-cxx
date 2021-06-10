@@ -25,16 +25,16 @@ limitations under the License.
 
 // EXPECT_OK is defined in google/protobuf/stubs/status.h
 #define EXPECT_OK(statement) \
-  EXPECT_EQ(::google::protobuf::util::Status::OK, (statement))
+  EXPECT_EQ(::google::protobuf::util::OkStatus(), (statement))
 #define ASSERT_OK(statement) \
-  ASSERT_EQ(::google::protobuf::util::Status::OK, (statement))
+  ASSERT_EQ(::google::protobuf::util::OkStatus(), (statement))
 
 // Test that a util::Status is not OK.  NOTE: It is preferable to use
 // {ASSERT,EXPECT}_ERROR_SUBSTR() and check for a specific error string.
 #define EXPECT_NOT_OK(cmd) \
-  EXPECT_NE(::google::protobuf::util::Status::OK, (cmd))
+  EXPECT_NE(::google::protobuf::util::OkStatus(), (cmd))
 #define ASSERT_NOT_OK(cmd) \
-  ASSERT_NE(::google::protobuf::util::Status::OK, (cmd))
+  ASSERT_NE(::google::protobuf::util::OkStatus(), (cmd))
 
 namespace google {
 namespace util {
@@ -52,31 +52,30 @@ namespace status_macros {
 class StatusErrorCodeMatcher : public ::testing::MatcherInterface<
                                    const ::google::protobuf::util::Status&> {
  public:
-  StatusErrorCodeMatcher(int error_code) : error_code_(error_code) {}
+  StatusErrorCodeMatcher(::google::protobuf::util::StatusCode code) : code_(code) {}
 
   virtual bool MatchAndExplain(const ::google::protobuf::util::Status& status,
                                ::testing::MatchResultListener* listener) const {
     if (status.ok()) {
-      // Code 0 always means OK, and the ErrorSpace is discarded.
-      return error_code_ == 0;
+      return code_ == ::google::protobuf::util::StatusCode::kOk;
     } else {
-      return status.error_code() == error_code_;
+      return status.code() == code_;
     }
   }
   virtual void DescribeTo(::std::ostream* os) const {
-    *os << "util::Status has error code " << error_code_;
+    *os << "util::Status has error code " << static_cast<int>(code_);
   }
   virtual void DescribeNegationTo(::std::ostream* os) const {
-    *os << "util::Status does not have error code " << error_code_;
+    *os << "util::Status does not have error code " << static_cast<int>(code_);
   }
 
  private:
-  const int error_code_;
+  const ::google::protobuf::util::StatusCode code_;
 };
 
 inline ::testing::Matcher<const ::google::protobuf::util::Status&> HasErrorCode(
-    int error_code) {
-  return ::testing::MakeMatcher(new StatusErrorCodeMatcher(error_code));
+    ::google::protobuf::util::StatusCode code) {
+  return ::testing::MakeMatcher(new StatusErrorCodeMatcher(code));
 }
 
 // Test that a util::Status has a specific error code, in the right ErrorSpace

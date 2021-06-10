@@ -33,7 +33,7 @@ using ::google::api::servicecontrol::v1::ReportResponse;
 using ::google::protobuf::TextFormat;
 using ::google::protobuf::util::MessageDifferencer;
 using ::google::protobuf::util::Status;
-using ::google::protobuf::util::error::Code;
+using ::google::protobuf::util::StatusCode;
 
 namespace google {
 namespace service_control_client {
@@ -209,7 +209,7 @@ class ReportAggregatorImplTest : public ::testing::Test {
 
 TEST_F(ReportAggregatorImplTest, TestNotMatchingServiceName) {
   *(request1_.mutable_service_name()) = "some-other-service-name";
-  EXPECT_ERROR_CODE(Code::INVALID_ARGUMENT, aggregator_->Report(request1_));
+  EXPECT_ERROR_CODE(StatusCode::kInvalidArgument, aggregator_->Report(request1_));
   // Nothing flush out
   EXPECT_EQ(flushed_.size(), 0);
 }
@@ -292,7 +292,7 @@ TEST_F(ReportAggregatorImplTest, TestCacheExpiration) {
 
 TEST_F(ReportAggregatorImplTest, TestHighValueOperationSuccess) {
   request1_.mutable_operations(0)->set_importance(Operation::HIGH);
-  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Report(request1_));
+  EXPECT_ERROR_CODE(StatusCode::kNotFound, aggregator_->Report(request1_));
 
   // Nothing flush out.
   EXPECT_EQ(flushed_.size(), 0);
@@ -310,7 +310,7 @@ TEST_F(ReportAggregatorImplTest, TestDisableCache) {
   aggregator_->SetFlushCallback(std::bind(
       &ReportAggregatorImplTest::FlushCallback, this, std::placeholders::_1));
 
-  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Report(request1_));
+  EXPECT_ERROR_CODE(StatusCode::kNotFound, aggregator_->Report(request1_));
   // Nothing flush out.
   EXPECT_EQ(flushed_.size(), 0);
   // Nothing in the cache

@@ -23,8 +23,9 @@ using ::google::api::MetricDescriptor;
 using ::google::api::servicecontrol::v1::Operation;
 using ::google::api::servicecontrol::v1::ReportRequest;
 using ::google::api::servicecontrol::v1::ReportResponse;
+using ::google::protobuf::util::OkStatus;
 using ::google::protobuf::util::Status;
-using ::google::protobuf::util::error::Code;
+using ::google::protobuf::util::StatusCode;
 
 namespace google {
 namespace service_control_client {
@@ -81,13 +82,13 @@ void ReportAggregatorImpl::SetFlushCallback(FlushCallback callback) {
 Status ReportAggregatorImpl::Report(
     const ::google::api::servicecontrol::v1::ReportRequest& request) {
   if (request.service_name() != service_name_) {
-    return Status(Code::INVALID_ARGUMENT,
+    return Status(StatusCode::kInvalidArgument,
                   (string("Invalid service name: ") + request.service_name() +
                    string(" Expecting: ") + service_name_));
   }
   if (HasHighImportantOperation(request) || !cache_) {
     // By returning NO_FOUND, caller will send request to server.
-    return Status(Code::NOT_FOUND, "");
+    return Status(StatusCode::kNotFound, "");
   }
 
   ReportCacheRemovedItemsHandler::StackBuffer stack_buffer(this);
@@ -117,7 +118,7 @@ Status ReportAggregatorImpl::Report(
       cache_->Remove(signature);
     }
   }
-  return Status::OK;
+  return OkStatus();
 }
 
 void ReportAggregatorImpl::OnCacheEntryDelete(OperationAggregator* iop) {
@@ -162,7 +163,7 @@ Status ReportAggregatorImpl::Flush() {
   if (cache_) {
     cache_->RemoveExpiredEntries();
   }
-  return Status::OK;
+  return OkStatus();
 }
 
 // Flush out aggregated report requests, clear all cache items.
@@ -175,7 +176,7 @@ Status ReportAggregatorImpl::FlushAll() {
   if (cache_) {
     cache_->RemoveAll();
   }
-  return Status::OK;
+  return OkStatus();
 }
 
 std::unique_ptr<ReportAggregator> CreateReportAggregator(

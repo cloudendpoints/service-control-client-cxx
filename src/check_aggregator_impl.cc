@@ -23,8 +23,9 @@ using ::google::api::MetricDescriptor;
 using ::google::api::servicecontrol::v1::Operation;
 using ::google::api::servicecontrol::v1::CheckRequest;
 using ::google::api::servicecontrol::v1::CheckResponse;
+using ::google::protobuf::util::OkStatus;
 using ::google::protobuf::util::Status;
-using ::google::protobuf::util::error::Code;
+using ::google::protobuf::util::StatusCode;
 using ::google::service_control_client::SimpleCycleTimer;
 
 namespace google {
@@ -89,16 +90,16 @@ void CheckAggregatorImpl::SetFlushCallback(FlushCallback callback) {
 Status CheckAggregatorImpl::Check(const CheckRequest& request,
                                   CheckResponse* response) {
   if (request.service_name() != service_name_) {
-    return Status(Code::INVALID_ARGUMENT,
+    return Status(StatusCode::kInvalidArgument,
                   (string("Invalid service name: ") + request.service_name() +
                    string(" Expecting: ") + service_name_));
   }
   if (!request.has_operation()) {
-    return Status(Code::INVALID_ARGUMENT, "operation field is required.");
+    return Status(StatusCode::kInvalidArgument, "operation field is required.");
   }
   if (request.operation().importance() != Operation::LOW || !cache_) {
     // By returning NO_FOUND, caller will send request to server.
-    return Status(Code::NOT_FOUND, "");
+    return Status(StatusCode::kNotFound, "");
   }
 
   string request_signature = GenerateCheckRequestSignature(request);
@@ -111,7 +112,7 @@ Status CheckAggregatorImpl::Check(const CheckRequest& request,
   CheckCache::ScopedLookup lookup(cache_.get(), request_signature);
   if (!lookup.Found()) {
     // By returning NO_FOUND, caller will send request to server.
-    return Status(Code::NOT_FOUND, "");
+    return Status(StatusCode::kNotFound, "");
   }
 
   CacheElem* elem = lookup.value();
@@ -134,11 +135,11 @@ Status CheckAggregatorImpl::Check(const CheckRequest& request,
       // Setting last check to now to block more check requests to Chemist.
       elem->set_last_check_time(SimpleCycleTimer::Now());
       // By returning NO_FOUND, caller will send request to server.
-      return Status(Code::NOT_FOUND, "");
+      return Status(StatusCode::kNotFound, "");
     } else {
       // Use cached response.
       *response = elem->check_response();
-      return Status::OK;
+      return OkStatus();
     }
   } else {
     elem->Aggregate(request, metric_kinds_.get());
@@ -151,7 +152,7 @@ Status CheckAggregatorImpl::Check(const CheckRequest& request,
       // Setting last check to now to block more check requests to Chemist.
       elem->set_last_check_time(SimpleCycleTimer::Now());
       // By returning NO_FOUND, caller will send request to server.
-      return Status(Code::NOT_FOUND, "");
+      return Status(StatusCode::kNotFound, "");
     }
 
     *response = elem->check_response();
@@ -159,7 +160,7 @@ Status CheckAggregatorImpl::Check(const CheckRequest& request,
   // TODO(qiwzhang): supports quota
   // ScaleQuotaTokens(request, elem->quota_scale(), response);
 
-  return Status::OK;
+  return OkStatus();
 }
 
 bool CheckAggregatorImpl::ShouldFlush(const CacheElem& elem) {
@@ -198,7 +199,7 @@ Status CheckAggregatorImpl::CacheResponse(const CheckRequest& request,
     }
   }
 
-  return Status::OK;
+  return OkStatus();
 }
 
 // When the next Flush() should be called.
@@ -219,7 +220,7 @@ Status CheckAggregatorImpl::Flush() {
     cache_->RemoveExpiredEntries();
   }
 
-  return Status::OK;
+  return OkStatus();
 }
 
 void CheckAggregatorImpl::OnCacheEntryDelete(CacheElem* elem) {
@@ -245,7 +246,7 @@ Status CheckAggregatorImpl::FlushAll() {
     cache_->RemoveAll();
   }
 
-  return Status::OK;
+  return OkStatus();
 }
 
 std::unique_ptr<CheckAggregator> CreateCheckAggregator(

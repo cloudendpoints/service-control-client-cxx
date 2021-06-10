@@ -39,9 +39,9 @@ http_archive(
 # Required by com_google_protobuf
 http_archive(
     name = "bazel_skylib",
-    sha256 = "bbccf674aa441c266df9894182d80de104cabd19be98be002f6d478aaa31574d",
-    strip_prefix = "bazel-skylib-2169ae1c374aab4a09aa90e65efe1a3aad4e279b",
-    urls = ["https://github.com/bazelbuild/bazel-skylib/archive/2169ae1c374aab4a09aa90e65efe1a3aad4e279b.tar.gz"],
+    sha256 = "b6cddd8206d5d2953791398b0f025a3f3f3c997872943625529e7b30eba92e78",
+    strip_prefix = "bazel-skylib-c6f6b5425b232baf5caecc3aae31d49d63ddec03",  # 06/09/2021
+    urls = ["https://github.com/bazelbuild/bazel-skylib/archive/c6f6b5425b232baf5caecc3aae31d49d63ddec03.tar.gz"],
 )
 
 # Required by com_google_protobuf
@@ -55,9 +55,9 @@ http_archive(
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "ad868d4d1ea45a045f7c0f833ecc83eeb9f28a2ccdd21ea012c354bd90c9e0fd",
-    strip_prefix = "protobuf-83b47e4c65def035a958a4ecdb8f757185f34d79",  # 2/13/2020
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/83b47e4c65def035a958a4ecdb8f757185f34d79.tar.gz"],
+    sha256 = "236df7c01ca5d3633f2086fa98dbefcbdca638a4ac0ecd9f6e6aab4e629c013f",
+    strip_prefix = "protobuf-b24d0c2b7aeb2923d6e8e0c23946e7e2f493053b",  # 06/09/2021
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/b24d0c2b7aeb2923d6e8e0c23946e7e2f493053b.tar.gz"],
 )
 
 http_archive(

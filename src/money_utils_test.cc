@@ -19,7 +19,7 @@ limitations under the License.
 
 using ::google::type::Money;
 using ::google::protobuf::util::Status;
-using ::google::protobuf::util::error::Code;
+using ::google::protobuf::util::StatusCode;
 
 namespace google {
 namespace service_control_client {
@@ -58,11 +58,11 @@ TEST_F(MoneyUtilsTest, ValidateSuccess) {
 TEST_F(MoneyUtilsTest, ValidateCurrencyCodeError) {
   Money money;
   money.set_currency_code("");
-  EXPECT_ERROR_CODE(Code::INVALID_ARGUMENT, ValidateMoney(money));
+  EXPECT_ERROR_CODE(StatusCode::kInvalidArgument, ValidateMoney(money));
   money.set_currency_code("US");
-  EXPECT_ERROR_CODE(Code::INVALID_ARGUMENT, ValidateMoney(money));
+  EXPECT_ERROR_CODE(StatusCode::kInvalidArgument, ValidateMoney(money));
   money.set_currency_code("USD1");
-  EXPECT_ERROR_CODE(Code::INVALID_ARGUMENT, ValidateMoney(money));
+  EXPECT_ERROR_CODE(StatusCode::kInvalidArgument, ValidateMoney(money));
 }
 
 TEST_F(MoneyUtilsTest, ValidateSignInconsistency) {
@@ -70,10 +70,10 @@ TEST_F(MoneyUtilsTest, ValidateSignInconsistency) {
   money.set_currency_code("USD");
   money.set_units(1);
   money.set_nanos(-1);
-  EXPECT_ERROR_CODE(Code::INVALID_ARGUMENT, ValidateMoney(money));
+  EXPECT_ERROR_CODE(StatusCode::kInvalidArgument, ValidateMoney(money));
   money.set_units(-1);
   money.set_nanos(1);
-  EXPECT_ERROR_CODE(Code::INVALID_ARGUMENT, ValidateMoney(money));
+  EXPECT_ERROR_CODE(StatusCode::kInvalidArgument, ValidateMoney(money));
 }
 
 TEST_F(MoneyUtilsTest, ValidateOutOfBound) {
@@ -81,15 +81,15 @@ TEST_F(MoneyUtilsTest, ValidateOutOfBound) {
   money.set_currency_code("USD");
   money.set_units(1);
   money.set_nanos(1000000000);
-  EXPECT_ERROR_CODE(Code::INVALID_ARGUMENT, ValidateMoney(money));
+  EXPECT_ERROR_CODE(StatusCode::kInvalidArgument, ValidateMoney(money));
   money.set_nanos(INT32_MAX);
-  EXPECT_ERROR_CODE(Code::INVALID_ARGUMENT, ValidateMoney(money));
+  EXPECT_ERROR_CODE(StatusCode::kInvalidArgument, ValidateMoney(money));
 
   money.set_units(-1);
   money.set_nanos(-1000000000);
-  EXPECT_ERROR_CODE(Code::INVALID_ARGUMENT, ValidateMoney(money));
+  EXPECT_ERROR_CODE(StatusCode::kInvalidArgument, ValidateMoney(money));
   money.set_nanos(-INT32_MIN);
-  EXPECT_ERROR_CODE(Code::INVALID_ARGUMENT, ValidateMoney(money));
+  EXPECT_ERROR_CODE(StatusCode::kInvalidArgument, ValidateMoney(money));
 }
 
 TEST_F(MoneyUtilsTest, GetAmountSign) {
@@ -273,7 +273,7 @@ TEST_F(MoneyUtilsTest, TryAddMoneyDifferentCurrencyCode) {
   sum.set_currency_code("USD");
   sum.set_units(1);
   sum.set_nanos(0);
-  EXPECT_ERROR_CODE(Code::INVALID_ARGUMENT, TryAddMoney(a, b, &sum));
+  EXPECT_ERROR_CODE(StatusCode::kInvalidArgument, TryAddMoney(a, b, &sum));
   EXPECT_EQ("", sum.currency_code());
   EXPECT_EQ(0, sum.units());
   EXPECT_EQ(0, sum.nanos());
@@ -290,7 +290,7 @@ TEST_F(MoneyUtilsTest, TryAddMoneyOverflow) {
   a.set_nanos(999999999);
   b.set_units(0);
   b.set_nanos(1);
-  EXPECT_ERROR_CODE(Code::OUT_OF_RANGE, TryAddMoney(a, b, &sum));
+  EXPECT_ERROR_CODE(StatusCode::kOutOfRange, TryAddMoney(a, b, &sum));
   EXPECT_EQ(INT64_MAX, sum.units());
   EXPECT_EQ(999999999, sum.nanos());
 
@@ -298,7 +298,7 @@ TEST_F(MoneyUtilsTest, TryAddMoneyOverflow) {
   a.set_nanos(999999999);
   b.set_units(1);
   b.set_nanos(0);
-  EXPECT_ERROR_CODE(Code::OUT_OF_RANGE, TryAddMoney(a, b, &sum));
+  EXPECT_ERROR_CODE(StatusCode::kOutOfRange, TryAddMoney(a, b, &sum));
   EXPECT_EQ(INT64_MAX, sum.units());
   EXPECT_EQ(999999999, sum.nanos());
 
@@ -306,7 +306,7 @@ TEST_F(MoneyUtilsTest, TryAddMoneyOverflow) {
   a.set_nanos(999999999);
   b.set_units(INT64_MAX);
   b.set_nanos(999999999);
-  EXPECT_ERROR_CODE(Code::OUT_OF_RANGE, TryAddMoney(a, b, &sum));
+  EXPECT_ERROR_CODE(StatusCode::kOutOfRange, TryAddMoney(a, b, &sum));
   EXPECT_EQ(INT64_MAX, sum.units());
   EXPECT_EQ(999999999, sum.nanos());
 
@@ -314,7 +314,7 @@ TEST_F(MoneyUtilsTest, TryAddMoneyOverflow) {
   a.set_nanos(0);
   b.set_units(200000000000);
   b.set_nanos(0);
-  EXPECT_ERROR_CODE(Code::OUT_OF_RANGE, TryAddMoney(a, b, &sum));
+  EXPECT_ERROR_CODE(StatusCode::kOutOfRange, TryAddMoney(a, b, &sum));
   EXPECT_EQ(INT64_MAX, sum.units());
   EXPECT_EQ(999999999, sum.nanos());
 
@@ -322,7 +322,7 @@ TEST_F(MoneyUtilsTest, TryAddMoneyOverflow) {
   a.set_nanos(-999999999);
   b.set_units(0);
   b.set_nanos(-1);
-  EXPECT_ERROR_CODE(Code::OUT_OF_RANGE, TryAddMoney(a, b, &sum));
+  EXPECT_ERROR_CODE(StatusCode::kOutOfRange, TryAddMoney(a, b, &sum));
   EXPECT_EQ(INT64_MIN, sum.units());
   EXPECT_EQ(-999999999, sum.nanos());
 
@@ -330,7 +330,7 @@ TEST_F(MoneyUtilsTest, TryAddMoneyOverflow) {
   a.set_nanos(-999999999);
   b.set_units(-1);
   b.set_nanos(-0);
-  EXPECT_ERROR_CODE(Code::OUT_OF_RANGE, TryAddMoney(a, b, &sum));
+  EXPECT_ERROR_CODE(StatusCode::kOutOfRange, TryAddMoney(a, b, &sum));
   EXPECT_EQ(INT64_MIN, sum.units());
   EXPECT_EQ(-999999999, sum.nanos());
 
@@ -338,7 +338,7 @@ TEST_F(MoneyUtilsTest, TryAddMoneyOverflow) {
   a.set_nanos(-999999999);
   b.set_units(INT64_MIN);
   b.set_nanos(-999999999);
-  EXPECT_ERROR_CODE(Code::OUT_OF_RANGE, TryAddMoney(a, b, &sum));
+  EXPECT_ERROR_CODE(StatusCode::kOutOfRange, TryAddMoney(a, b, &sum));
   EXPECT_EQ(INT64_MIN, sum.units());
   EXPECT_EQ(-999999999, sum.nanos());
 
@@ -346,7 +346,7 @@ TEST_F(MoneyUtilsTest, TryAddMoneyOverflow) {
   a.set_nanos(0);
   b.set_units(-50000000000000);
   b.set_nanos(0);
-  EXPECT_ERROR_CODE(Code::OUT_OF_RANGE, TryAddMoney(a, b, &sum));
+  EXPECT_ERROR_CODE(StatusCode::kOutOfRange, TryAddMoney(a, b, &sum));
   EXPECT_EQ(INT64_MIN, sum.units());
   EXPECT_EQ(-999999999, sum.nanos());
 }

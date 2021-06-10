@@ -30,7 +30,7 @@ using ::google::api::servicecontrol::v1::CheckResponse;
 using ::google::protobuf::TextFormat;
 using ::google::protobuf::util::MessageDifferencer;
 using ::google::protobuf::util::Status;
-using ::google::protobuf::util::error::Code;
+using ::google::protobuf::util::StatusCode;
 
 namespace google {
 namespace service_control_client {
@@ -166,21 +166,21 @@ class CheckAggregatorImplTest : public ::testing::Test {
 TEST_F(CheckAggregatorImplTest, TestNotMatchingServiceName) {
   *(request1_.mutable_service_name()) = "some-other-service-name";
   CheckResponse response;
-  EXPECT_ERROR_CODE(Code::INVALID_ARGUMENT,
+  EXPECT_ERROR_CODE(StatusCode::kInvalidArgument,
                     aggregator_->Check(request1_, &response));
 }
 
 TEST_F(CheckAggregatorImplTest, TestNoOperation) {
   request1_.clear_operation();
   CheckResponse response;
-  EXPECT_ERROR_CODE(Code::INVALID_ARGUMENT,
+  EXPECT_ERROR_CODE(StatusCode::kInvalidArgument,
                     aggregator_->Check(request1_, &response));
 }
 
 TEST_F(CheckAggregatorImplTest, TestHighValueOperationSuccess) {
   request1_.mutable_operation()->set_importance(Operation::HIGH);
   CheckResponse response;
-  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request1_, &response));
+  EXPECT_ERROR_CODE(StatusCode::kNotFound, aggregator_->Check(request1_, &response));
 }
 
 TEST_F(CheckAggregatorImplTest, TestDisableCache) {
@@ -190,12 +190,12 @@ TEST_F(CheckAggregatorImplTest, TestDisableCache) {
                             std::shared_ptr<MetricKindMap>(new MetricKindMap));
   ASSERT_TRUE((bool)(aggregator_));
   CheckResponse response;
-  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request1_, &response));
+  EXPECT_ERROR_CODE(StatusCode::kNotFound, aggregator_->Check(request1_, &response));
 }
 
 TEST_F(CheckAggregatorImplTest, TestCachePassResponses) {
   CheckResponse response;
-  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request1_, &response));
+  EXPECT_ERROR_CODE(StatusCode::kNotFound, aggregator_->Check(request1_, &response));
 
   EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
   EXPECT_OK(aggregator_->Check(request1_, &response));
@@ -209,7 +209,7 @@ TEST_F(CheckAggregatorImplTest, TestCachePassResponses) {
 
 TEST_F(CheckAggregatorImplTest, TestCacheErrorResponses) {
   CheckResponse response;
-  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request1_, &response));
+  EXPECT_ERROR_CODE(StatusCode::kNotFound, aggregator_->Check(request1_, &response));
 
   EXPECT_OK(aggregator_->CacheResponse(request1_, error_response1_));
   EXPECT_OK(aggregator_->Check(request1_, &response));
@@ -223,14 +223,14 @@ TEST_F(CheckAggregatorImplTest, TestCacheErrorResponses) {
 
 TEST_F(CheckAggregatorImplTest, TestCacheCapacity) {
   CheckResponse response;
-  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request1_, &response));
+  EXPECT_ERROR_CODE(StatusCode::kNotFound, aggregator_->Check(request1_, &response));
 
   EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
   EXPECT_OK(aggregator_->Check(request1_, &response));
   EXPECT_TRUE(MessageDifferencer::Equals(response, pass_response1_));
   EXPECT_EQ(flushed_.size(), 0);
 
-  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request2_, &response));
+  EXPECT_ERROR_CODE(StatusCode::kNotFound, aggregator_->Check(request2_, &response));
   EXPECT_OK(aggregator_->CacheResponse(request2_, pass_response2_));
   EXPECT_OK(aggregator_->Check(request2_, &response));
   EXPECT_TRUE(MessageDifferencer::Equals(response, pass_response2_));
@@ -244,7 +244,7 @@ TEST_F(CheckAggregatorImplTest, TestCacheCapacity) {
 
 TEST_F(CheckAggregatorImplTest, TestRefresh) {
   CheckResponse response;
-  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request1_, &response));
+  EXPECT_ERROR_CODE(StatusCode::kNotFound, aggregator_->Check(request1_, &response));
 
   EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
   EXPECT_OK(aggregator_->Check(request1_, &response));
@@ -254,7 +254,7 @@ TEST_F(CheckAggregatorImplTest, TestRefresh) {
   usleep(120000);
 
   // First one should be NOT_FOUND for refresh
-  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request1_, &response));
+  EXPECT_ERROR_CODE(StatusCode::kNotFound, aggregator_->Check(request1_, &response));
   // Second one use cached response.
   EXPECT_OK(aggregator_->Check(request1_, &response));
   EXPECT_TRUE(MessageDifferencer::Equals(response, pass_response1_));
@@ -275,7 +275,7 @@ TEST_F(CheckAggregatorImplTest, TestRefresh) {
 
 TEST_F(CheckAggregatorImplTest, TestCacheExpired) {
   CheckResponse response;
-  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request1_, &response));
+  EXPECT_ERROR_CODE(StatusCode::kNotFound, aggregator_->Check(request1_, &response));
 
   EXPECT_OK(aggregator_->CacheResponse(request1_, pass_response1_));
   EXPECT_OK(aggregator_->Check(request1_, &response));
@@ -287,7 +287,7 @@ TEST_F(CheckAggregatorImplTest, TestCacheExpired) {
   EXPECT_OK(aggregator_->Flush());
 
   // First one should be NOT_FOUND for refresh
-  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request1_, &response));
+  EXPECT_ERROR_CODE(StatusCode::kNotFound, aggregator_->Check(request1_, &response));
 
   EXPECT_EQ(flushed_.size(), 1);
   EXPECT_TRUE(MessageDifferencer::Equals(flushed_[0], request1_));
@@ -333,7 +333,7 @@ TEST_F(CheckAggregatorImplTest, TestCheckWithCallbackCallingCacheResposne) {
 
   usleep(220000);
 
-  EXPECT_ERROR_CODE(Code::NOT_FOUND, aggregator_->Check(request1_, &response));
+  EXPECT_ERROR_CODE(StatusCode::kNotFound, aggregator_->Check(request1_, &response));
   // Check() will evict request1 since it is expired.
   EXPECT_EQ(flushed_.size(), 1);
 }

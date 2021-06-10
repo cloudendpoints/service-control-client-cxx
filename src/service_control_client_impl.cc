@@ -28,8 +28,9 @@ using ::google::api::servicecontrol::v1::AllocateQuotaRequest;
 using ::google::api::servicecontrol::v1::AllocateQuotaResponse;
 using ::google::api::servicecontrol::v1::ReportRequest;
 using ::google::api::servicecontrol::v1::ReportResponse;
+using ::google::protobuf::util::OkStatus;
 using ::google::protobuf::util::Status;
-using ::google::protobuf::util::error::Code;
+using ::google::protobuf::util::StatusCode;
 
 namespace google {
 namespace service_control_client {
@@ -94,19 +95,19 @@ ServiceControlClientImpl::ServiceControlClientImpl(
           Status status = check_aggregator_copy->Flush();
           if (!status.ok()) {
             GOOGLE_LOG(ERROR) << "Failed in Check::Flush() "
-                              << status.error_message();
+                              << status.message();
           }
 
           status = quota_aggregator_copy->Flush();
           if (!status.ok()) {
             GOOGLE_LOG(ERROR) << "Failed in AllocateQuota::Flush() "
-                              << status.error_message();
+                              << status.message();
           }
 
           status = report_aggregator_copy->Flush();
           if (!status.ok()) {
             GOOGLE_LOG(ERROR) << "Failed in Report::Flush() "
-                              << status.error_message();
+                              << status.message();
           }
         });
   }
@@ -141,7 +142,7 @@ void ServiceControlClientImpl::AllocateQuotaFlushCallback(
                    [this, quota_request_copy, quota_response](Status status) {
                      if (!status.ok()) {
                        GOOGLE_LOG(ERROR) << "Failed in AllocateQuota call: "
-                                         << status.error_message();
+                                         << status.message();
                        // cache dummy response for fail open
                        AllocateQuotaResponse dummy_response;
                        (void)this->quota_aggregator_->CacheResponse(
@@ -166,7 +167,7 @@ void ServiceControlClientImpl::CheckFlushCallback(
                      delete check_response;
                      if (!status.ok()) {
                        GOOGLE_LOG(ERROR) << "Failed in Check call: "
-                                         << status.error_message();
+                                         << status.message();
                      }
                    });
   ++send_checks_by_flush_;
@@ -180,7 +181,7 @@ void ServiceControlClientImpl::ReportFlushCallback(
                       delete report_response;
                       if (!status.ok()) {
                         GOOGLE_LOG(ERROR) << "Failed in Report call: "
-                                          << status.error_message();
+                                          << status.message();
                       }
                     });
   ++send_reports_by_flush_;
@@ -193,12 +194,12 @@ void ServiceControlClientImpl::Check(const CheckRequest& check_request,
                                      TransportCheckFunc check_transport) {
   ++total_called_checks_;
   if (check_transport == NULL) {
-    on_check_done(Status(Code::INVALID_ARGUMENT, "transport is NULL."));
+    on_check_done(Status(StatusCode::kInvalidArgument, "transport is NULL."));
     return;
   }
 
   Status status = check_aggregator_->Check(check_request, check_response);
-  if (status.error_code() == Code::NOT_FOUND) {
+  if (status.code() == StatusCode::kNotFound) {
     // Makes a copy of check_request so that on_done() callback can use
     // it to call CacheResponse.
     CheckRequest* check_request_copy = new CheckRequest(check_request);
@@ -211,7 +212,7 @@ void ServiceControlClientImpl::Check(const CheckRequest& check_request,
                             *check_request_copy, *check_response);
                       } else {
                         GOOGLE_LOG(ERROR) << "Failed in Check call: "
-                                          << status.error_message();
+                                          << status.message();
                       }
                       delete check_request_copy;
                       on_check_done(status);
@@ -254,12 +255,12 @@ void ServiceControlClientImpl::Quota(const AllocateQuotaRequest& quota_request,
                                      TransportQuotaFunc quota_transport) {
   ++total_called_quotas_;
   if (quota_transport == NULL) {
-    on_quota_done(Status(Code::INVALID_ARGUMENT, "transport is NULL."));
+    on_quota_done(Status(StatusCode::kInvalidArgument, "transport is NULL."));
     return;
   }
 
   Status status = quota_aggregator_->Quota(quota_request, quota_response);
-  if (status.error_code() == Code::NOT_FOUND) {
+  if (status.code() == StatusCode::kNotFound) {
     // Makes a copy of check_request so that on_done() callback can use
     // it to call CacheResponse.
     AllocateQuotaRequest* quota_request_copy =
@@ -281,7 +282,7 @@ void ServiceControlClientImpl::Quota(const AllocateQuotaRequest& quota_request,
                             *quota_request_copy, dummy_response);
 
                         GOOGLE_LOG(ERROR) << "Failed in Quota call: "
-                                          << status.error_message();
+                                          << status.message();
                       }
 
                       delete quota_request_copy;
@@ -292,7 +293,7 @@ void ServiceControlClientImpl::Quota(const AllocateQuotaRequest& quota_request,
     ++send_quotas_in_flight_;
     return;
   } else {
-    // Status::OK, return response status from AllocateQuotaResponse
+    // OkStatus(), return response status from AllocateQuotaResponse
     on_quota_done(status);
   }
 }
@@ -332,12 +333,12 @@ void ServiceControlClientImpl::Report(const ReportRequest& report_request,
                                       TransportReportFunc report_transport) {
   ++total_called_reports_;
   if (report_transport == NULL) {
-    on_report_done(Status(Code::INVALID_ARGUMENT, "transport is NULL."));
+    on_report_done(Status(StatusCode::kInvalidArgument, "transport is NULL."));
     return;
   }
 
   Status status = report_aggregator_->Report(report_request);
-  if (status.error_code() == Code::NOT_FOUND) {
+  if (status.code() == StatusCode::kNotFound) {
     report_transport(report_request, report_response, on_report_done);
     ++send_reports_in_flight_;
     send_report_operations_ += report_request.operations_size();
@@ -385,7 +386,7 @@ Status ServiceControlClientImpl::GetStatistics(Statistics* stat) const {
   stat->send_reports_by_flush = send_reports_by_flush_;
   stat->send_reports_in_flight = send_reports_in_flight_;
   stat->send_report_operations = send_report_operations_;
-  return Status::OK;
+  return OkStatus();
 }
 
 int ServiceControlClientImpl::GetNextFlushInterval() {

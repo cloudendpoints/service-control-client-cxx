@@ -21,8 +21,9 @@ limitations under the License.
 #include <sstream>
 
 using ::google::api::servicecontrol::v1::Distribution;
+using ::google::protobuf::util::OkStatus;
 using ::google::protobuf::util::Status;
-using ::google::protobuf::util::error::Code;
+using ::google::protobuf::util::StatusCode;
 
 namespace google {
 namespace service_control_client {
@@ -184,17 +185,17 @@ Status DistributionHelper::InitExponential(int num_finite_buckets,
                                            double growth_factor, double scale,
                                            Distribution* distribution) {
   if (num_finite_buckets <= 0) {
-    return Status(Code::INVALID_ARGUMENT,
+    return Status(StatusCode::kInvalidArgument,
                   StrCat("Argument num_finite_buckets should be > 0. pass in: ",
                          num_finite_buckets));
   }
   if (growth_factor <= 1.0) {
-    return Status(Code::INVALID_ARGUMENT,
+    return Status(StatusCode::kInvalidArgument,
                   StrCat("Argument growth_factor should be > 1.0. pass in: ",
                          growth_factor));
   }
   if (scale <= 0) {
-    return Status(Code::INVALID_ARGUMENT,
+    return Status(StatusCode::kInvalidArgument,
                   StrCat("Argument scale should be > 0. pass in: ", scale));
   }
 
@@ -203,19 +204,19 @@ Status DistributionHelper::InitExponential(int num_finite_buckets,
   exponential->set_growth_factor(growth_factor);
   exponential->set_scale(scale);
   distribution->mutable_bucket_counts()->Resize(num_finite_buckets + 2, 0);
-  return Status::OK;
+  return OkStatus();
 }
 
 Status DistributionHelper::InitLinear(int num_finite_buckets, double width,
                                       double offset,
                                       Distribution* distribution) {
   if (num_finite_buckets <= 0) {
-    return Status(Code::INVALID_ARGUMENT,
+    return Status(StatusCode::kInvalidArgument,
                   StrCat("Argument num_finite_buckets should be > 0. pass in: ",
                          num_finite_buckets));
   }
   if (width <= 0.0) {
-    return Status(Code::INVALID_ARGUMENT,
+    return Status(StatusCode::kInvalidArgument,
                   StrCat("Argument width should be > 0.0. pass in: ", width));
   }
 
@@ -224,17 +225,17 @@ Status DistributionHelper::InitLinear(int num_finite_buckets, double width,
   linear->set_width(width);
   linear->set_offset(offset);
   distribution->mutable_bucket_counts()->Resize(num_finite_buckets + 2, 0);
-  return Status::OK;
+  return OkStatus();
 }
 
 Status DistributionHelper::InitExplicit(const std::vector<double>& bounds,
                                         Distribution* distribution) {
   if (!std::is_sorted(bounds.begin(), bounds.end())) {
-    return Status(Code::INVALID_ARGUMENT, "Argument bounds should be sorted.");
+    return Status(StatusCode::kInvalidArgument, "Argument bounds should be sorted.");
   }
   if (std::adjacent_find(bounds.begin(), bounds.end()) != bounds.end()) {
     return Status(
-        Code::INVALID_ARGUMENT,
+        StatusCode::kInvalidArgument,
         "Two adjacent elements in argument bounds should NOT be the same.");
   }
 
@@ -243,7 +244,7 @@ Status DistributionHelper::InitExplicit(const std::vector<double>& bounds,
     explicit_buckets->mutable_bounds()->Add(bounds.at(i));
   }
   distribution->mutable_bucket_counts()->Resize(bounds.size() + 1, 0);
-  return Status::OK;
+  return OkStatus();
 }
 
 Status DistributionHelper::AddSample(double value, Distribution* distribution) {
@@ -261,29 +262,29 @@ Status DistributionHelper::AddSample(double value, Distribution* distribution) {
       UpdateExplicitBucketCount(value, distribution);
       break;
     default:
-      return Status(Code::INVALID_ARGUMENT,
+      return Status(StatusCode::kInvalidArgument,
                     StrCat("Unknown bucket option case: ",
                            distribution->bucket_option_case()));
   }
-  return Status::OK;
+  return OkStatus();
 }
 
 Status DistributionHelper::Merge(const Distribution& from, Distribution* to) {
   if (!BucketsApproximatelyEqual(from, *to)) {
-    return Status(Code::INVALID_ARGUMENT,
+    return Status(StatusCode::kInvalidArgument,
                   std::string("Bucket options don't match. From: ") +
                       from.DebugString() + " to: " + to->DebugString());
   }
 
   // TODO(chengliang): Make merging more tolerant here.
   if (from.bucket_counts_size() != to->bucket_counts_size()) {
-    return Status(Code::INVALID_ARGUMENT, "Bucket counts size don't match.");
+    return Status(StatusCode::kInvalidArgument, "Bucket counts size don't match.");
   }
 
-  if (from.count() <= 0) return Status::OK;
+  if (from.count() <= 0) return OkStatus();
   if (to->count() <= 0) {
     *to = from;
-    return Status::OK;
+    return OkStatus();
   }
 
   int64_t count = to->count();
@@ -302,7 +303,7 @@ Status DistributionHelper::Merge(const Distribution& from, Distribution* to) {
   for (int i = 0; i < from.bucket_counts_size(); i++) {
     to->set_bucket_counts(i, to->bucket_counts(i) + from.bucket_counts(i));
   }
-  return Status::OK;
+  return OkStatus();
 }
 
 }  // namespace service_control_client

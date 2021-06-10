@@ -35,7 +35,8 @@ using ::google::api::servicecontrol::v1::ReportResponse;
 using ::google::protobuf::TextFormat;
 using ::google::protobuf::util::MessageDifferencer;
 using ::google::protobuf::util::Status;
-using ::google::protobuf::util::error::Code;
+using ::google::protobuf::util::StatusCode;
+using ::google::protobuf::util::UnknownError;
 using ::testing::Invoke;
 using ::testing::Mock;
 using ::testing::_;
@@ -299,11 +300,11 @@ class ServiceControlClientImplTest : public ::testing::Test {
         mock_check_transport_.on_done_vector_.size();
 
     CheckResponse check_response;
-    Status done_status = Status::UNKNOWN;
+    Status done_status = UnknownError("");
     client_->Check(request, &check_response,
                    [&done_status](Status status) { done_status = status; });
     // on_check_done is not called yet. waiting for transport one_check_done.
-    EXPECT_EQ(done_status, Status::UNKNOWN);
+    EXPECT_EQ(done_status, UnknownError(""));
 
     // Since it is not cached, transport should be called.
     EXPECT_EQ(mock_check_transport_.on_done_vector_.size(),
@@ -342,7 +343,7 @@ class ServiceControlClientImplTest : public ::testing::Test {
     mock_check_transport_.check_response_ = transport_response;
 
     CheckResponse check_response;
-    Status done_status = Status::UNKNOWN;
+    Status done_status = UnknownError("");
     client_->Check(request, &check_response,
                    [&done_status](Status status) { done_status = status; });
     // on_check_done should be called.
@@ -475,11 +476,11 @@ class ServiceControlClientImplTest : public ::testing::Test {
         mock_check_transport_.on_done_vector_.size();
 
     CheckResponse check_response2;
-    Status done_status2 = Status::UNKNOWN;
+    Status done_status2 = UnknownError("");
     client_->Check(request2, &check_response2,
                    [&done_status2](Status status) { done_status2 = status; });
     // on_check_done is not called yet. waiting for transport one_check_done.
-    EXPECT_EQ(done_status2, Status::UNKNOWN);
+    EXPECT_EQ(done_status2, UnknownError(""));
 
     // Since it is not cached, transport should be called.
     EXPECT_EQ(mock_check_transport_.on_done_vector_.size(),
@@ -541,7 +542,7 @@ class ServiceControlClientImplTest : public ::testing::Test {
     mock_check_transport_.check_response_ = transport_response2;
 
     CheckResponse check_response;
-    Status done_status = Status::UNKNOWN;
+    Status done_status = UnknownError("");
     client_->Check(request2, &check_response,
                    [&done_status](Status status) { done_status = status; });
     EXPECT_EQ(transport_status2, done_status);
@@ -660,7 +661,7 @@ class ServiceControlClientImplTest : public ::testing::Test {
     EXPECT_CALL(mock_check_transport_, Check(_, _, _)).Times(0);
 
     CheckResponse cached_response;
-    Status cached_done_status = Status::UNKNOWN;
+    Status cached_done_status = UnknownError("");
     client_->Check(
         request, &cached_response,
         [&cached_done_status](Status status) { cached_done_status = status; });
@@ -717,7 +718,7 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedCheckWithStoredCallback) {
   // Client::Check is called with the same check request. It should use the one
   // in the cache. Such call did not change the cache state, it can be called
   // repeatly.
-  InternalTestNonCachedCheckWithStoredCallback(check_request1_, Status::OK,
+  InternalTestNonCachedCheckWithStoredCallback(check_request1_, OkStatus(),
                                                &pass_check_response1_);
   // For a cached request, it can be called repeatedly.
   for (int i = 0; i < 10; i++) {
@@ -725,7 +726,7 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedCheckWithStoredCallback) {
   }
   Statistics stat;
   Status stat_status = client_->GetStatistics(&stat);
-  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat_status, OkStatus());
   EXPECT_EQ(stat.total_called_checks, 11);
   EXPECT_EQ(stat.send_checks_by_flush, 0);
   EXPECT_EQ(stat.send_checks_in_flight, 1);
@@ -742,23 +743,23 @@ TEST_F(ServiceControlClientImplTest, TestReplacedGoodCheckWithStoredCallback) {
   // Send request1 and a pass response to cache,
   // then replace it with request2.  request1 will be evited, it will be send
   // to server again.
-  InternalTestNonCachedCheckWithStoredCallback(check_request1_, Status::OK,
+  InternalTestNonCachedCheckWithStoredCallback(check_request1_, OkStatus(),
                                                &pass_check_response1_);
   InternalTestCachedCheck(check_request1_, pass_check_response1_);
   Statistics stat;
   Status stat_status = client_->GetStatistics(&stat);
-  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat_status, OkStatus());
   EXPECT_EQ(stat.total_called_checks, 2);
   EXPECT_EQ(stat.send_checks_by_flush, 0);
   EXPECT_EQ(stat.send_checks_in_flight, 1);
   EXPECT_EQ(stat.send_report_operations, 0);
 
   InternalTestReplacedGoodCheckWithStoredCallback(
-      check_request2_, Status::OK, &pass_check_response2_, check_request1_,
-      Status::OK, &pass_check_response1_);
+      check_request2_, OkStatus(), &pass_check_response2_, check_request1_,
+      OkStatus(), &pass_check_response1_);
   InternalTestCachedCheck(check_request2_, pass_check_response2_);
   stat_status = client_->GetStatistics(&stat);
-  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat_status, OkStatus());
   EXPECT_EQ(stat.total_called_checks, 4);
   EXPECT_EQ(stat.send_checks_by_flush, 1);
   EXPECT_EQ(stat.send_checks_in_flight, 2);
@@ -775,11 +776,11 @@ TEST_F(ServiceControlClientImplTest, TestReplacedBadCheckWithStoredCallback) {
   // Send request1 and a error response to cache,
   // then replace it with request2.  request1 will be evited. Since it only
   // has an error response, it will not need to sent to server
-  InternalTestNonCachedCheckWithStoredCallback(check_request1_, Status::OK,
+  InternalTestNonCachedCheckWithStoredCallback(check_request1_, OkStatus(),
                                                &error_check_response1_);
   InternalTestCachedCheck(check_request1_, error_check_response1_);
 
-  InternalTestNonCachedCheckWithStoredCallback(check_request2_, Status::OK,
+  InternalTestNonCachedCheckWithStoredCallback(check_request2_, OkStatus(),
                                                &error_check_response2_);
   InternalTestCachedCheck(check_request2_, error_check_response2_);
 }
@@ -794,7 +795,7 @@ TEST_F(ServiceControlClientImplTest,
   // For a failed Check calls, it can be called repeatly.
   for (int i = 0; i < 10; i++) {
     InternalTestNonCachedCheckWithStoredCallback(
-        check_request1_, Status(Code::PERMISSION_DENIED, ""),
+        check_request1_, Status(StatusCode::kPermissionDenied, ""),
         &pass_check_response1_);
   }
 }
@@ -809,12 +810,12 @@ TEST_F(ServiceControlClientImplTest,
   stack_mock_check_transport.check_response_ = &pass_check_response1_;
 
   CheckResponse check_response;
-  Status done_status = Status::UNKNOWN;
+  Status done_status = UnknownError("");
   client_->Check(check_request1_, &check_response,
                  [&done_status](Status status) { done_status = status; },
                  stack_mock_check_transport.GetFunc());
   // on_check_done is not called yet. waiting for transport one_check_done.
-  EXPECT_EQ(done_status, Status::UNKNOWN);
+  EXPECT_EQ(done_status, UnknownError(""));
 
   // Since it is not cached, transport should be called.
   EXPECT_EQ(stack_mock_check_transport.on_done_vector_.size(), 1);
@@ -822,7 +823,7 @@ TEST_F(ServiceControlClientImplTest,
       stack_mock_check_transport.check_request_, check_request1_));
 
   // Calls the on_check_done() to send status.
-  stack_mock_check_transport.on_done_vector_[0](Status::OK);
+  stack_mock_check_transport.on_done_vector_[0](OkStatus());
   // on_check_done is called with right status.
   EXPECT_TRUE(done_status.ok());
   EXPECT_TRUE(
@@ -850,7 +851,7 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedCheckWithInplaceCallback) {
   // Client::Check is called with the same check request. It should use the one
   // in the cache. Such call did not change the cache state, it can be called
   // repeatly.
-  InternalTestNonCachedCheckWithInplaceCallback(check_request1_, Status::OK,
+  InternalTestNonCachedCheckWithInplaceCallback(check_request1_, OkStatus(),
                                                 &pass_check_response1_);
   // For a cached request, it can be called repeatly.
   for (int i = 0; i < 10; i++) {
@@ -874,7 +875,7 @@ TEST_F(ServiceControlClientImplTest,
   // repeatly.
   // Test with blocking check.
   InternalTestNonCachedBlockingCheckWithInplaceCallback(
-      check_request1_, Status::OK, &pass_check_response1_);
+      check_request1_, OkStatus(), &pass_check_response1_);
   // For a cached request, it can be called repeatly.
   for (int i = 0; i < 10; i++) {
     InternalTestCachedBlockingCheck(check_request1_, pass_check_response1_);
@@ -891,11 +892,11 @@ TEST_F(ServiceControlClientImplTest, TestReplacedGoodCheckWithInplaceCallback) {
   // Send request1 and a pass response to cache,
   // then replace it with request2.  request1 will be evited, it will be send
   // to server again.
-  InternalTestNonCachedCheckWithInplaceCallback(check_request1_, Status::OK,
+  InternalTestNonCachedCheckWithInplaceCallback(check_request1_, OkStatus(),
                                                 &pass_check_response1_);
   InternalTestCachedCheck(check_request1_, pass_check_response1_);
 
-  InternalTestReplacedGoodCheckWithInplaceCallback(check_request2_, Status::OK,
+  InternalTestReplacedGoodCheckWithInplaceCallback(check_request2_, OkStatus(),
                                                    &pass_check_response2_);
   InternalTestCachedCheck(check_request2_, pass_check_response2_);
 
@@ -913,11 +914,11 @@ TEST_F(ServiceControlClientImplTest,
   // to server again.
   // Test with blocking check.
   InternalTestNonCachedBlockingCheckWithInplaceCallback(
-      check_request1_, Status::OK, &pass_check_response1_);
+      check_request1_, OkStatus(), &pass_check_response1_);
   InternalTestCachedBlockingCheck(check_request1_, pass_check_response1_);
 
   InternalTestReplacedBlockingCheckWithInplaceCallback(
-      check_request2_, Status::OK, &pass_check_response2_);
+      check_request2_, OkStatus(), &pass_check_response2_);
   InternalTestCachedBlockingCheck(check_request2_, pass_check_response2_);
 
   // There is a cached check request in the cache. When client is destroyed,
@@ -931,11 +932,11 @@ TEST_F(ServiceControlClientImplTest, TestReplacedBadCheckWithInplaceCallback) {
   // Send request1 and a error response to cache,
   // then replace it with request2.  request1 will be evited. Since it only
   // has an error response, it will not need to sent to server
-  InternalTestNonCachedCheckWithInplaceCallback(check_request1_, Status::OK,
+  InternalTestNonCachedCheckWithInplaceCallback(check_request1_, OkStatus(),
                                                 &error_check_response1_);
   InternalTestCachedCheck(check_request1_, error_check_response1_);
 
-  InternalTestNonCachedCheckWithInplaceCallback(check_request2_, Status::OK,
+  InternalTestNonCachedCheckWithInplaceCallback(check_request2_, OkStatus(),
                                                 &error_check_response2_);
   InternalTestCachedCheck(check_request2_, error_check_response2_);
 }
@@ -950,7 +951,7 @@ TEST_F(ServiceControlClientImplTest,
   // For a failed Check calls, it can be called repeatly.
   for (int i = 0; i < 10; i++) {
     InternalTestNonCachedCheckWithInplaceCallback(
-        check_request1_, Status(Code::PERMISSION_DENIED, ""),
+        check_request1_, Status(StatusCode::kPermissionDenied, ""),
         &pass_check_response1_);
   }
 }
@@ -962,7 +963,7 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedCheckUsingThread) {
   // Client::Check is called with the same check request. It should use the one
   // in the cache. Such call did not change the cache state, it can be called
   // repeatly.
-  InternalTestNonCachedCheckUsingThread(check_request1_, Status::OK,
+  InternalTestNonCachedCheckUsingThread(check_request1_, OkStatus(),
                                         &error_check_response1_);
   // For a cached request, it can be called repeatly.
   for (int i = 0; i < 10; i++) {
@@ -981,7 +982,7 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedBlockingCheckUsingThread) {
   // in the cache. Such call did not change the cache state, it can be called
   // repeatedly.
   // Test with blocking check.
-  InternalTestNonCachedBlockingCheckUsingThread(check_request1_, Status::OK,
+  InternalTestNonCachedBlockingCheckUsingThread(check_request1_, OkStatus(),
                                                 &error_check_response1_);
   // For a cached request, it can be called repeatly.
   for (int i = 0; i < 10; i++) {
@@ -996,11 +997,11 @@ TEST_F(ServiceControlClientImplTest, TestReplacedGoodCheckUsingThread) {
   // Send request1 and a pass response to cache,
   // then replace it with request2.  request1 will be evited, it will be send
   // to server again.
-  InternalTestNonCachedCheckUsingThread(check_request1_, Status::OK,
+  InternalTestNonCachedCheckUsingThread(check_request1_, OkStatus(),
                                         &pass_check_response1_);
   InternalTestCachedCheck(check_request1_, pass_check_response1_);
 
-  InternalTestReplacedGoodCheckUsingThread(check_request2_, Status::OK,
+  InternalTestReplacedGoodCheckUsingThread(check_request2_, OkStatus(),
                                            &pass_check_response2_);
   InternalTestCachedCheck(check_request2_, pass_check_response2_);
 
@@ -1016,11 +1017,11 @@ TEST_F(ServiceControlClientImplTest, TestReplacedBlockingCheckUsingThread) {
   // then replace it with request2.  request1 will be evited, it will be send
   // to server again.
   // Test with blocking check:
-  InternalTestNonCachedBlockingCheckUsingThread(check_request1_, Status::OK,
+  InternalTestNonCachedBlockingCheckUsingThread(check_request1_, OkStatus(),
                                                 &pass_check_response1_);
   InternalTestCachedBlockingCheck(check_request1_, pass_check_response1_);
 
-  InternalTestReplacedBlockingCheckUsingThread(check_request2_, Status::OK,
+  InternalTestReplacedBlockingCheckUsingThread(check_request2_, OkStatus(),
                                                &pass_check_response2_);
   InternalTestCachedBlockingCheck(check_request2_, pass_check_response2_);
 
@@ -1035,11 +1036,11 @@ TEST_F(ServiceControlClientImplTest, TestReplacedBadCheckUsingThread) {
   // Send request1 and a error response to cache,
   // then replace it with request2.  request1 will be evited. Since it only
   // has an error response, it will not need to sent to server
-  InternalTestNonCachedCheckUsingThread(check_request1_, Status::OK,
+  InternalTestNonCachedCheckUsingThread(check_request1_, OkStatus(),
                                         &error_check_response1_);
   InternalTestCachedCheck(check_request1_, error_check_response1_);
 
-  InternalTestNonCachedCheckUsingThread(check_request2_, Status::OK,
+  InternalTestNonCachedCheckUsingThread(check_request2_, OkStatus(),
                                         &error_check_response2_);
   InternalTestCachedCheck(check_request2_, error_check_response2_);
 }
@@ -1053,7 +1054,7 @@ TEST_F(ServiceControlClientImplTest, TestFailedNonCachedCheckUsingThread) {
   // For a failed Check calls, it can be called repeatly.
   for (int i = 0; i < 10; i++) {
     InternalTestNonCachedCheckUsingThread(check_request1_,
-                                          Status(Code::PERMISSION_DENIED, ""),
+                                          Status(StatusCode::kPermissionDenied, ""),
                                           &pass_check_response1_);
   }
 }
@@ -1065,13 +1066,13 @@ TEST_F(ServiceControlClientImplTest, TestCachedReportWithStoredCallback) {
   // After client is destroyed, Transport::Report() should be called
   // to send a merged_request.
   ReportResponse report_response;
-  Status done_status1 = Status::UNKNOWN;
+  Status done_status1 = UnknownError("");
   // this report should be cached,  one_done() should be called right away
   client_->Report(report_request1_, &report_response,
                   [&done_status1](Status status) { done_status1 = status; });
   EXPECT_OK(done_status1);
 
-  Status done_status2 = Status::UNKNOWN;
+  Status done_status2 = UnknownError("");
   // this report should be cached,  one_done() should be called right away
   client_->Report(report_request2_, &report_response,
                   [&done_status2](Status status) { done_status2 = status; });
@@ -1090,7 +1091,7 @@ TEST_F(ServiceControlClientImplTest, TestCachedReportWithStoredCallback) {
                                          merged_report_request_));
 
   // Call the on_check_done() to complete the data flow.
-  mock_report_transport_.on_done_vector_[0](Status::OK);
+  mock_report_transport_.on_done_vector_[0](OkStatus());
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_report_transport_));
 }
 
@@ -1101,13 +1102,13 @@ TEST_F(ServiceControlClientImplTest, TestCachedReportWithInplaceCallback) {
   // After client destroyed, Transport::Report() should be called
   // to send a merged_request.
   ReportResponse report_response;
-  Status done_status1 = Status::UNKNOWN;
+  Status done_status1 = UnknownError("");
   // this report should be cached,  one_done() should be called right away
   client_->Report(report_request1_, &report_response,
                   [&done_status1](Status status) { done_status1 = status; });
   EXPECT_OK(done_status1);
 
-  Status done_status2 = Status::UNKNOWN;
+  Status done_status2 = UnknownError("");
   // this report should be cached,  one_done() should be called right away
   client_->Report(report_request2_, &report_response,
                   [&done_status2](Status status) { done_status2 = status; });
@@ -1133,13 +1134,13 @@ TEST_F(ServiceControlClientImplTest, TestCachedReportUsingThread) {
   // After client destroyed, Transport::Report() should be called
   // to send a merged_request.
   ReportResponse report_response;
-  Status done_status1 = Status::UNKNOWN;
+  Status done_status1 = UnknownError("");
   // this report should be cached,  one_done() should be called right away
   client_->Report(report_request1_, &report_response,
                   [&done_status1](Status status) { done_status1 = status; });
   EXPECT_OK(done_status1);
 
-  Status done_status2 = Status::UNKNOWN;
+  Status done_status2 = UnknownError("");
   // this report should be cached,  one_done() should be called right away
   client_->Report(report_request2_, &report_response,
                   [&done_status2](Status status) { done_status2 = status; });
@@ -1168,7 +1169,7 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportWithStoredCallback) {
   EXPECT_CALL(mock_report_transport_, Report(_, _, _)).Times(0);
 
   ReportResponse report_response;
-  Status done_status1 = Status::UNKNOWN;
+  Status done_status1 = UnknownError("");
   // this report should be cached,  one_done() should be called right away
   client_->Report(report_request1_, &report_response,
                   [&done_status1](Status status) { done_status1 = status; });
@@ -1185,7 +1186,7 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportWithStoredCallback) {
       .WillOnce(Invoke(&mock_report_transport_,
                        &MockReportTransport::ReportWithStoredCallback));
 
-  Status done_status2 = Status::UNKNOWN;
+  Status done_status2 = UnknownError("");
   // this report should be cached,  one_done() should be called right away
   client_->Report(report_request2_, &report_response,
                   [&done_status2](Status status) { done_status2 = status; });
@@ -1195,7 +1196,7 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportWithStoredCallback) {
   EXPECT_TRUE(MessageDifferencer::Equals(mock_report_transport_.report_request_,
                                          report_request1_));
 
-  mock_report_transport_.on_done_vector_[0](Status::OK);
+  mock_report_transport_.on_done_vector_[0](OkStatus());
   // Verifies that mock_report_transport_::Report() is NOT called.
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_report_transport_));
 
@@ -1209,7 +1210,7 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportWithStoredCallback) {
                                          report_request2_));
 
   // Call the on_check_done() to complete the data flow.
-  mock_report_transport_.on_done_vector_[1](Status::OK);
+  mock_report_transport_.on_done_vector_[1](OkStatus());
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_report_transport_));
 }
 
@@ -1223,7 +1224,7 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportWithInplaceCallback) {
   EXPECT_CALL(mock_report_transport_, Report(_, _, _)).Times(0);
 
   ReportResponse report_response;
-  Status done_status1 = Status::UNKNOWN;
+  Status done_status1 = UnknownError("");
   // this report should be cached,  one_done() should be called right away
   client_->Report(report_request1_, &report_response,
                   [&done_status1](Status status) { done_status1 = status; });
@@ -1240,7 +1241,7 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportWithInplaceCallback) {
       .WillOnce(Invoke(&mock_report_transport_,
                        &MockReportTransport::ReportWithInplaceCallback));
 
-  Status done_status2 = Status::UNKNOWN;
+  Status done_status2 = UnknownError("");
   // this report should be cached,  one_done() should be called right away
   client_->Report(report_request2_, &report_response,
                   [&done_status2](Status status) { done_status2 = status; });
@@ -1319,13 +1320,13 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportUsingThread) {
   EXPECT_CALL(mock_report_transport_, Report(_, _, _)).Times(0);
 
   ReportResponse report_response;
-  Status done_status1 = Status::UNKNOWN;
+  Status done_status1 = UnknownError("");
   // this report should be cached,  one_done() should be called right away
   client_->Report(report_request1_, &report_response,
                   [&done_status1](Status status) { done_status1 = status; });
   Statistics stat;
   Status stat_status = client_->GetStatistics(&stat);
-  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat_status, OkStatus());
   EXPECT_EQ(stat.total_called_reports, 1);
   EXPECT_EQ(stat.send_reports_by_flush, 0);
   EXPECT_EQ(stat.send_reports_in_flight, 0);
@@ -1344,12 +1345,12 @@ TEST_F(ServiceControlClientImplTest, TestReplacedReportUsingThread) {
       .WillOnce(Invoke(&mock_report_transport_,
                        &MockReportTransport::ReportUsingThread));
 
-  Status done_status2 = Status::UNKNOWN;
+  Status done_status2 = UnknownError("");
   // this report should be cached,  one_done() should be called right away
   client_->Report(report_request2_, &report_response,
                   [&done_status2](Status status) { done_status2 = status; });
   stat_status = client_->GetStatistics(&stat);
-  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat_status, OkStatus());
   EXPECT_EQ(stat.total_called_reports, 2);
   EXPECT_EQ(stat.send_reports_by_flush, 1);
   EXPECT_EQ(stat.send_reports_in_flight, 0);
@@ -1428,14 +1429,14 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportWithStoredCallback) {
                        &MockReportTransport::ReportWithStoredCallback));
 
   ReportResponse report_response;
-  Status done_status = Status::UNKNOWN;
+  Status done_status = UnknownError("");
   // This request is high important, so it will not be cached.
   // client->Report() will call Transport::Report() right away.
   report_request1_.mutable_operations(0)->set_importance(Operation::HIGH);
   client_->Report(report_request1_, &report_response,
                   [&done_status](Status status) { done_status = status; });
   // on_report_done is not called yet. waiting for transport one_report_done.
-  EXPECT_EQ(done_status, Status::UNKNOWN);
+  EXPECT_EQ(done_status, UnknownError(""));
 
   // Since it is not cached, transport should be called.
   EXPECT_TRUE(mock_report_transport_.on_done_vector_.size() == 1);
@@ -1444,9 +1445,9 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportWithStoredCallback) {
 
   // Calls the on_check_done() to send status.
   mock_report_transport_.on_done_vector_[0](
-      Status(Code::PERMISSION_DENIED, ""));
+      Status(StatusCode::kPermissionDenied, ""));
   // on_report_done is called with right status.
-  EXPECT_ERROR_CODE(Code::PERMISSION_DENIED, done_status);
+  EXPECT_ERROR_CODE(StatusCode::kPermissionDenied, done_status);
 }
 
 TEST_F(ServiceControlClientImplTest,
@@ -1461,7 +1462,7 @@ TEST_F(ServiceControlClientImplTest,
                        &MockReportTransport::ReportWithStoredCallback));
 
   ReportResponse report_response;
-  Status done_status = Status::UNKNOWN;
+  Status done_status = UnknownError("");
   // This request is high important, so it will not be cached.
   // client->Report() will call Transport::Report() right away.
   report_request1_.mutable_operations(0)->set_importance(Operation::HIGH);
@@ -1469,7 +1470,7 @@ TEST_F(ServiceControlClientImplTest,
                   [&done_status](Status status) { done_status = status; },
                   stack_mock_report_transport.GetFunc());
   // on_report_done is not called yet. waiting for transport one_report_done.
-  EXPECT_EQ(done_status, Status::UNKNOWN);
+  EXPECT_EQ(done_status, UnknownError(""));
 
   // Since it is not cached, transport should be called.
   EXPECT_TRUE(stack_mock_report_transport.on_done_vector_.size() == 1);
@@ -1478,9 +1479,9 @@ TEST_F(ServiceControlClientImplTest,
 
   // Calls the on_check_done() to send status.
   stack_mock_report_transport.on_done_vector_[0](
-      Status(Code::PERMISSION_DENIED, ""));
+      Status(StatusCode::kPermissionDenied, ""));
   // on_report_done is called with right status.
-  EXPECT_ERROR_CODE(Code::PERMISSION_DENIED, done_status);
+  EXPECT_ERROR_CODE(StatusCode::kPermissionDenied, done_status);
 }
 
 TEST_F(ServiceControlClientImplTest, TestNonCachedReportWithInplaceCallback) {
@@ -1493,10 +1494,10 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportWithInplaceCallback) {
                        &MockReportTransport::ReportWithInplaceCallback));
 
   // Set the report status to be used in the on_report_done
-  mock_report_transport_.done_status_ = Status(Code::PERMISSION_DENIED, "");
+  mock_report_transport_.done_status_ = Status(StatusCode::kPermissionDenied, "");
 
   ReportResponse report_response;
-  Status done_status = Status::UNKNOWN;
+  Status done_status = UnknownError("");
   // This request is high important, so it will not be cached.
   // client->Report() will call Transport::Report() right away.
   report_request1_.mutable_operations(0)->set_importance(Operation::HIGH);
@@ -1505,14 +1506,14 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportWithInplaceCallback) {
 
   Statistics stat;
   Status stat_status = client_->GetStatistics(&stat);
-  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat_status, OkStatus());
   EXPECT_EQ(stat.total_called_reports, 1);
   EXPECT_EQ(stat.send_reports_by_flush, 0);
   EXPECT_EQ(stat.send_reports_in_flight, 1);
   EXPECT_EQ(stat.send_report_operations, 1);
 
   // one_done should be called for now.
-  EXPECT_ERROR_CODE(Code::PERMISSION_DENIED, done_status);
+  EXPECT_ERROR_CODE(StatusCode::kPermissionDenied, done_status);
 
   // Since it is not cached, transport should be called.
   EXPECT_TRUE(MessageDifferencer::Equals(mock_report_transport_.report_request_,
@@ -1531,7 +1532,7 @@ TEST_F(ServiceControlClientImplTest,
                        &MockReportTransport::ReportWithInplaceCallback));
 
   // Set the report status to be used in the on_report_done
-  mock_report_transport_.done_status_ = Status(Code::PERMISSION_DENIED, "");
+  mock_report_transport_.done_status_ = Status(StatusCode::kPermissionDenied, "");
 
   ReportResponse report_response;
 
@@ -1542,7 +1543,7 @@ TEST_F(ServiceControlClientImplTest,
   Status done_status = client_->Report(report_request1_, &report_response);
 
   // one_done should be called for now.
-  EXPECT_ERROR_CODE(Code::PERMISSION_DENIED, done_status);
+  EXPECT_ERROR_CODE(StatusCode::kPermissionDenied, done_status);
 
   // Since it is not cached, transport should be called.
   EXPECT_TRUE(MessageDifferencer::Equals(mock_report_transport_.report_request_,
@@ -1559,7 +1560,7 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportUsingThread) {
                        &MockReportTransport::ReportUsingThread));
 
   // Set the report status to be used in the on_report_done
-  mock_report_transport_.done_status_ = Status(Code::PERMISSION_DENIED, "");
+  mock_report_transport_.done_status_ = Status(StatusCode::kPermissionDenied, "");
 
   StatusPromise status_promise;
   StatusFuture status_future = status_promise.get_future();
@@ -1576,7 +1577,7 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportUsingThread) {
 
   Statistics stat;
   Status stat_status = client_->GetStatistics(&stat);
-  EXPECT_EQ(stat_status, Status::OK);
+  EXPECT_EQ(stat_status, OkStatus());
   EXPECT_EQ(stat.total_called_reports, 1);
   EXPECT_EQ(stat.send_reports_by_flush, 0);
   EXPECT_EQ(stat.send_reports_in_flight, 1);
@@ -1588,7 +1589,7 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedReportUsingThread) {
 
   // on_report_done is called with right status.
   status_future.wait();
-  EXPECT_ERROR_CODE(Code::PERMISSION_DENIED, status_future.get());
+  EXPECT_ERROR_CODE(StatusCode::kPermissionDenied, status_future.get());
 }
 
 TEST_F(ServiceControlClientImplTest, TestNonCachedBlockingReportUsingThread) {
@@ -1601,7 +1602,7 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedBlockingReportUsingThread) {
                        &MockReportTransport::ReportUsingThread));
 
   // Set the report status to be used in the on_report_done
-  mock_report_transport_.done_status_ = Status(Code::PERMISSION_DENIED, "");
+  mock_report_transport_.done_status_ = Status(StatusCode::kPermissionDenied, "");
 
   ReportResponse report_response;
   // This request is high important, so it will not be cached.
@@ -1615,7 +1616,7 @@ TEST_F(ServiceControlClientImplTest, TestNonCachedBlockingReportUsingThread) {
                                          report_request1_));
 
   // on_report_done is called with right status.
-  EXPECT_ERROR_CODE(Code::PERMISSION_DENIED, done_status);
+  EXPECT_ERROR_CODE(StatusCode::kPermissionDenied, done_status);
 }
 
 TEST_F(ServiceControlClientImplTest, TestFlushIntervalReportNeverFlush) {
@@ -1695,7 +1696,7 @@ TEST_F(ServiceControlClientImplTest, TestFlushCalled) {
   ASSERT_TRUE(mock_timer.callback_ != NULL);
 
   ReportResponse report_response;
-  Status done_status1 = Status::UNKNOWN;
+  Status done_status1 = UnknownError("");
   // this report should be cached,  one_done() should be called right away
   client_->Report(report_request1_, &report_response,
                   [&done_status1](Status status) { done_status1 = status; });
@@ -1713,7 +1714,7 @@ TEST_F(ServiceControlClientImplTest, TestFlushCalled) {
   EXPECT_TRUE(MessageDifferencer::Equals(mock_report_transport_.report_request_,
                                          report_request1_));
   // Call the on_check_done() to complete the data flow.
-  mock_report_transport_.on_done_vector_[0](Status::OK);
+  mock_report_transport_.on_done_vector_[0](OkStatus());
 }
 
 TEST_F(ServiceControlClientImplTest,
@@ -1736,7 +1737,7 @@ TEST_F(ServiceControlClientImplTest,
   ASSERT_TRUE(mock_timer.callback_ != NULL);
 
   ReportResponse report_response;
-  Status done_status1 = Status::UNKNOWN;
+  Status done_status1 = UnknownError("");
   // this report should be cached,  one_done() should be called right away
   client_->Report(report_request1_, &report_response,
                   [&done_status1](Status status) { done_status1 = status; });
@@ -1752,7 +1753,7 @@ TEST_F(ServiceControlClientImplTest,
   EXPECT_TRUE(MessageDifferencer::Equals(mock_report_transport_.report_request_,
                                          report_request1_));
   // Call the on_check_done() to complete the data flow.
-  mock_report_transport_.on_done_vector_[0](Status::OK);
+  mock_report_transport_.on_done_vector_[0](OkStatus());
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(&mock_report_transport_));
   mock_timer.callback_();
 }
