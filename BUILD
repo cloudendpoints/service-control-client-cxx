@@ -29,6 +29,7 @@ cc_library(
         "src/quota_operation_aggregator.h",
         "src/report_aggregator_impl.cc",
         "src/report_aggregator_impl.h",
+        "src/service_control_client_factory_impl.h",
         "src/service_control_client_impl.cc",
         "src/service_control_client_impl.h",
         "src/signature.cc",
@@ -44,6 +45,7 @@ cc_library(
     hdrs = [
         "include/aggregation_options.h",
         "include/service_control_client.h",
+        "include/service_control_client_factory.h",
         "utils/distribution_helper.h",
         "utils/simple_lru_cache.h",
         "utils/simple_lru_cache_inl.h",
@@ -56,7 +58,7 @@ cc_library(
         "@boringssl//:crypto",
         "@googleapis_git//google/api:metric_cc_proto",
         "@googleapis_git//google/api/servicecontrol/v1:servicecontrol_cc_proto",
-         "@googleapis_git//google/type:money_cc_proto",
+        "@googleapis_git//google/type:money_cc_proto",
     ],
 )
 
@@ -68,6 +70,16 @@ cc_library(
         "utils/simple_lru_cache_inl.h",
     ],
     visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "mocks_lib",
+    hdrs = ["test/mocks.h"],
+    deps = [
+        "@googletest_git//:gtest",
+        ":service_control_client_lib",
+    ],
+    testonly = 1,
 )
 
 cc_test(
@@ -202,6 +214,16 @@ cc_test(
     ],
     deps = [
         ":simple_lru_cache",
+        "@googletest_git//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "mocks_test",
+    size = "small",
+    srcs = ["test/mocks_test.cc"],
+    deps = [
+        ":mocks_lib",
         "@googletest_git//:gtest_main",
     ],
 )

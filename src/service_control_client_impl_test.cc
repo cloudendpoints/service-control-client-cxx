@@ -15,6 +15,7 @@ limitations under the License.
 
 #include "include/service_control_client.h"
 
+#include "src/service_control_client_factory_impl.h"
 #include "src/mock_transport.h"
 
 #include "gmock/gmock.h"
@@ -275,8 +276,10 @@ class ServiceControlClientImplTest : public ::testing::Test {
         ReportAggregationOptions(1 /* entries */, 500 /*flush_interval_ms*/));
     options.check_transport = mock_check_transport_.GetFunc();
     options.report_transport = mock_report_transport_.GetFunc();
+
+    ServiceControlClientFactoryImpl factory;
     client_ =
-        CreateServiceControlClient(kServiceName, kServiceConfigId, options);
+        factory.CreateClient(kServiceName, kServiceConfigId, options);
   }
 
   // Tests non cached check request. Mocked transport::Check() is storing
