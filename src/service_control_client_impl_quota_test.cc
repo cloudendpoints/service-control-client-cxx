@@ -97,9 +97,7 @@ class ServiceControlClientImplQuotaTest : public ::testing::Test {
         QuotaAggregationOptions(10 /*entries */, 500 /* refresh_interval_ms */),
         ReportAggregationOptions(10 /* entries */, 500 /*flush_interval_ms*/));
 
-    cached_options.check_transport = mock_check_transport_.GetFunc();
     cached_options.quota_transport = mock_quota_transport_.GetFunc();
-    cached_options.report_transport = mock_report_transport_.GetFunc();
 
     cached_client_ = CreateServiceControlClient(kServiceName, kServiceConfigId,
                                                 cached_options);
@@ -109,9 +107,7 @@ class ServiceControlClientImplQuotaTest : public ::testing::Test {
         CheckAggregationOptions(0, 500, 1000), QuotaAggregationOptions(0, 500),
         ReportAggregationOptions(0, 500));
 
-    noncached_options.check_transport = mock_check_transport_.GetFunc();
     noncached_options.quota_transport = mock_quota_transport_.GetFunc();
-    noncached_options.report_transport = mock_report_transport_.GetFunc();
 
     noncached_client_ = CreateServiceControlClient(
         kServiceName, kServiceConfigId, noncached_options);
@@ -121,12 +117,20 @@ class ServiceControlClientImplQuotaTest : public ::testing::Test {
   AllocateQuotaResponse pass_quota_response1_;
   AllocateQuotaResponse error_quota_response1_;
 
-  MockCheckTransport mock_check_transport_;
-  MockQuotaTransport mock_quota_transport_;
-  MockReportTransport mock_report_transport_;
+  // Store some commonly used variables as member variables to prevent
+  // use-after-destruction in tests.
+  AllocateQuotaResponse quota_response_;
 
+  // Clients must be the second to be destructed.
+  // During destruction, the internal caches will be flushed and results will
+  // be written to the variables above.
   std::unique_ptr<ServiceControlClient> cached_client_;
   std::unique_ptr<ServiceControlClient> noncached_client_;
+
+  // Transports must be first to be destructed.
+  // During destruction, threads will complete and results will be written to
+  // the caches above.
+  MockQuotaTransport mock_quota_transport_;
 };
 
 // Error on different service name
@@ -135,9 +139,7 @@ TEST_F(ServiceControlClientImplQuotaTest, TestQuotaWithInvalidServiceName) {
                                       QuotaAggregationOptions(10, 500),
                                       ReportAggregationOptions(10, 500));
 
-  options.check_transport = mock_check_transport_.GetFunc();
   options.quota_transport = mock_quota_transport_.GetFunc();
-  options.report_transport = mock_report_transport_.GetFunc();
 
   std::unique_ptr<ServiceControlClient> client =
       CreateServiceControlClient("unknown", kServiceConfigId, options);
@@ -173,9 +175,7 @@ TEST_F(ServiceControlClientImplQuotaTest,
                                       QuotaAggregationOptions(10, 500),
                                       ReportAggregationOptions(10, 500));
 
-  options.check_transport = mock_check_transport_.GetFunc();
   options.quota_transport = nullptr;
-  options.report_transport = mock_report_transport_.GetFunc();
 
   Status done_status = UnknownError("");
   AllocateQuotaResponse quota_response;
@@ -496,19 +496,18 @@ TEST_F(ServiceControlClientImplQuotaTest, TestCachedQuotaInSyncThread) {
                              &MockQuotaTransport::AllocateQuotaUsingThread));
 
   Status done_status;
-  AllocateQuotaResponse quota_response;
 
   // Set the check status and response to be used in the on_quota_done
   mock_quota_transport_.done_status_ = done_status;
-  mock_quota_transport_.quota_response_ = &quota_response;
+  mock_quota_transport_.quota_response_ = &quota_response_;
 
-  done_status = cached_client_->Quota(quota_request1_, &quota_response);
+  done_status = cached_client_->Quota(quota_request1_, &quota_response_);
   EXPECT_TRUE(MessageDifferencer::Equals(mock_quota_transport_.quota_request_,
                                          quota_request1_));
   EXPECT_EQ(done_status, OkStatus());
 
   for (int i = 0; i < 10; i++) {
-    done_status = cached_client_->Quota(quota_request1_, &quota_response);
+    done_status = cached_client_->Quota(quota_request1_, &quota_response_);
     EXPECT_TRUE(MessageDifferencer::Equals(mock_quota_transport_.quota_request_,
                                            quota_request1_));
     EXPECT_EQ(done_status, OkStatus());
@@ -530,17 +529,16 @@ TEST_F(ServiceControlClientImplQuotaTest, TestNonCachedQuotaThread) {
                              &MockQuotaTransport::AllocateQuotaUsingThread));
 
   Status done_status;
-  AllocateQuotaResponse quota_response;
 
   // Set the check status and response to be used in the on_quota_done
   mock_quota_transport_.done_status_ = done_status;
-  mock_quota_transport_.quota_response_ = &quota_response;
+  mock_quota_transport_.quota_response_ = &quota_response_;
 
   StatusPromise status_promise;
   StatusFuture status_future = status_promise.get_future();
 
   noncached_client_->Quota(
-      quota_request1_, &quota_response,
+      quota_request1_, &quota_response_,
       [&status_promise](Status status) {
         StatusPromise moved_promise(std::move(status_promise));
         moved_promise.set_value(status);
@@ -569,16 +567,15 @@ TEST_F(ServiceControlClientImplQuotaTest, TestCachedQuotaThread) {
                              &MockQuotaTransport::AllocateQuotaUsingThread));
 
   Status done_status;
-  AllocateQuotaResponse quota_response;
 
   // Set the check status and response to be used in the on_quota_done
   mock_quota_transport_.done_status_ = done_status;
-  mock_quota_transport_.quota_response_ = &quota_response;
+  mock_quota_transport_.quota_response_ = &quota_response_;
 
   StatusPromise status_promise;
   StatusFuture status_future = status_promise.get_future();
   cached_client_->Quota(
-      quota_request1_, &quota_response,
+      quota_request1_, &quota_response_,
       [&status_promise](Status status) {
         StatusPromise moved_promise(std::move(status_promise));
         moved_promise.set_value(status);
@@ -587,7 +584,7 @@ TEST_F(ServiceControlClientImplQuotaTest, TestCachedQuotaThread) {
                                          quota_request1_));
 
   for (int i = 0; i < 10; i++) {
-    cached_client_->Quota(quota_request1_, &quota_response,
+    cached_client_->Quota(quota_request1_, &quota_response_,
                           [](Status status) {
                             EXPECT_EQ(status, OkStatus());
                           });
