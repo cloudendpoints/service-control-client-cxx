@@ -74,12 +74,12 @@ cc_library(
 
 cc_library(
     name = "mocks_lib",
+    testonly = 1,
     hdrs = ["test/mocks.h"],
     deps = [
-        "@googletest_git//:gtest",
         ":service_control_client_lib",
+        "@googletest_git//:gtest",
     ],
-    testonly = 1,
 )
 
 cc_test(
